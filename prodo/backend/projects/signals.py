@@ -124,21 +124,23 @@ def broadcast_activity(sender, instance, created, **kwargs):
             "display_name": instance.triggered_by.display_name,
         }
 
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            "type": "activity.created",
-            "data": {
-                "id": str(instance.id),
-                "project": str(instance.project_id),
-                "task": str(instance.task_id) if instance.task_id else None,
-                "task_title": instance.task.title if instance.task else None,
-                "activity_type": instance.activity_type,
-                "title": instance.title,
-                "description": instance.description,
-                "triggered_by": triggered_by,
-                "read": instance.read,
-                "created_at": instance.created_at.isoformat(),
-            },
+    message = {
+        "type": "activity.created",
+        "data": {
+            "id": str(instance.id),
+            "project": str(instance.project_id),
+            "task": str(instance.task_id) if instance.task_id else None,
+            "task_title": instance.task.title if instance.task else None,
+            "activity_type": instance.activity_type,
+            "title": instance.title,
+            "description": instance.description,
+            "triggered_by": triggered_by,
+            "read": instance.read,
+            "created_at": instance.created_at.isoformat(),
         },
-    )
+    }
+
+    # Send to project-specific group
+    async_to_sync(channel_layer.group_send)(group_name, message)
+    # Send to global group
+    async_to_sync(channel_layer.group_send)("activities_global", message)

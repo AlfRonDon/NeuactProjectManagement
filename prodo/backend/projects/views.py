@@ -286,7 +286,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.filter(task_id=self.kwargs.get("task_pk"))
 
     def perform_create(self, serializer):
-        serializer.save(task_id=self.kwargs["task_pk"])
+        author = ""
+        if self.request.user and self.request.user.is_authenticated:
+            author = self.request.user.get_full_name() or self.request.user.username
+        serializer.save(task_id=self.kwargs["task_pk"], author=author)
 
 
 class ChangelogViewSet(viewsets.ReadOnlyModelViewSet):

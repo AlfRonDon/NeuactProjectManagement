@@ -24,6 +24,7 @@ class SubTaskSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
+    author = serializers.CharField(read_only=True, default="")
 
     class Meta:
         model = Comment

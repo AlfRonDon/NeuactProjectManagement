@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "./Providers";
+import { AuthWrapper } from "./AuthWrapper";
 
 export const metadata: Metadata = {
   title: "Neuact Project Management",
@@ -13,9 +13,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full w-full overflow-hidden">
-      <body className="h-full w-full overflow-hidden bg-neutral-50 text-neutral-900 antialiased">
-        <Providers>{children}</Providers>
+    <html lang="en">
+      <body className="bg-neutral-50 text-neutral-900 antialiased">
+        <AuthWrapper>{children}</AuthWrapper>
       </body>
     </html>
   );
