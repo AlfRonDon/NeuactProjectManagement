@@ -1,0 +1,250 @@
+================================================================================
+  NEUACT PROJECT MANAGEMENT — API ENDPOINTS & WEBSOCKET REFERENCE
+  Base URL: http://100.90.185.31:9017
+  Auth: Bearer <keycloak_access_token> in Authorization header
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  AUTH & USERS
+────────────────────────────────────────────────────────────────────────────────
+
+GET   /api/auth/me/
+      → Returns current authenticated user info (keycloak_id, username, email)
+
+GET   /api/users/
+      → List all known users (for assignment dropdowns)
+      Response: [{"keycloak_id", "username", "display_name"}]
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROJECTS
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/projects/                    → List all projects
+POST   /api/projects/projects/                    → Create project
+       Body: {"name", "short", "description", "color", "status", "start_date", "target_date"}
+
+GET    /api/projects/projects/{id}/               → Get project detail (with tasks, milestones, changelogs)
+PUT    /api/projects/projects/{id}/               → Update project
+PATCH  /api/projects/projects/{id}/               → Partial update
+DELETE /api/projects/projects/{id}/               → Delete project
+
+GET    /api/projects/projects/{id}/overview/      → Project overview (progress, task counts, filtered tasks, members)
+       Query: ?filter=urgent | today | this_week | next_week | not_started
+              ?status=active  — filter by exact status (combinable with filter)
+
+GET    /api/projects/projects/{id}/brief/         → Project brief (progress %, days_left, tasks_by_status, pipeline)
+
+GET    /api/projects/projects/{id}/sprint/        → Sprint health (planned vs actual dates, velocity, drift)
+
+GET    /api/projects/projects/{id}/pipeline/      → Pipeline view (tasks grouped by category with counts)
+
+GET    /api/projects/projects/{id}/gantt/         → Gantt chart data (lanes, events, annotations, dependencies)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  TASKS
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/tasks/                       → List tasks
+       Query: ?project={uuid}&status={status}&priority={priority}
+              &category={uuid}&assignee={uuid}&assigner={uuid}
+POST   /api/projects/tasks/                       → Create task
+       Body: {
+         "title", "description", "project": "<project-uuid>",
+         "status", "priority",
+         "assignee": "<userprofile-uuid>",
+         "assigner": "<userprofile-uuid>",
+         "category": "<category-uuid>",
+         "planned_start_date": "YYYY-MM-DD",
+         "planned_end_date": "YYYY-MM-DD",
+         "start_date": "YYYY-MM-DD",
+         "due_date": "YYYY-MM-DD",
+         "estimated_hours", "actual_hours", "tags": []
+       }
+
+GET    /api/projects/tasks/{id}/                  → Get task detail (with subtasks, comments, dependencies)
+PUT    /api/projects/tasks/{id}/                  → Update task
+PATCH  /api/projects/tasks/{id}/                  → Partial update (also triggers date cascade if dates change)
+DELETE /api/projects/tasks/{id}/                  → Delete task
+
+GET    /api/projects/tasks/{id}/detail_full/      → Full task detail (explicit action)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  SUBTASKS
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/tasks/{task_id}/subtasks/              → List subtasks for a task
+POST   /api/projects/tasks/{task_id}/subtasks/              → Create subtask
+       Body: {"title", "description", "done", "assignee": "<uuid>", "assigner": "<uuid>", "priority", "order"}
+
+GET    /api/projects/tasks/{task_id}/subtasks/{id}/         → Get subtask
+PATCH  /api/projects/tasks/{task_id}/subtasks/{id}/         → Update subtask
+DELETE /api/projects/tasks/{task_id}/subtasks/{id}/         → Delete subtask
+
+
+────────────────────────────────────────────────────────────────────────────────
+  COMMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/tasks/{task_id}/comments/              → List comments for a task
+POST   /api/projects/tasks/{task_id}/comments/              → Create comment (triggers "mention" activity)
+       Body: {"author": "username", "text": "comment content"}
+
+GET    /api/projects/tasks/{task_id}/comments/{id}/         → Get comment
+DELETE /api/projects/tasks/{task_id}/comments/{id}/         → Delete comment
+
+
+────────────────────────────────────────────────────────────────────────────────
+  CATEGORIES
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/categories/                  → List all categories
+POST   /api/projects/categories/                  → Create category
+       Body: {"name": "Research", "color": "#10b981"}
+
+GET    /api/projects/categories/{id}/             → Get category
+PUT    /api/projects/categories/{id}/             → Update category
+PATCH  /api/projects/categories/{id}/             → Partial update
+DELETE /api/projects/categories/{id}/             → Delete category
+
+
+────────────────────────────────────────────────────────────────────────────────
+  TASK DEPENDENCIES
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/dependencies/                → List dependencies
+       Query: ?task={uuid}      — dependencies involving this task
+              ?project={uuid}   — all dependencies in a project
+POST   /api/projects/dependencies/                → Create dependency (auto-blocks successor)
+       Body: {
+         "predecessor": "<task-uuid>",
+         "successor": "<task-uuid>",
+         "dependency_type": "FS",       ← FS | SS | FF | SF
+         "lag_days": 0
+       }
+       Types:
+         FS = Finish-to-Start  (B starts after A finishes)
+         SS = Start-to-Start   (B starts after A starts)
+         FF = Finish-to-Finish (B finishes after A finishes)
+         SF = Start-to-Finish  (B finishes after A starts)
+
+GET    /api/projects/dependencies/{id}/           → Get dependency
+PATCH  /api/projects/dependencies/{id}/           → Update (type or lag)
+DELETE /api/projects/dependencies/{id}/           → Delete (auto-unblocks successor)
+
+       Auto behaviors:
+       - Creating a dependency blocks the successor if predecessor isn't done
+       - Deleting a dependency unblocks successor if no other blockers remain
+       - When predecessor completes → successor auto-unblocks
+       - When predecessor dates shift and overlap → successor dates cascade forward
+
+
+────────────────────────────────────────────────────────────────────────────────
+  ACTIVITIES
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/activities/                  → List all activities
+       Query: ?project={uuid}   — filter by project
+              ?type=blocker     — filter by type (blocker | overdue | mention | ai)
+POST   /api/projects/activities/                  → Create activity manually
+       Body: {
+         "project": "<project-uuid>",
+         "task": "<task-uuid>",
+         "activity_type": "blocker",
+         "title": "...",
+         "description": "..."
+       }
+
+GET    /api/projects/activities/{id}/             → Get activity
+PATCH  /api/projects/activities/{id}/             → Mark as read: {"read": true}
+DELETE /api/projects/activities/{id}/             → Delete activity
+
+       Auto-created activities:
+       - "blocker" → when a task gets blocked by a dependency
+       - "mention" → when a comment is posted on a task
+
+
+────────────────────────────────────────────────────────────────────────────────
+  MILESTONES
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/milestones/                  → List milestones
+       Query: ?project={uuid}
+POST   /api/projects/milestones/                  → Create milestone
+       Body: {"name", "due_date", "project": "<uuid>"}
+
+GET    /api/projects/milestones/{id}/             → Get milestone
+PUT    /api/projects/milestones/{id}/             → Update
+DELETE /api/projects/milestones/{id}/             → Delete
+
+
+────────────────────────────────────────────────────────────────────────────────
+  CHANGELOGS
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/changelogs/                  → List changelogs
+       Query: ?project={uuid}
+GET    /api/projects/changelogs/{id}/             → Get changelog (read-only)
+
+
+────────────────────────────────────────────────────────────────────────────────
+  NOTIFICATIONS (legacy)
+────────────────────────────────────────────────────────────────────────────────
+
+GET    /api/projects/notifications/               → List notifications
+POST   /api/projects/notifications/               → Create notification
+GET    /api/projects/notifications/{id}/          → Get notification
+PATCH  /api/projects/notifications/{id}/          → Update
+DELETE /api/projects/notifications/{id}/          → Delete
+
+
+────────────────────────────────────────────────────────────────────────────────
+  AI ORCHESTRATION
+────────────────────────────────────────────────────────────────────────────────
+
+POST   /api/projects/orchestrate/                 → AI intent detection
+       Body: {"transcript": "which tasks are overdue?"}
+
+
+================================================================================
+  WEBSOCKET
+================================================================================
+
+  ws://100.90.185.31:9017/ws/activities/{project_id}/
+
+  Connect to receive real-time activity notifications for a specific project.
+  No auth required on WebSocket connection (currently).
+
+  Received message format:
+  {
+    "id": "uuid",
+    "project": "project-uuid",
+    "task": "task-uuid",
+    "task_title": "Fix bento grid bug",
+    "activity_type": "blocker",
+    "title": "Task B is blocked by Task A",
+    "description": "...",
+    "triggered_by": {
+      "keycloak_id": "...",
+      "username": "rohith",
+      "display_name": "Rohith Admin"
+    },
+    "read": false,
+    "created_at": "2026-04-30T..."
+  }
+
+  Postman: New → WebSocket Request → paste the ws:// URL → Connect
+
+
+================================================================================
+  NOTES
+================================================================================
+
+  - All UUIDs are v4 format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  - Date format: YYYY-MM-DD
+  - Server must be running with daphne (not gunicorn) for WebSocket support
+  - assignee/assigner fields accept UserProfile UUID (not keycloak_id)
+  - To get UserProfile UUIDs, use GET /api/users/
