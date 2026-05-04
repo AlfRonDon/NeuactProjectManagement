@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { usePMStore } from "@/lib/store";
+import { FONT_SANS } from "@/design";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -347,7 +348,7 @@ export default function BlockersPanel({ projectId, onClose }: BlockersPanelProps
       style={{
         width: 380,
         border: "0.5px solid #E9E5E4",
-        fontFamily: "'Geist', sans-serif",
+        fontFamily: FONT_SANS,
       }}
     >
       {/* Header */}

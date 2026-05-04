@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCategories, createCategory, deleteCategory } from "@/lib/api";
+import { FONT_SANS } from "@/design";
 
 /* ── Constants ────────────────────────────────────────── */
 
@@ -88,7 +89,7 @@ export function CategoriesModal({ onClose }: CategoriesModalProps) {
           padding: 18,
           minWidth: 360,
           maxWidth: 440,
-          fontFamily: "var(--font-geist-sans, Geist, sans-serif)",
+          fontFamily: FONT_SANS,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -282,7 +283,7 @@ export function CategoryFilter({ selected, onChange }: CategoryFilterProps) {
 
   return (
     <>
-      <div ref={wrapperRef} className="relative" style={{ fontFamily: "var(--font-geist-sans, Geist, sans-serif)" }}>
+      <div ref={wrapperRef} className="relative" style={{ fontFamily: FONT_SANS }}>
         {/* Filter pill button */}
         <button
           onClick={() => setOpen((v) => !v)}

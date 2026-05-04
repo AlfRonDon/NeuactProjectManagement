@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { usePMStore } from "@/lib/store";
+import { FONT_SANS } from "@/design";
 
 /* ── Types ─────────────────────────────────────────────── */
 
@@ -378,7 +379,7 @@ export default function DependenciesPanel({ projectId, tasks }: DependenciesPane
         backgroundColor: "var(--neutral-50, #faf9f6)",
         padding: 32,
         gap: 18,
-        fontFamily: "'Geist', system-ui, sans-serif",
+        fontFamily: FONT_SANS,
       }}
     >
       {/* ── Header ───────────────────────────────────────── */}

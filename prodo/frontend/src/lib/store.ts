@@ -542,15 +542,8 @@ export const usePMStore = create<PMStoreState>((set, get) => {
     ]);
   }
 
-  // ── Seed data: ensures dashboard looks correct before API loads ──
-  const SEED_PROJECTS = [
-    { id: "seed-ccv5", name: "Command Center v5", short: "CCv5", color: "#6366F1", status: "active", progress: 42, task_count: 12, done_count: 5, active_count: 3, blocked_count: 1, start_date: "2026-04-01", target_date: "2026-07-31", description: "AI-powered project management dashboard with real-time pipeline orchestration, voice-first interaction, and intelligent task scheduling." },
-    { id: "seed-nrv3", name: "NeuactReport v3", short: "NRv3", color: "#8B5CF6", status: "active", progress: 31, task_count: 8, done_count: 3, active_count: 2, blocked_count: 0, start_date: "2026-03-15", target_date: "2026-06-01", description: "Automated reporting engine with NL query parsing, chart auto-generation, and PDF export." },
-    { id: "seed-spot", name: "Spot Particle", short: "Spot", color: "#EC4899", status: "active", progress: 68, task_count: 9, done_count: 6, active_count: 1, blocked_count: 2, start_date: "2026-03-01", target_date: "2026-04-30", description: "WebGL particle animation engine with audio-reactive visuals and touch gesture controls." },
-  ];
-
   return {
-    projects: SEED_PROJECTS,
+    projects: [],
     tasks: [],
     notifications: [],
     portfolio: null,

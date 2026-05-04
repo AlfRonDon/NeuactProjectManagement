@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { usePMStore } from "@/lib/store";
+import { FONT_SANS } from "@/design";
 
 /* ── Types ─────────────────────────────────────────────── */
 
@@ -144,7 +145,7 @@ export default function PullWorkModal({
     /* Overlay */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.45)", fontFamily: "'Geist', sans-serif" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.45)", fontFamily: FONT_SANS }}
       onClick={onClose}
     >
       {/* Modal card */}

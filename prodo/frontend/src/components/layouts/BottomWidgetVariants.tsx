@@ -47,6 +47,7 @@ import {
   snoozeBlocker,
 } from "@/lib/api";
 import { usePMStore, selectDashboardProjects } from "@/lib/store";
+import { STATUS_HEX, SERIES_COLORS, NEUTRAL, FONT_SANS, FONT_MONO } from "@/design";
 import type { DashboardProject } from "@/lib/store";
 
 /* ── Types ────────────────────────────────────────────────── */
@@ -350,9 +351,9 @@ function DiagRadarTick(props: any) {
   const delta = score - lastScore;
   const deltaStr = delta > 15 ? "\u2191\u2191" : delta > 0 ? "\u2191" : delta < 0 ? "\u2193" : "";
 
-  let color = "#a8a29e";
-  if (index === 0) color = "#ef4444";
-  else if (score > 70) color = "#f97316";
+  let color: string = NEUTRAL[400];
+  if (index === 0) color = STATUS_HEX.bad.solid;
+  else if (score > 70) color = STATUS_HEX.hot.solid;
 
   // Push label outward
   const angle = Math.atan2(y - cy, x - cx);
@@ -367,7 +368,7 @@ function DiagRadarTick(props: any) {
         y={ty}
         textAnchor={tx > cx ? "start" : "end"}
         dominantBaseline="central"
-        style={{ fontSize: 10, fontFamily: "Geist, sans-serif", fill: color, fontWeight: 500 }}
+        style={{ fontSize: 10, fontFamily: FONT_SANS, fill: color, fontWeight: 500 }}
       >
         {axisItem?.axis}
       </text>
@@ -377,7 +378,7 @@ function DiagRadarTick(props: any) {
           y={ty + 11}
           textAnchor={tx > cx ? "start" : "end"}
           dominantBaseline="central"
-          style={{ fontSize: 9, fontFamily: "Geist Mono, monospace", fill: color }}
+          style={{ fontSize: 9, fontFamily: FONT_MONO, fill: color }}
         >
           {deltaStr}
         </text>
@@ -394,7 +395,7 @@ function DiagRadarDot(props: any) {
   const { cx, cy, index } = props;
   const axes = props.axes || DIAG_AXES;
   const score = axes[index]?.actual ?? 0;
-  const fill = score > 60 ? "#f97316" : "#22c55e";
+  const fill = score > 60 ? STATUS_HEX.hot.solid : STATUS_HEX.ok.solid;
   return <circle cx={cx} cy={cy} r={3.5} fill={fill} stroke="#fff" strokeWidth={1} />;
 }
 
@@ -421,7 +422,7 @@ function DiagnosticSectionC({
 function TopSection({ sel, setSel }: { sel: string; setSel: (s: string) => void }) {
   return (
     <div className="space-y-2">
-      <ProjectCards />
+      <ProjectCards selected={sel} onSelect={setSel} />
       <ProjectDetail projectShort={sel} />
     </div>
   );
@@ -545,12 +546,12 @@ export function GanttEditView() {
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
 
   const tasks = [
-    { id: "g1", label: "Auth API", start: 0, duration: 12, lane: 0, color: "#3b82f6", status: "done" },
-    { id: "g2", label: "Dashboard API", start: 8, duration: 17, lane: 0, color: "#3b82f6", status: "active" },
-    { id: "g3", label: "Login UI", start: 5, duration: 13, lane: 1, color: "#8b5cf6", status: "done" },
-    { id: "g4", label: "Widget Renderer", start: 15, duration: 25, lane: 1, color: "#8b5cf6", status: "active" },
-    { id: "g5", label: "Voice Pipeline", start: 20, duration: 25, lane: 2, color: "#f59e0b", status: "active" },
-    { id: "g6", label: "E2E Tests", start: 45, duration: 26, lane: 3, color: "#22c55e", status: "todo" },
+    { id: "g1", label: "Auth API", start: 0, duration: 12, lane: 0, color: STATUS_HEX.info.solid, status: "done" },
+    { id: "g2", label: "Dashboard API", start: 8, duration: 17, lane: 0, color: STATUS_HEX.info.solid, status: "active" },
+    { id: "g3", label: "Login UI", start: 5, duration: 13, lane: 1, color: SERIES_COLORS[4], status: "done" },
+    { id: "g4", label: "Widget Renderer", start: 15, duration: 25, lane: 1, color: SERIES_COLORS[4], status: "active" },
+    { id: "g5", label: "Voice Pipeline", start: 20, duration: 25, lane: 2, color: SERIES_COLORS[5], status: "active" },
+    { id: "g6", label: "E2E Tests", start: 45, duration: 26, lane: 3, color: STATUS_HEX.ok.solid, status: "todo" },
   ];
 
   const lanes = ["Backend", "Frontend", "ML", "QA"];
@@ -612,7 +613,7 @@ export function GanttEditView() {
 export function TaskWidgetVariantA() { return null; }
 export function TaskWidgetVariantB() { return null; }
 export function TaskWidgetVariantC() { return null; }
-export function GanttChart(_props: any) { return null; }
+export function GanttChart(_props: any) { return <GanttEditView />; }
 
 /* ── Compat type exports ── */
 export type GanttRow = { id: string; label: string; tasks: any[]; isGroup?: boolean };

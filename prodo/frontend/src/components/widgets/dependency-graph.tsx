@@ -2,6 +2,9 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { GitBranch, AlertTriangle } from "lucide-react";
+import {
+  STATUS_COLOR_HEX, PRIORITY_BORDER_HEX, NEUTRAL, STATUS_HEX, FOUNDATION, FONT_SANS,
+} from "@/design";
 
 interface GraphNode {
   id: string;
@@ -23,22 +26,9 @@ interface DependencyGraphData {
   criticalPath?: string[];
 }
 
-// Canvas 2D cannot resolve CSS var() — use hex values matching v1 tokens.
-const STATUS_COLOR: Record<string, string> = {
-  backlog: "#D5CFCE",   // --border-strong
-  todo: "#3B82F6",      // --info-solid
-  in_progress: "#F59E0B", // --warn-solid
-  in_review: "#8B5CF6", // --series-4
-  done: "#22C55E",      // --ok-solid
-  cancelled: "#938A89", // --text-tertiary
-};
-
-const PRIORITY_BORDER: Record<string, string> = {
-  critical: "#EA580C",  // --hot-solid
-  high: "#EA580C",      // --hot-solid
-  medium: "#938A89",    // --text-tertiary
-  low: "#D5CFCE",       // --border-strong
-};
+// Canvas 2D cannot resolve CSS var() — use hex values from design palette.
+const STATUS_COLOR = STATUS_COLOR_HEX;
+const PRIORITY_BORDER = PRIORITY_BORDER_HEX;
 
 export default function DependencyGraph({ data }: { data: DependencyGraphData }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -137,7 +127,7 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
       const cx2 = from.x + (to.x - from.x) * 0.6;
       ctx.bezierCurveTo(cx1, from.y, cx2, to.y, to.x, to.y);
 
-      ctx.strokeStyle = isCritical ? "#EF4444" : "#E9E5E4"; // --bad-solid / --border-subtle
+      ctx.strokeStyle = isCritical ? STATUS_HEX.bad.solid : FOUNDATION.borderSubtle;
       ctx.lineWidth = isCritical ? 2 : 1;
       ctx.stroke();
 
@@ -155,7 +145,7 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
         to.x - 20 * Math.cos(angle) - arrowLen * Math.cos(angle + 0.4),
         to.y - 20 * Math.sin(angle) - arrowLen * Math.sin(angle + 0.4)
       );
-      ctx.strokeStyle = isCritical ? "#EF4444" : "#D5CFCE"; // --bad-solid / --border-strong
+      ctx.strokeStyle = isCritical ? STATUS_HEX.bad.solid : FOUNDATION.borderStrong;
       ctx.lineWidth = isCritical ? 2 : 1;
       ctx.stroke();
     });
@@ -180,15 +170,15 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
       // Node circle
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, isHovered ? r + 2 : r, 0, Math.PI * 2);
-      ctx.fillStyle = STATUS_COLOR[node.status] || "#D5CFCE"; // --border-strong
+      ctx.fillStyle = STATUS_COLOR[node.status] || NEUTRAL[200];
       ctx.fill();
-      ctx.strokeStyle = PRIORITY_BORDER[node.priority] || "#938A89"; // --text-tertiary
+      ctx.strokeStyle = PRIORITY_BORDER[node.priority] || NEUTRAL[500];
       ctx.lineWidth = node.priority === "critical" ? 3 : node.priority === "high" ? 2 : 1;
       ctx.stroke();
 
       // Label
-      ctx.fillStyle = "#3D3837"; // --text-primary
-      ctx.font = "bold 9px Geist, sans-serif";
+      ctx.fillStyle = FOUNDATION.textPrimary;
+      ctx.font = `bold 9px ${FONT_SANS}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       const label = node.label.length > 20 ? node.label.slice(0, 18) + "..." : node.label;
@@ -196,8 +186,8 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
 
       // Assignee
       if (node.assignee) {
-        ctx.fillStyle = "#938A89"; // --text-tertiary
-        ctx.font = "8px Geist, sans-serif";
+        ctx.fillStyle = FOUNDATION.textTertiary;
+        ctx.font = `8px ${FONT_SANS}`;
         ctx.fillText(node.assignee, pos.x, pos.y + r + 15);
       }
     });

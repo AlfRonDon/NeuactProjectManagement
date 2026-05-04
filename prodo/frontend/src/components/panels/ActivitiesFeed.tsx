@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { fetchActivities } from "@/lib/api";
+import { FONT_SANS } from "@/design";
 const NotifPanel = lazy(() => import("@/components/widgets/NotifPanel"));
 
 /* ── Types ────────────────────────────────────────────── */
@@ -360,7 +361,7 @@ export default function ActivitiesFeed({
         borderRadius: 12,
         border: "0.5px solid #E9E5E4",
         padding: 14,
-        fontFamily: "'Geist', sans-serif",
+        fontFamily: FONT_SANS,
       }}
     >
       {/* ── Tabs ──────────────────────────────────────── */}

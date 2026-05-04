@@ -5,6 +5,22 @@
 /* Ensure html/body don't break height chain for full-viewport layouts */
 html, body { height: 100%; margin: 0; }
 
+/* ── Font Application (must be explicit, not just Tailwind class) ── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  font-family: 'Geist', system-ui, -apple-system, sans-serif;
+  color: #3D3837;
+  background-color: #F6F4F4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+code, kbd, pre, samp, .font-mono {
+  font-family: 'Geist Mono', ui-monospace, Consolas, monospace;
+}
+h1, h2, h3, .font-serif {
+  font-family: 'Source Serif 4', Georgia, serif;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Color System v1 — CSS Custom Properties
    See /COLOR_SYSTEM_v1.md for full spec.
@@ -12,6 +28,11 @@ html, body { height: 100%; margin: 0; }
 
 @layer base {
   :root {
+    /* Font stacks (CMD-compatible CSS variables) */
+    --font-sans:  'Geist', system-ui, -apple-system, sans-serif;
+    --font-mono:  'Geist Mono', ui-monospace, Consolas, monospace;
+    --font-serif: 'Source Serif 4', Georgia, serif;
+
     /* Foundation — warm taupe neutrals (brand) */
     --bg-canvas:      #F6F4F4;
     --bg-surface:     #FFFFFF;

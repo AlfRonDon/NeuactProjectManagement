@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { PageShell } from "@/design";
+import {
+  PageShell, DEP_STATUS_PILL, DEP_STATUS_DOT, DEP_SEGMENT, DEP_SEVERITY, DEP_SIDE_BAR,
+  CAL_UI, CAL_BAR_COLOR, avatarColors, FONT_SANS,
+} from "@/design";
 import { selectDependencyTasks, usePMStore } from "@/lib/store";
 
 /* ── Types ──────────────────────────────────────────────── */
@@ -21,43 +24,13 @@ interface DepTask {
 
 /* ── Constants ──────────────────────────────────────────── */
 
-const F = "'Geist', sans-serif";
+const F = FONT_SANS;
 
-const STATUS_PILL: Record<string, { bg: string; border: string; text: string; label: string }> = {
-  done:        { bg: "#c0dd97", border: "#639922", text: "#173404", label: "done" },
-  active:      { bg: "#faeeda", border: "#ba7517", text: "#412402", label: "active" },
-  in_progress: { bg: "#faeeda", border: "#ba7517", text: "#412402", label: "active" },
-  blocked:     { bg: "#fcebeb", border: "#f09595", text: "#501313", label: "blocked" },
-  todo:        { bg: "#f1efe8", border: "#b4b2a9", text: "#2c2c2a", label: "todo" },
-  backlog:     { bg: "#f1efe8", border: "#b4b2a9", text: "#2c2c2a", label: "backlog" },
-  in_review:   { bg: "#f1efe8", border: "#b4b2a9", text: "#2c2c2a", label: "review" },
-};
-
-const STATUS_DOT_COLOR: Record<string, string> = {
-  done: "#639922", active: "#ba7517", in_progress: "#ba7517",
-  blocked: "#a32d2d", todo: "#b4b2a9", backlog: "#b4b2a9", in_review: "#0c447c",
-};
-
-const SEGMENT_COLORS: Record<string, { bg: string; text: string }> = {
-  done:        { bg: "#97c459", text: "#173404" },
-  active:      { bg: "#fac775", text: "#412402" },
-  in_progress: { bg: "#fac775", text: "#412402" },
-  blocked:     { bg: "#f09595", text: "#501313" },
-  todo:        { bg: "#d3d1c7", text: "#2c2c2a" },
-  backlog:     { bg: "#d3d1c7", text: "#2c2c2a" },
-  in_review:   { bg: "#b5d4f4", text: "#0c447c" },
-};
-
-const SEVERITY_BADGE: Record<string, { bg: string; text: string; border?: string }> = {
-  critical: { bg: "#a32d2d", text: "#fcebeb" },
-  high:     { bg: "#a32d2d", text: "#fcebeb" },
-  medium:   { bg: "#faeeda", text: "#412402" },
-  low:      { bg: "#f1efe8", text: "#5f5e5a" },
-};
-
-const SIDE_BAR_COLOR: Record<string, string> = {
-  critical: "#a32d2d", high: "#a32d2d", medium: "#ef9f27", low: "#b4b2a9",
-};
+const STATUS_PILL = DEP_STATUS_PILL;
+const STATUS_DOT_COLOR = DEP_STATUS_DOT;
+const SEGMENT_COLORS = DEP_SEGMENT;
+const SEVERITY_BADGE = DEP_SEVERITY;
+const SIDE_BAR_COLOR = DEP_SIDE_BAR;
 
 /* ── Helpers ────────────────────────────────────────────── */
 
@@ -137,8 +110,8 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     <button onClick={onClick}
       style={{
         fontFamily: F, fontSize: 11, fontWeight: active ? 500 : 400,
-        color: active ? "#fff" : "#5f5e5a",
-        background: active ? "#2c2c2a" : "#fff",
+        color: active ? "#fff" : CAL_UI.textMid,
+        background: active ? CAL_UI.textDark : "#fff",
         border: active ? "none" : "0.5px solid #e5e3dd",
         borderRadius: 14, padding: "5px 14px",
         cursor: "pointer", whiteSpace: "nowrap" as const,
@@ -149,7 +122,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
 }
 
 function StatusDot({ status, size = 7 }: { status: string; size?: number }) {
-  return <div style={{ width: size, height: size, borderRadius: "50%", background: STATUS_DOT_COLOR[status] || "#b4b2a9", flexShrink: 0 }} />;
+  return <div style={{ width: size, height: size, borderRadius: "50%", background: STATUS_DOT_COLOR[status] || CAL_UI.textMuted, flexShrink: 0 }} />;
 }
 
 function ChainPill({ title, assignee, status, extra }: { title: string; assignee?: string; status?: string; extra?: string }) {
@@ -157,13 +130,13 @@ function ChainPill({ title, assignee, status, extra }: { title: string; assignee
   return (
     <div style={{
       display: "flex", gap: 6, alignItems: "center",
-      background: s === "blocked" ? "#fcebeb" : "#f1efe8",
+      background: s === "blocked" ? CAL_UI.blockedBg : CAL_UI.panelBg,
       borderRadius: 6, padding: "5px 9px",
     }}>
       <StatusDot status={s} size={6} />
-      <span style={{ fontFamily: F, fontWeight: 500, fontSize: 12, color: s === "blocked" ? "#501313" : "#2c2c2a", whiteSpace: "nowrap" as const }}>{title}</span>
+      <span style={{ fontFamily: F, fontWeight: 500, fontSize: 12, color: s === "blocked" ? CAL_UI.blockedText : CAL_UI.textDark, whiteSpace: "nowrap" as const }}>{title}</span>
       {(assignee || extra) && (
-        <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#888780", whiteSpace: "nowrap" as const }}>
+        <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMuted, whiteSpace: "nowrap" as const }}>
           {assignee ? `${shortName(assignee)}` : ""}{extra ? ` · ${extra}` : ""}
         </span>
       )}
@@ -201,7 +174,7 @@ export default function DependenciesPage() {
   // Insight cards
   const insights = useMemo(() => {
     // Biggest unblock: task with most downstream dependents
-    let biggestUnblock = { title: "—", desc: "", sideColor: "#ef9f27" };
+    let biggestUnblock = { title: "—", desc: "", sideColor: CAL_BAR_COLOR.in_progress };
     let maxDown = 0;
     tasks.forEach(t => {
       if (t.status === "done") return;
@@ -211,20 +184,20 @@ export default function DependenciesPage() {
         biggestUnblock = {
           title: t.title,
           desc: `Frees ${downstream.map(d => d.title.split(" ")[0]).slice(0, 1).join(", ")} + ${Math.max(0, downstream.length - 1)} downstream task${downstream.length > 1 ? "s" : ""}`,
-          sideColor: "#ef9f27",
+          sideColor: CAL_BAR_COLOR.in_progress,
         };
       }
     });
 
     // Long pole: task with most hours on critical path
-    let longPole = { title: "—", hours: 0, desc: "", sideColor: "#a32d2d" };
+    let longPole = { title: "—", hours: 0, desc: "", sideColor: CAL_UI.criticalAccent };
     criticalTasks.forEach(t => {
       if (t.estimatedHours > longPole.hours) {
         longPole = {
           title: `${t.title} · ${t.estimatedHours}h`,
           hours: t.estimatedHours,
           desc: "Sets the deadline. Can't shrink it.",
-          sideColor: "#a32d2d",
+          sideColor: CAL_UI.criticalAccent,
         };
       }
     });
@@ -265,8 +238,8 @@ export default function DependenciesPage() {
         let statusTextColor = "#173404";
         if (isBlocked && daysOpen > 0) {
           statusText = `● ${daysOpen}d open`;
-          statusBg = "#fcebeb";
-          statusTextColor = "#a32d2d";
+          statusBg = CAL_UI.blockedBg;
+          statusTextColor = CAL_UI.criticalAccent;
         } else if (isBlocked) {
           statusText = "1d wait";
           statusBg = "transparent";
@@ -341,16 +314,16 @@ export default function DependenciesPage() {
     <PageShell title="Dependencies" contentMode="scroll">
       {/* ── Critical Path Banner ── */}
       <div style={{
-        background: "#fcebeb", border: "0.5px solid #f09595", borderRadius: 12,
+        background: CAL_UI.blockedBg, border: "0.5px solid #f09595", borderRadius: 12,
         padding: "22px 28px", display: "flex", flexDirection: "column", gap: 14,
       }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 11, color: "#791f1f" }}>CRITICAL PATH</span>
+          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 11, color: CAL_UI.blockedDark }}>CRITICAL PATH</span>
           <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-            <span style={{ fontFamily: F, fontWeight: 500, fontSize: 18, color: "#501313" }}>
+            <span style={{ fontFamily: F, fontWeight: 500, fontSize: 18, color: CAL_UI.blockedText }}>
               {critTotalHours}h · {critWorkDays} working days
             </span>
-            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 13, color: "#791f1f" }}>
+            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 13, color: CAL_UI.blockedDark }}>
               · finishes {fmtDate(critFinishDate)} · {critRemaining} of {criticalPath.length} tasks remaining
             </span>
           </div>
@@ -374,15 +347,15 @@ export default function DependenciesPage() {
           })}
           {/* Today marker */}
           {critTotalHours > 0 && (
-            <div style={{ position: "absolute", left: `${todayPct}%`, top: 0, width: 2, height: 36, background: "#a32d2d" }} />
+            <div style={{ position: "absolute", left: `${todayPct}%`, top: 0, width: 2, height: 36, background: CAL_UI.criticalAccent }} />
           )}
         </div>
 
         {/* Footer */}
         <div style={{ display: "flex", justifyContent: "space-between", fontFamily: F, fontWeight: 500, fontSize: 11 }}>
-          <span style={{ color: "#791f1f" }}>● {critDoneHours}h done</span>
-          <span style={{ color: "#a32d2d" }}>↑ today · {new Date().toLocaleDateString("en", { month: "short", day: "numeric" }).toLowerCase()}</span>
-          <span style={{ color: "#791f1f" }}>{critRemainingHours}h remaining ●</span>
+          <span style={{ color: CAL_UI.blockedDark }}>● {critDoneHours}h done</span>
+          <span style={{ color: CAL_UI.criticalAccent }}>↑ today · {new Date().toLocaleDateString("en", { month: "short", day: "numeric" }).toLowerCase()}</span>
+          <span style={{ color: CAL_UI.blockedDark }}>{critRemainingHours}h remaining ●</span>
         </div>
       </div>
 
@@ -393,12 +366,12 @@ export default function DependenciesPage() {
           { label: "LONG POLE", title: insights.longPole.title, desc: insights.longPole.desc, color: insights.longPole.sideColor },
           { label: "SLACK AVAILABLE", title: insights.slackTask.title, desc: insights.slackTask.desc, color: insights.slackTask.sideColor },
         ].map((card, i) => (
-          <div key={i} style={{ flex: 1, background: "#f1efe8", borderRadius: 8, display: "flex", overflow: "hidden" }}>
+          <div key={i} style={{ flex: 1, background: CAL_UI.panelBg, borderRadius: 8, display: "flex", overflow: "hidden" }}>
             <div style={{ width: 3, background: card.color, flexShrink: 0 }} />
             <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 4 }}>
-              <span style={{ fontFamily: F, fontWeight: 500, fontSize: 11, color: "#888780" }}>{card.label}</span>
-              <span style={{ fontFamily: F, fontWeight: 500, fontSize: 14, color: "#2c2c2a" }}>{card.title}</span>
-              <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: "#5f5e5a" }}>{card.desc}</span>
+              <span style={{ fontFamily: F, fontWeight: 500, fontSize: 11, color: CAL_UI.textMuted }}>{card.label}</span>
+              <span style={{ fontFamily: F, fontWeight: 500, fontSize: 14, color: CAL_UI.textDark }}>{card.title}</span>
+              <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: CAL_UI.textMid }}>{card.desc}</span>
             </div>
           </div>
         ))}
@@ -411,7 +384,7 @@ export default function DependenciesPage() {
       }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 11, color: "#888780" }}>DEPENDENCY GRAPH</span>
+          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 11, color: CAL_UI.textMuted }}>DEPENDENCY GRAPH</span>
           <div style={{ display: "flex", gap: 6 }}>
             {[
               { key: "all", label: "All paths" },
@@ -431,8 +404,8 @@ export default function DependenciesPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 20, alignItems: "center" }}>
                   {layer.map((_, ni) => (
                     <svg key={ni} width="50" height="2" style={{ flexShrink: 0 }}>
-                      <line x1="0" y1="1" x2="43" y2="1" stroke={criticalSet.has(layer[ni]?.id) && li > 0 && criticalSet.has(graphNodes[li - 1]?.[0]?.id) ? "#a32d2d" : "#b4b2a9"} strokeWidth={criticalSet.has(layer[ni]?.id) ? 2 : 1} />
-                      <polygon points="43,1 38,4 38,-2" fill={criticalSet.has(layer[ni]?.id) ? "#a32d2d" : "#b4b2a9"} />
+                      <line x1="0" y1="1" x2="43" y2="1" stroke={criticalSet.has(layer[ni]?.id) && li > 0 && criticalSet.has(graphNodes[li - 1]?.[0]?.id) ? CAL_UI.criticalAccent : CAL_UI.textMuted} strokeWidth={criticalSet.has(layer[ni]?.id) ? 2 : 1} />
+                      <polygon points="43,1 38,4 38,-2" fill={criticalSet.has(layer[ni]?.id) ? CAL_UI.criticalAccent : CAL_UI.textMuted} />
                     </svg>
                   ))}
                 </div>
@@ -468,38 +441,38 @@ export default function DependenciesPage() {
             </React.Fragment>
           ))}
           {graphNodes.length === 0 && (
-            <span style={{ fontFamily: F, fontSize: 13, color: "#888780" }}>No dependency data</span>
+            <span style={{ fontFamily: F, fontSize: 13, color: CAL_UI.textMuted }}>No dependency data</span>
           )}
         </div>
 
         {/* Legend */}
         <div style={{ display: "flex", gap: 22, alignItems: "center", padding: "4px 0" }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ width: 20, height: 2, background: "#a32d2d" }} />
-            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#5f5e5a" }}>critical path · {critTotalHours}h</span>
+            <div style={{ width: 20, height: 2, background: CAL_UI.criticalAccent }} />
+            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMid }}>critical path · {critTotalHours}h</span>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <div style={{ width: 20, height: 0, borderTop: "1px dashed #888780" }} />
-            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#5f5e5a" }}>parallel · has slack</span>
+            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMid }}>parallel · has slack</span>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <div style={{ width: 12, height: 12, border: "1.5px solid #a32d2d", borderRadius: 3 }} />
-            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#5f5e5a" }}>on critical chain</span>
+            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMid }}>on critical chain</span>
           </div>
           <div style={{ flex: 1 }} />
-          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#888780" }}>node fill = status · pill = task</span>
+          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMuted }}>node fill = status · pill = task</span>
         </div>
 
         {/* Critical chain summary */}
         {criticalPath.length > 0 && (
           <div style={{
-            background: "#f1efe8", borderRadius: 8, padding: "12px 14px",
+            background: CAL_UI.panelBg, borderRadius: 8, padding: "12px 14px",
             display: "flex", justifyContent: "space-between", alignItems: "center",
           }}>
-            <span style={{ fontFamily: F, fontWeight: 500, fontSize: 12, color: "#2c2c2a" }}>
+            <span style={{ fontFamily: F, fontWeight: 500, fontSize: 12, color: CAL_UI.textDark }}>
               Critical chain · {criticalTasks.filter(t => t.status !== "done").length + criticalTasks.filter(t => t.status === "done").length} of {tasks.length} tasks · {critTotalHours}h end-to-end
             </span>
-            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#5f5e5a" }}>
+            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMid }}>
               {criticalTasks.map(t => t.title.split(" ").slice(0, 2).join(" ")).join(" → ")}
             </span>
           </div>
@@ -508,28 +481,28 @@ export default function DependenciesPage() {
 
       {/* ── Stats Row ── */}
       <div style={{ display: "flex", gap: 14 }}>
-        <div style={{ flex: 1, background: "#f1efe8", borderRadius: 8, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 24, color: "#2c2c2a" }}>{tasksWaiting}</span>
-          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: "#5f5e5a" }}>tasks waiting</span>
+        <div style={{ flex: 1, background: CAL_UI.panelBg, borderRadius: 8, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 24, color: CAL_UI.textDark }}>{tasksWaiting}</span>
+          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: CAL_UI.textMid }}>tasks waiting</span>
         </div>
-        <div style={{ flex: 1, background: "#f1efe8", borderRadius: 8, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 24, color: "#2c2c2a" }}>{personDaysLost}d</span>
-          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: "#5f5e5a" }}>person-days lost</span>
+        <div style={{ flex: 1, background: CAL_UI.panelBg, borderRadius: 8, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 24, color: CAL_UI.textDark }}>{personDaysLost}d</span>
+          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: CAL_UI.textMid }}>person-days lost</span>
         </div>
         <div style={{
           flex: 1, borderRadius: 8, padding: "14px 16px",
           display: "flex", flexDirection: "column", gap: 4,
-          background: critBottleneck.length > 0 ? "#fcebeb" : "#f1efe8",
+          background: critBottleneck.length > 0 ? CAL_UI.blockedBg : CAL_UI.panelBg,
           border: critBottleneck.length > 0 ? "0.5px solid #f09595" : "none",
         }}>
-          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 24, color: critBottleneck.length > 0 ? "#501313" : "#2c2c2a" }}>
+          <span style={{ fontFamily: F, fontWeight: 500, fontSize: 24, color: critBottleneck.length > 0 ? CAL_UI.blockedText : CAL_UI.textDark }}>
             {critBottleneck.length}
           </span>
-          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: critBottleneck.length > 0 ? "#791f1f" : "#5f5e5a" }}>
+          <span style={{ fontFamily: F, fontWeight: 400, fontSize: 12, color: critBottleneck.length > 0 ? CAL_UI.blockedDark : CAL_UI.textMid }}>
             critical bottleneck{critBottleneck.length !== 1 ? "s" : ""}
           </span>
           {critBottleneck.length > 0 && (
-            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#791f1f" }}>
+            <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.blockedDark }}>
               {critBottleneck[0].title}
             </span>
           )}
@@ -545,18 +518,18 @@ export default function DependenciesPage() {
           <FilterChip key={f.key} label={f.label} active={listFilter === f.key} onClick={() => setListFilter(f.key)} />
         ))}
         <div style={{ flex: 1 }} />
-        <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#888780" }}>sorted by impact</span>
+        <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMuted }}>sorted by impact</span>
       </div>
 
       {/* ── Dependency Rows ── */}
       {visibleRows.map(row => {
         const sev = SEVERITY_BADGE[row.severity] || SEVERITY_BADGE.low;
-        const sideColor = SIDE_BAR_COLOR[row.severity] || "#b4b2a9";
+        const sideColor = SIDE_BAR_COLOR[row.severity] || CAL_UI.textMuted;
 
         return (
           <div key={row.id} style={{
-            background: row.severity === "critical" ? "#fffafa" : "#fff",
-            border: `0.5px solid ${row.severity === "critical" ? "#f09595" : "#e5e3dd"}`,
+            background: row.severity === "critical" ? CAL_UI.blockedBg : "#fff",
+            border: `0.5px solid ${row.severity === "critical" ? CAL_UI.blockedBorder : CAL_UI.border}`,
             borderRadius: 8, display: "flex", overflow: "hidden",
           }}>
             <div style={{ width: 4, background: sideColor, flexShrink: 0 }} />
@@ -565,8 +538,8 @@ export default function DependenciesPage() {
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <div style={{ flex: 1, display: "flex", gap: 8, alignItems: "center" }}>
                   <StatusDot status={row.isBlocked ? "blocked" : row.status} />
-                  <span style={{ fontFamily: F, fontWeight: 500, fontSize: 13, color: row.severity === "critical" ? "#501313" : "#2c2c2a" }}>{row.title}</span>
-                  <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#888780" }}>· {row.isBlocked ? "blocked" : row.status}</span>
+                  <span style={{ fontFamily: F, fontWeight: 500, fontSize: 13, color: row.severity === "critical" ? CAL_UI.blockedText : CAL_UI.textDark }}>{row.title}</span>
+                  <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMuted }}>· {row.isBlocked ? "blocked" : row.status}</span>
                 </div>
                 <div style={{
                   background: sev.bg, color: sev.text,
@@ -591,7 +564,7 @@ export default function DependenciesPage() {
                 <ChainPill title={row.title} status={row.isBlocked ? "blocked" : row.status} />
                 {row.upstreamTasks.map((u, i) => (
                   <React.Fragment key={u.id}>
-                    <span style={{ fontFamily: F, fontWeight: 400, fontSize: 13, color: "#888780" }}>←</span>
+                    <span style={{ fontFamily: F, fontWeight: 400, fontSize: 13, color: CAL_UI.textMuted }}>←</span>
                     <ChainPill
                       title={u.title}
                       assignee={u.assignee}
@@ -604,12 +577,12 @@ export default function DependenciesPage() {
 
               {/* Footer */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 2 }}>
-                <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: "#5f5e5a" }}>
+                <span style={{ fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMid }}>
                   {row.downstream.length} downstream{row.downstream.length !== 1 ? "" : ""} · est unblock {row.estUnblock}
                 </span>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button style={{
-                    fontFamily: F, fontWeight: 400, fontSize: 11, color: "#5f5e5a",
+                    fontFamily: F, fontWeight: 400, fontSize: 11, color: CAL_UI.textMid,
                     background: "#fff", border: "0.5px solid #e5e3dd", borderRadius: 6,
                     padding: "5px 12px", cursor: "pointer",
                   }}>
@@ -618,7 +591,7 @@ export default function DependenciesPage() {
                   {row.severity === "critical" && (
                     <button style={{
                       fontFamily: F, fontWeight: 400, fontSize: 11, color: "#fff",
-                      background: "#a32d2d", border: "none", borderRadius: 6,
+                      background: CAL_UI.criticalAccent, border: "none", borderRadius: 6,
                       padding: "5px 12px", cursor: "pointer",
                     }}>
                       escalate

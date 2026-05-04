@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { LogOut, User } from "lucide-react";
 import { useAuth } from "@/lib/AuthProvider";
-import { avatarColors } from "@/lib/colors";
+import { avatarColors } from "@/design";
 
 export default function UserAvatar() {
   const { user, logout } = useAuth();

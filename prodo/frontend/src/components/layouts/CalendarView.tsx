@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import {
+  CAL_STATUS, CAL_BAR_COLOR, CAL_LEGEND, CAL_BAR_STYLES, CAL_UI, CAL_PRIORITY,
+  avatarColors as getAvatarStyleFromPalette, FONT_SANS,
+} from "@/design";
 
 /* ── Types ───────────────────────────────────────────── */
 
@@ -35,40 +39,9 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "timeline", label: "timeline" },
 ];
 
-const STATUS_COLORS: Record<string, { bg: string; border: string; label: string }> = {
-  done: { bg: "#c0dd97", border: "#97c459", label: "done" },
-  in_progress: { bg: "#faeeda", border: "#ef9f27", label: "in progress" },
-  active: { bg: "#faece7", border: "#d85a30", label: "active" },
-  blocked: { bg: "#fcebeb", border: "#e24b4a", label: "blocked" },
-  in_review: { bg: "#b5d4f4", border: "#378add", label: "in review" },
-  todo: { bg: "#e6f1fb", border: "#85b7eb", label: "to do" },
-  backlog: { bg: "#e5e5e2", border: "#888780", label: "backlog" },
-};
-
-const LEGEND_ITEMS = [
-  { color: "#97c459", label: "done" },
-  { color: "#ef9f27", label: "in progress" },
-  { color: "#d85a30", label: "active" },
-  { color: "#e24b4a", label: "blocked" },
-  { color: "#378add", label: "in review" },
-  { color: "#85b7eb", label: "to do" },
-  { color: "#888780", label: "backlog" },
-];
-
-const STATUS_BAR_COLORS: Record<string, string> = {
-  done: "#97c459",
-  in_progress: "#ef9f27",
-  active: "#d85a30",
-  blocked: "#e24b4a",
-  in_review: "#378add",
-  todo: "#85b7eb",
-  backlog: "#888780",
-};
-
-const AVATAR_PALETTE: Record<string, { bg: string; fg: string }> = {
-  rohith: { bg: "#cecbf6", fg: "#26215c" },
-  arjun: { bg: "#9fe1cb", fg: "#04342c" },
-};
+const STATUS_COLORS = CAL_STATUS;
+const LEGEND_ITEMS = CAL_LEGEND;
+const STATUS_BAR_COLORS = CAL_BAR_COLOR;
 
 const DAY_NAMES = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 const DAY_NAMES_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -77,14 +50,7 @@ const DAY_NAMES_SHORT = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 /* ── Helpers ─────────────────────────────────────────── */
 
 function getAvatarStyle(name: string): { bg: string; fg: string } {
-  const key = name.toLowerCase().trim();
-  if (AVATAR_PALETTE[key]) return AVATAR_PALETTE[key];
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
-  const bgs = ["#E0E7FF", "#CCFBF1", "#FCE7F3", "#EDE9FE", "#FEF3C7"];
-  const fgs = ["#3730A3", "#115E59", "#9D174D", "#5B21B6", "#92400E"];
-  const idx = h % 5;
-  return { bg: bgs[idx], fg: fgs[idx] };
+  return getAvatarStyleFromPalette(name);
 }
 
 function parseDate(d?: string): Date | null {
@@ -162,7 +128,7 @@ function TabBar({ active, onChange }: { active: TabKey; onChange: (t: TabKey) =>
         gap: "2px",
         alignItems: "flex-start",
         padding: "2px",
-        backgroundColor: "#f1efe8",
+        backgroundColor: CAL_UI.panelBg,
         borderRadius: "6px",
         overflow: "hidden",
       }}
@@ -177,10 +143,10 @@ function TabBar({ active, onChange }: { active: TabKey; onChange: (t: TabKey) =>
             padding: "3px 8px",
             borderRadius: "4px",
             overflow: "hidden",
-            backgroundColor: active === tab.key ? "#ffffff" : "transparent",
+            backgroundColor: active === tab.key ? CAL_UI.cardBg : "transparent",
             border: "none",
             cursor: "pointer",
-            fontFamily: "'Geist', sans-serif",
+            fontFamily: FONT_SANS,
             fontWeight: active === tab.key ? 500 : 400,
             fontSize: "11px",
             lineHeight: "normal",
@@ -229,11 +195,11 @@ function LegendRow() {
           />
           <span
             style={{
-              fontFamily: "'Geist', sans-serif",
+              fontFamily: FONT_SANS,
               fontWeight: 400,
               fontSize: "10px",
               lineHeight: "normal",
-              color: "#5f5e5a",
+              color: CAL_UI.textMid,
               whiteSpace: "nowrap" as const,
             }}
           >
@@ -257,7 +223,7 @@ function Footer({ tasks }: { tasks: CalendarTask[] }) {
         alignItems: "center",
         alignContent: "center",
         padding: "8px 12px",
-        backgroundColor: "#f1efe8",
+        backgroundColor: CAL_UI.panelBg,
         borderRadius: "6px",
         overflow: "hidden",
         width: "100%",
@@ -266,11 +232,11 @@ function Footer({ tasks }: { tasks: CalendarTask[] }) {
     >
       <span
         style={{
-          fontFamily: "'Geist', sans-serif",
+          fontFamily: FONT_SANS,
           fontWeight: 500,
           fontSize: "11px",
           lineHeight: "normal",
-          color: "#5f5e5a",
+          color: CAL_UI.textMid,
           whiteSpace: "nowrap" as const,
           flexShrink: 0,
         }}
@@ -280,11 +246,11 @@ function Footer({ tasks }: { tasks: CalendarTask[] }) {
       {dueTasks.length === 0 && (
         <span
           style={{
-            fontFamily: "'Geist', sans-serif",
+            fontFamily: FONT_SANS,
             fontWeight: 400,
             fontSize: "10px",
             lineHeight: "normal",
-            color: "#888780",
+            color: CAL_UI.textMuted,
             whiteSpace: "nowrap" as const,
           }}
         >
@@ -298,7 +264,7 @@ function Footer({ tasks }: { tasks: CalendarTask[] }) {
             display: "flex",
             alignItems: "center",
             padding: "2px 8px",
-            backgroundColor: "#ffffff",
+            backgroundColor: CAL_UI.cardBg,
             borderRadius: "10px",
             overflow: "hidden",
             flexShrink: 0,
@@ -306,11 +272,11 @@ function Footer({ tasks }: { tasks: CalendarTask[] }) {
         >
           <span
             style={{
-              fontFamily: "'Geist', sans-serif",
+              fontFamily: FONT_SANS,
               fontWeight: 400,
               fontSize: "10px",
               lineHeight: "normal",
-              color: "#5f5e5a",
+              color: CAL_UI.textMid,
               whiteSpace: "nowrap" as const,
             }}
           >
@@ -321,10 +287,10 @@ function Footer({ tasks }: { tasks: CalendarTask[] }) {
       {dueTasks.length > 8 && (
         <span
           style={{
-            fontFamily: "'Geist', sans-serif",
+            fontFamily: FONT_SANS,
             fontWeight: 400,
             fontSize: "10px",
-            color: "#888780",
+            color: CAL_UI.textMuted,
           }}
         >
           +{dueTasks.length - 8} more
@@ -379,7 +345,7 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
               flexDirection: "column",
               borderRadius: "6px",
               minWidth: 0,
-              backgroundColor: isToday ? "#faeeda" : "#f1efe8",
+              backgroundColor: isToday ? CAL_UI.todayBg : "#f1efe8",
               border: isToday ? "0.5px solid #f0c97d" : "none",
               padding: "8px 6px",
               gap: "6px",
@@ -388,7 +354,7 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               <span
                 style={{
-                  fontFamily: "'Geist', sans-serif",
+                  fontFamily: FONT_SANS,
                   fontWeight: 400,
                   fontSize: "9px",
                   lineHeight: "12px",
@@ -399,7 +365,7 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
               </span>
               <span
                 style={{
-                  fontFamily: "'Geist', sans-serif",
+                  fontFamily: FONT_SANS,
                   fontWeight: 500,
                   fontSize: "18px",
                   lineHeight: "22px",
@@ -409,13 +375,13 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
                 {date.getDate()}
               </span>
               {isToday && (
-                <span style={{ fontSize: "9px", lineHeight: "12px", color: "#412402" }}>
+                <span style={{ fontSize: "9px", lineHeight: "12px", color: CAL_UI.todayText }}>
                   today
                 </span>
               )}
             </div>
 
-            <div style={{ height: "0.5px", backgroundColor: isToday ? "#f0c97d" : "#e5e3dd" }} />
+            <div style={{ height: "0.5px", backgroundColor: isToday ? CAL_UI.todayBorder : CAL_UI.border }} />
 
             {dayTasks.length > 0 && (
               <div style={{ display: "flex", borderRadius: "2px", overflow: "hidden", height: "3px" }}>
@@ -446,7 +412,7 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
                       display: "flex",
                       borderRadius: "3px",
                       overflow: "hidden",
-                      backgroundColor: isBlocked ? "#fcebeb" : "#ffffff",
+                      backgroundColor: isBlocked ? CAL_UI.blockedBg : CAL_UI.cardBg,
                       border: isBlocked ? "0.5px solid #f09595" : "0.5px solid #e5e3dd",
                     }}
                   >
@@ -461,11 +427,11 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
                     <div style={{ display: "flex", flexDirection: "column", minWidth: 0, padding: "5px 6px", gap: "2px" }}>
                       <span
                         style={{
-                          fontFamily: "'Geist', sans-serif",
+                          fontFamily: FONT_SANS,
                           fontWeight: 500,
                           fontSize: "10px",
                           lineHeight: "13px",
-                          color: isBlocked ? "#501313" : "#2c2c2a",
+                          color: isBlocked ? CAL_UI.blockedText : "#2c2c2a",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap" as const,
@@ -476,11 +442,11 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
                       {subtitle && (
                         <span
                           style={{
-                            fontFamily: "'Geist', sans-serif",
+                            fontFamily: FONT_SANS,
                             fontWeight: 400,
                             fontSize: "9px",
                             lineHeight: "12px",
-                            color: isBlocked ? "#791f1f" : "#888780",
+                            color: isBlocked ? CAL_UI.blockedDark : "#888780",
                           }}
                         >
                           {subtitle}
@@ -495,7 +461,7 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
             {overflow > 0 && (
               <span
                 style={{
-                  fontFamily: "'Geist', sans-serif",
+                  fontFamily: FONT_SANS,
                   fontSize: "9px",
                   color: isToday ? "#412402" : "#888780",
                   textAlign: "center",
@@ -508,9 +474,9 @@ function WeeklyView({ tasks }: { tasks: CalendarTask[] }) {
             {dayTasks.length === 0 && (
               <span
                 style={{
-                  fontFamily: "'Geist', sans-serif",
+                  fontFamily: FONT_SANS,
                   fontSize: "9px",
-                  color: "#888780",
+                  color: CAL_UI.textMuted,
                   textAlign: "center",
                   padding: "8px 0",
                 }}
@@ -590,11 +556,11 @@ function MonthlyView({ tasks }: { tasks: CalendarTask[] }) {
           >
             <span
               style={{
-                fontFamily: "'Geist', sans-serif",
+                fontFamily: FONT_SANS,
                 fontWeight: 400,
                 fontSize: "9px",
                 lineHeight: "normal",
-                color: "#888780",
+                color: CAL_UI.textMuted,
                 textAlign: "center",
                 whiteSpace: "nowrap" as const,
               }}
@@ -685,7 +651,7 @@ function MonthlyView({ tasks }: { tasks: CalendarTask[] }) {
                     overflow: "hidden",
                     padding: "6px",
                     borderRadius: "4px",
-                    backgroundColor: isCurrentMonth ? "#ffffff" : "#f8f6f0",
+                    backgroundColor: isCurrentMonth ? CAL_UI.cardBg : CAL_UI.pageBg,
                     border: isToday ? "1.5px solid #378add" : "0.5px solid #e5e3dd",
                     opacity: isCurrentMonth ? 1 : 0.6,
                   }}
@@ -704,7 +670,7 @@ function MonthlyView({ tasks }: { tasks: CalendarTask[] }) {
                   >
                     <span
                       style={{
-                        fontFamily: "'Geist', sans-serif",
+                        fontFamily: FONT_SANS,
                         fontWeight: isToday ? 500 : 400,
                         fontSize: "11px",
                         lineHeight: "normal",
@@ -717,11 +683,11 @@ function MonthlyView({ tasks }: { tasks: CalendarTask[] }) {
                     {isToday && (
                       <span
                         style={{
-                          fontFamily: "'Geist', sans-serif",
+                          fontFamily: FONT_SANS,
                           fontWeight: 500,
                           fontSize: "8px",
                           lineHeight: "normal",
-                          color: "#0c447c",
+                          color: CAL_UI.todayAccent,
                           flexShrink: 0,
                         }}
                       >
@@ -734,7 +700,7 @@ function MonthlyView({ tasks }: { tasks: CalendarTask[] }) {
                           width: "6px",
                           height: "6px",
                           borderRadius: "50%",
-                          backgroundColor: "#e24b4a",
+                          backgroundColor: CAL_BAR_COLOR.blocked,
                           flexShrink: 0,
                         }}
                       />
@@ -771,11 +737,11 @@ function MonthlyView({ tasks }: { tasks: CalendarTask[] }) {
                   {taskLabel && isCurrentMonth && (
                     <span
                       style={{
-                        fontFamily: "'Geist', sans-serif",
+                        fontFamily: FONT_SANS,
                         fontWeight: taskLabelIsBlocked || isToday ? 500 : 400,
                         fontSize: "9px",
                         lineHeight: "12px",
-                        color: taskLabelIsBlocked ? "#e24b4a" : "#5f5e5a",
+                        color: taskLabelIsBlocked ? CAL_BAR_COLOR.blocked : "#5f5e5a",
                         width: "100%",
                         minWidth: "100%",
                         flexShrink: 0,
@@ -795,11 +761,11 @@ function MonthlyView({ tasks }: { tasks: CalendarTask[] }) {
                   {overflow > 0 && isCurrentMonth && (
                     <span
                       style={{
-                        fontFamily: "'Geist', sans-serif",
+                        fontFamily: FONT_SANS,
                         fontWeight: 400,
                         fontSize: "9px",
                         lineHeight: "normal",
-                        color: "#888780",
+                        color: CAL_UI.textMuted,
                         whiteSpace: "nowrap" as const,
                         flexShrink: 0,
                       }}
@@ -857,7 +823,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
   const phaseTask    = selectedTasks.find((t) => t.phase);
 
   /* ---- font shorthand ---- */
-  const F = "'Geist', sans-serif";
+  const F = FONT_SANS;
 
   return (
     /* Figma 9:38 — split wrapper */
@@ -875,7 +841,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
       {/* ═══ Figma 9:39 — agenda sidebar ═══ */}
       <div
         style={{
-          backgroundColor: "#f1efe8",
+          backgroundColor: CAL_UI.panelBg,
           display: "flex",
           flexDirection: "column",
           gap: 2,
@@ -909,7 +875,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
               fontSize: 9,
               lineHeight: "normal",
               fontStyle: "normal",
-              color: "#888780",
+              color: CAL_UI.textMuted,
               whiteSpace: "nowrap" as const,
               flexShrink: 0,
             }}
@@ -942,7 +908,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
                 width: "100%",
                 cursor: "pointer",
                 textAlign: "left" as const,
-                backgroundColor: isToday ? "#ffffff" : "transparent",
+                backgroundColor: isToday ? CAL_UI.cardBg : "transparent",
                 border: isToday ? "1.5px solid #378add" : "1.5px solid transparent",
               }}
             >
@@ -1073,7 +1039,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
                 fontSize: 9,
                 lineHeight: "normal",
                 fontStyle: "normal",
-                color: "#888780",
+                color: CAL_UI.textMuted,
                 textAlign: "center" as const,
                 whiteSpace: "nowrap" as const,
                 flexShrink: 0,
@@ -1129,7 +1095,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
                 fontSize: 16,
                 lineHeight: "normal",
                 fontStyle: "normal",
-                color: "#2c2c2a",
+                color: CAL_UI.textDark,
                 whiteSpace: "nowrap" as const,
                 flexShrink: 0,
               }}
@@ -1141,7 +1107,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
             {isSameDay(selectedDate, today) && (
               <div
                 style={{
-                  backgroundColor: "#e6f1fb",
+                  backgroundColor: CAL_STATUS.todo.bg,
                   display: "flex",
                   alignItems: "flex-start",
                   overflow: "hidden",
@@ -1160,7 +1126,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
                     fontSize: 11,
                     lineHeight: "normal",
                     fontStyle: "normal",
-                    color: "#0c447c",
+                    color: CAL_UI.todayAccent,
                     whiteSpace: "nowrap" as const,
                     flexShrink: 0,
                   }}
@@ -1179,7 +1145,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
               fontSize: 12,
               lineHeight: "normal",
               fontStyle: "normal",
-              color: "#5f5e5a",
+              color: CAL_UI.textMid,
               whiteSpace: "nowrap" as const,
               flexShrink: 0,
             }}
@@ -1197,7 +1163,7 @@ function SplitView({ tasks }: { tasks: CalendarTask[] }) {
               fontFamily: F,
               fontSize: 13,
               fontStyle: "italic",
-              color: "#888780",
+              color: CAL_UI.textMuted,
               padding: "32px 0",
               textAlign: "center" as const,
               width: "100%",
@@ -1226,7 +1192,7 @@ function SplitTaskCard({
   allTasks: CalendarTask[];
   today: Date;
 }) {
-  const F = "'Geist', sans-serif";
+  const F = FONT_SANS;
   const sc = getStatusColor(task.status);
   const blocked = task.status === "blocked";
   const start = parseDate(task.start);
@@ -1258,19 +1224,14 @@ function SplitTaskCard({
   /* deps */
   const deps = (task.deps ?? []).map((id) => {
     const dep = allTasks.find((t) => t.id === id || t.title.toLowerCase() === id.toLowerCase());
-    return { name: dep?.title ?? id, color: dep ? getStatusColor(dep.status).border : "#ef9f27" };
+    return { name: dep?.title ?? id, color: dep ? getStatusColor(dep.status).border : CAL_BAR_COLOR.in_progress };
   });
 
   /* priority pill */
-  const PRI: Record<string, { bg: string; fg: string }> = {
-    high:   { bg: "#faece7", fg: "#4a1b0c" },
-    medium: { bg: "#faeeda", fg: "#412402" },
-    low:    { bg: "#e6f1fb", fg: "#0c447c" },
-  };
-  const pri = task.priority ? PRI[task.priority.toLowerCase()] ?? { bg: "#f1efe8", fg: "#5f5e5a" } : null;
+  const pri = task.priority ? CAL_PRIORITY[task.priority.toLowerCase()] ?? { bg: CAL_UI.panelBg, fg: CAL_UI.textMid } : null;
 
-  const trackBg = blocked ? "#f7c1c1" : "#f1efe8";
-  const fillBg  = blocked ? "#a32d2d" : sc.border;
+  const trackBg = blocked ? "#f7c1c1" : CAL_UI.panelBg;
+  const fillBg  = blocked ? CAL_UI.criticalAccent : sc.border;
   const fillFlex = Math.round(pctFill);
   const emptyFlex = Math.round(100 - pctFill);
 
@@ -1278,7 +1239,7 @@ function SplitTaskCard({
     /* Figma dc — card wrapper */
     <div
       style={{
-        backgroundColor: blocked ? "#fcebeb" : "#ffffff",
+        backgroundColor: blocked ? CAL_UI.blockedBg : CAL_UI.cardBg,
         border: blocked ? "0.5px solid #f09595" : "0.5px solid #e5e3dd",
         display: "flex",
         flexDirection: "column",
@@ -1344,7 +1305,7 @@ function SplitTaskCard({
                 fontSize: 13,
                 lineHeight: "normal",
                 fontStyle: "normal",
-                color: blocked ? "#501313" : "#2c2c2a",
+                color: blocked ? CAL_UI.blockedText : "#2c2c2a",
                 minWidth: 1,
               }}
             >
@@ -1394,7 +1355,7 @@ function SplitTaskCard({
                 fontSize: 12,
                 lineHeight: "normal",
                 fontStyle: "normal",
-                color: blocked ? "#791f1f" : "#5f5e5a",
+                color: blocked ? CAL_UI.blockedDark : "#5f5e5a",
                 flexShrink: 0,
                 width: "100%",
               }}
@@ -1460,7 +1421,7 @@ function SplitTaskCard({
           ) : (
             <div
               style={{
-                backgroundColor: "#fcebeb",
+                backgroundColor: CAL_UI.blockedBg,
                 border: "1px dashed #a32d2d",
                 display: "flex",
                 flexDirection: "column",
@@ -1480,7 +1441,7 @@ function SplitTaskCard({
                   fontSize: 8,
                   lineHeight: "normal",
                   fontStyle: "normal",
-                  color: "#501313",
+                  color: CAL_UI.blockedText,
                   whiteSpace: "nowrap" as const,
                   flexShrink: 0,
                 }}
@@ -1497,7 +1458,7 @@ function SplitTaskCard({
               fontSize: 10,
               lineHeight: "normal",
               fontStyle: "normal",
-              color: blocked ? "#501313" : "#888780",
+              color: blocked ? CAL_UI.blockedText : "#888780",
               whiteSpace: "nowrap" as const,
               flexShrink: 0,
             }}
@@ -1509,10 +1470,10 @@ function SplitTaskCard({
         {/* dot · hours */}
         {task.estimated_hours != null && (
           <>
-            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: CAL_UI.textMuted, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
               {"\u00B7"}
             </p>
-            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: blocked ? "#501313" : "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: blocked ? CAL_UI.blockedText : "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
               {task.estimated_hours}h est
             </p>
           </>
@@ -1521,10 +1482,10 @@ function SplitTaskCard({
         {/* dot · date range */}
         {start && due && (
           <>
-            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: CAL_UI.textMuted, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
               {"\u00B7"}
             </p>
-            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: blocked ? "#501313" : "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+            <p style={{ fontFamily: F, fontWeight: 400, fontSize: 10, lineHeight: "normal", fontStyle: "normal", color: blocked ? CAL_UI.blockedText : "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
               {formatShortDate(start)} {"\u2192"} {formatShortDate(due)}
             </p>
           </>
@@ -1574,7 +1535,7 @@ function SplitTaskCard({
               fontStyle: "normal",
               overflow: "hidden",
               flexShrink: 0,
-              color: blocked ? "#791f1f" : "#888780",
+              color: blocked ? CAL_UI.blockedDark : "#888780",
               fontSize: 9,
               width: "100%",
               whiteSpace: "nowrap" as const,
@@ -1593,7 +1554,7 @@ function SplitTaskCard({
       {/* ── Figma Rectangle — divider ── */}
       <div
         style={{
-          backgroundColor: blocked ? "#f09595" : "#e5e3dd",
+          backgroundColor: blocked ? CAL_UI.blockedBorder : CAL_UI.border,
           height: 0.5,
           flexShrink: 0,
           width: "100%",
@@ -1620,7 +1581,7 @@ function SplitTaskCard({
               fontSize: 10,
               lineHeight: "normal",
               fontStyle: "normal",
-              color: blocked ? "#501313" : "#888780",
+              color: blocked ? CAL_UI.blockedText : "#888780",
               whiteSpace: "nowrap" as const,
               flexShrink: 0,
             }}
@@ -1657,7 +1618,7 @@ function SplitTaskCard({
                   fontSize: 10,
                   lineHeight: "normal",
                   fontStyle: "normal",
-                  color: blocked ? "#501313" : "#2c2c2a",
+                  color: blocked ? CAL_UI.blockedText : "#2c2c2a",
                   whiteSpace: "nowrap" as const,
                   flexShrink: 0,
                 }}
@@ -1675,18 +1636,10 @@ function SplitTaskCard({
 /* ── Timeline View ───────────────────────────────────── */
 /* Rebuilt from scratch — direct translation of Figma node 19:2 */
 
-const BAR_STYLES: Record<string, { bg: string; border: string; fg: string; borderStyle?: string; opacity?: number }> = {
-  done:        { bg: "#c0dd97", border: "#639922", fg: "#173404", opacity: 0.78 },
-  in_progress: { bg: "#faeeda", border: "#ba7517", fg: "#412402" },
-  active:      { bg: "#faece7", border: "#d85a30", fg: "#4a1b0c" },
-  blocked:     { bg: "#fcebeb", border: "#e24b4a", fg: "#501313" },
-  in_review:   { bg: "#b5d4f4", border: "#185fa5", fg: "#042c53" },
-  todo:        { bg: "#e6f1fb", border: "#378add", fg: "#0c447c", borderStyle: "dashed" },
-  backlog:     { bg: "#e5e5e2", border: "#888780", fg: "#2c2c2a" },
-};
+const BAR_STYLES = CAL_BAR_STYLES;
 
 function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
-  const F = "'Geist', sans-serif";
+  const F = FONT_SANS;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -1828,7 +1781,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                 fontWeight: 400,
                 fontSize: 10,
                 lineHeight: "normal",
-                color: "#888780",
+                color: CAL_UI.textMuted,
                 whiteSpace: "nowrap" as const,
                 flexShrink: 0,
               }}
@@ -1857,7 +1810,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                   fontFamily: F,
                   fontWeight: 500,
                   fontSize: 10,
-                  color: wl.isToday ? "#a32d2d" : "#888780",
+                  color: wl.isToday ? CAL_UI.criticalAccent : "#888780",
                   whiteSpace: "nowrap" as const,
                   top: 0,
                   left: wl.idx * dayPx,
@@ -1880,7 +1833,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                     fontFamily: F,
                     fontWeight: isT ? 500 : 400,
                     fontSize: 9,
-                    color: isT ? "#a32d2d" : "#888780",
+                    color: isT ? CAL_UI.criticalAccent : "#888780",
                     textAlign: "center" as const,
                     width: dayPx,
                     height: 12,
@@ -1899,7 +1852,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
         </div>
 
         {/* ═══ Figma 19:71 — divider ═══ */}
-        <div style={{ backgroundColor: "#e5e3dd", height: 0.5, flexShrink: 0, width: "100%" }} />
+        <div style={{ backgroundColor: CAL_UI.border, height: 0.5, flexShrink: 0, width: "100%" }} />
 
         {/* ═══ Assignee bands ═══ */}
         {groups.map(([assignee, assigneeTasks]) => {
@@ -1949,7 +1902,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                   {isUn ? (
                     <div
                       style={{
-                        backgroundColor: "#fcebeb",
+                        backgroundColor: CAL_UI.blockedBg,
                         border: "1px dashed #a32d2d",
                         display: "flex",
                         flexDirection: "column",
@@ -1962,7 +1915,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                         height: 22,
                       }}
                     >
-                      <p style={{ fontFamily: F, fontWeight: 500, fontSize: 11, lineHeight: "normal", color: "#501313", whiteSpace: "nowrap" as const, flexShrink: 0 }}>?</p>
+                      <p style={{ fontFamily: F, fontWeight: 500, fontSize: 11, lineHeight: "normal", color: CAL_UI.blockedText, whiteSpace: "nowrap" as const, flexShrink: 0 }}>?</p>
                     </div>
                   ) : (
                     <div
@@ -2004,7 +1957,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                         fontFamily: F,
                         fontWeight: 500,
                         fontSize: 12,
-                        color: isUn ? "#e24b4a" : "#2c2c2a",
+                        color: isUn ? CAL_BAR_COLOR.blocked : "#2c2c2a",
                         flexShrink: 0,
                         width: "100%",
                         overflow: "hidden",
@@ -2019,7 +1972,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                         fontFamily: F,
                         fontWeight: 400,
                         fontSize: 10,
-                        color: "#5f5e5a",
+                        color: CAL_UI.textMid,
                         flexShrink: 0,
                         width: "100%",
                         overflow: "hidden",
@@ -2093,7 +2046,7 @@ function TimelineView({ tasks }: { tasks: CalendarTask[] }) {
                         fontWeight: 400,
                         fontSize: 9,
                         lineHeight: "normal",
-                        color: "#888780",
+                        color: CAL_UI.textMuted,
                         whiteSpace: "nowrap" as const,
                         top: 14,
                         right: 0,
@@ -2178,10 +2131,10 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
         gap: "12px",
         alignItems: "flex-start",
         padding: "32px",
-        backgroundColor: "#faf9f5",
+        backgroundColor: CAL_UI.pageBg,
         width: "100%",
         height: "100%",
-        fontFamily: "'Geist', sans-serif",
+        fontFamily: FONT_SANS,
         overflow: "hidden",
       }}
     >
@@ -2199,11 +2152,11 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
         <div style={{ display: "flex", gap: "12px", alignItems: "center", overflow: "hidden", flexShrink: 0 }}>
           <span
             style={{
-              fontFamily: "'Geist', sans-serif",
+              fontFamily: FONT_SANS,
               fontWeight: 500,
               fontSize: "15px",
               lineHeight: "normal",
-              color: "#2c2c2a",
+              color: CAL_UI.textDark,
               whiteSpace: "nowrap" as const,
               flexShrink: 0,
             }}
@@ -2217,7 +2170,7 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
           <div style={{ display: "flex", gap: 6, alignItems: "center", overflow: "hidden", flexShrink: 0 }}>
             <div
               style={{
-                backgroundColor: "#f1efe8",
+                backgroundColor: CAL_UI.panelBg,
                 display: "flex",
                 alignItems: "flex-start",
                 overflow: "hidden",
@@ -2226,25 +2179,25 @@ export default function CalendarView({ tasks }: CalendarViewProps) {
                 flexShrink: 0,
               }}
             >
-              <span style={{ fontFamily: "'Geist', sans-serif", fontWeight: 400, fontSize: 11, lineHeight: "normal", color: "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+              <span style={{ fontFamily: FONT_SANS, fontWeight: 400, fontSize: 11, lineHeight: "normal", color: CAL_UI.textMuted, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
                 3 weeks
               </span>
             </div>
-            <span style={{ fontFamily: "'Geist', sans-serif", fontWeight: 400, fontSize: 11, lineHeight: "normal", color: "#888780", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+            <span style={{ fontFamily: FONT_SANS, fontWeight: 400, fontSize: 11, lineHeight: "normal", color: CAL_UI.textMuted, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
               {"\u00B7"}
             </span>
-            <span style={{ fontFamily: "'Geist', sans-serif", fontWeight: 500, fontSize: 11, lineHeight: "normal", color: "#a32d2d", whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+            <span style={{ fontFamily: FONT_SANS, fontWeight: 500, fontSize: 11, lineHeight: "normal", color: CAL_UI.criticalAccent, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
               today {"\u00B7"} {formatShortDate(today)}
             </span>
           </div>
         ) : (
           <span
             style={{
-              fontFamily: "'Geist', sans-serif",
+              fontFamily: FONT_SANS,
               fontWeight: 400,
               fontSize: "11px",
               lineHeight: "normal",
-              color: "#888780",
+              color: CAL_UI.textMuted,
               whiteSpace: "nowrap" as const,
               flexShrink: 0,
             }}

@@ -42,12 +42,12 @@ function RightColumn({ selectedProject, setSelectedProject, sprintId, topBlocker
 }) {
   return (
     <div className="w-1/2 overflow-hidden"
-      style={{ height: "calc(100dvh - 56px)", display: "flex", flexDirection: "column", gap: 4 }}>
+      style={{ height: "calc(100dvh - 56px)", display: "flex", flexDirection: "column", gap: 8 }}>
       <div style={{ overflow: "hidden", minHeight: 0, flex: "1 1 0%" }}
         className="bg-white rounded-lg border border-neutral-200">
         <TeamWidget />
       </div>
-      <div style={{ overflow: "hidden", minHeight: 0, height: 280, flexShrink: 0 }}>
+      <div style={{ overflow: "hidden", minHeight: 0, flex: "0 0 40%", maxHeight: 320 }}>
         <KPIDashboard renderLayout="diagnostic-only" sel={selectedProject} onSelChange={setSelectedProject} sprintId={sprintId} topBlockerId={topBlockerId} />
       </div>
     </div>
@@ -94,9 +94,9 @@ export default function AdminOverview({ externalShowTask, externalShowProject, o
       {/* Content — no tab bar, fits screen */}
       <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {view === "overview" && (
-          <div className="flex-1 flex gap-1 overflow-hidden p-1">
+          <div className="flex-1 flex gap-2 overflow-hidden p-2">
             {/* Left — Project cards + Detail + Sprint 12 */}
-            <div className="w-1/2 flex flex-col overflow-hidden gap-1">
+            <div className="w-1/2 flex flex-col overflow-hidden gap-2">
               <div className="shrink-0">
                 <KPIDashboard renderLayout="left-only" sel={selectedProject} onSelChange={setSelectedProject} />
               </div>

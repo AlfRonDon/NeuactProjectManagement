@@ -15,6 +15,7 @@ import {
   ReferenceDot,
 } from "recharts";
 import { TrendingDown, AlertTriangle } from "lucide-react";
+import { CHART_TOOLTIP_STYLE, NEUTRAL, SERIES_COLORS } from "@/design";
 
 interface BurndownPoint {
   date: string;
@@ -36,14 +37,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   const annotation = payload[0]?.payload?.annotation;
   return (
-    <div style={{ background: "#fff", border: "1px solid #E9E5E4", borderRadius: 8, padding: "8px 12px", fontFamily: "'Geist', sans-serif", fontSize: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
-      <div style={{ fontWeight: 600, color: "#1A1716", marginBottom: 4 }}>{label}</div>
+    <div style={{ ...CHART_TOOLTIP_STYLE, fontSize: 12 }}>
+      <div style={{ fontWeight: 600, color: NEUTRAL[950], marginBottom: 4 }}>{label}</div>
       <div style={{ display: "flex", gap: 12 }}>
-        <span style={{ color: "#938A89" }}>Planned: <b style={{ color: "#1A1716" }}>{payload[0]?.value}</b></span>
-        <span style={{ color: "#938A89" }}>Actual: <b style={{ color: "#6366F1" }}>{payload[1]?.value}</b></span>
+        <span style={{ color: NEUTRAL[500] }}>Planned: <b style={{ color: NEUTRAL[950] }}>{payload[0]?.value}</b></span>
+        <span style={{ color: NEUTRAL[500] }}>Actual: <b style={{ color: SERIES_COLORS[1] }}>{payload[1]?.value}</b></span>
       </div>
       {annotation && (
-        <div style={{ marginTop: 4, paddingTop: 4, borderTop: "1px solid #E9E5E4", color: "#938A89", fontSize: 11 }}>
+        <div style={{ marginTop: 4, paddingTop: 4, borderTop: `1px solid ${NEUTRAL[100]}`, color: NEUTRAL[500], fontSize: 11 }}>
           {annotation}
         </div>
       )}

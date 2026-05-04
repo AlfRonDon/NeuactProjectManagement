@@ -169,56 +169,60 @@ export const FILTER_PILL_ACTIVE = "bg-neutral-900 text-white";
 export const FILTER_BAR = "px-3 py-1.5 border-b border-neutral-100 flex gap-1.5 shrink-0";
 
 /* ── Chart Styling ──────────────────────────────────────── */
+// Re-exported from palette.ts for backwards compat.
+// New code should import directly from @/design/palette or @/design.
+export {
+  CHART_AXIS_STYLE,
+  CHART_AXIS_MONO_STYLE,
+  CHART_GRID_COLOR,
+  CHART_TOOLTIP_STYLE,
+  CHART_TOOLTIP_DARK_STYLE,
+  SERIES_COLORS,
+  SERIES_EXTENDED,
+  SERIES_ARRAY,
+  HEATMAP_GRADIENT,
+  GAUGE,
+  DIAGNOSTIC_BAR_COLORS,
+  DIAGNOSTIC_ACCENT,
+  STATUS_COLOR_HEX,
+  PRIORITY_BORDER_HEX,
+  RISK_COLOR_HEX,
+  HEALTH_CONFIG,
+  DARK,
+  SHADOW,
+  ZONE_COLORS,
+  // Calendar / timeline
+  CAL_STATUS,
+  CAL_BAR_COLOR,
+  CAL_LEGEND,
+  CAL_BAR_STYLES,
+  CAL_UI,
+  CAL_PRIORITY,
+  // Dependencies
+  DEP_STATUS_PILL,
+  DEP_STATUS_DOT,
+  DEP_SEGMENT,
+  DEP_SEVERITY,
+  DEP_SIDE_BAR,
+  // Neutral / foundation hex
+  NEUTRAL,
+  PRIMARY,
+  STATUS_HEX,
+  FOUNDATION,
+} from "./palette";
 
-/** Recharts axis text */
-export const CHART_AXIS_STYLE = {
-  fontSize: 10,
-  fontFamily: "'Geist', sans-serif",
-  fill: "#938A89", // neutral-500
-};
-
-/** Recharts grid */
-export const CHART_GRID_COLOR = "#E9E5E4"; // neutral-100
-
-/** Recharts tooltip (CMD white card style) */
-export const CHART_TOOLTIP_STYLE = {
-  backgroundColor: "#fff",
-  border: "1px solid #E9E5E4",
-  borderRadius: 8,
-  padding: "8px 12px",
-  fontFamily: "'Geist', sans-serif",
-  fontSize: 11,
-  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-};
-
-/** Chart series colors */
-export const SERIES_COLORS = {
-  1: "#6366F1",
-  2: "#14B8A6",
-  3: "#EC4899",
-  4: "#8B5CF6",
-  5: "#F59E0B",
-  planned: "#9CA3AF",
-};
-
-/* ── Avatar ─────────────────────────────────────────────── */
-
-/** Per-person avatar colors (used in boards, task cards) */
-export const AVATAR_COLORS: Record<string, { bg: string; fg: string }> = {
-  rohith: { bg: "#cecbf6", fg: "#26215c" },
-  priya:  { bg: "#fcd6e0", fg: "#5c2133" },
-  arjun:  { bg: "#9fe1cb", fg: "#04342c" },
-};
-
-export function getAvatarColor(name: string): { bg: string; fg: string } {
-  const key = name.toLowerCase().trim();
-  if (AVATAR_COLORS[key]) return AVATAR_COLORS[key];
-  // Fallback: hash-based
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = key.charCodeAt(i) + ((h << 5) - h);
-  const hue = Math.abs(h) % 360;
-  return { bg: `hsl(${hue}, 60%, 88%)`, fg: `hsl(${hue}, 60%, 25%)` };
-}
+/* ── Avatar & Project Colors ───────────────────────────── */
+// Re-exported from palette.ts for single-import convenience.
+export {
+  AVATAR_NAMED as AVATAR_COLORS,
+  AVATAR_BG,
+  AVATAR_FG,
+  avatarColors,
+  avatarColors as getAvatarColor,
+  projectColor,
+  PROJECT_COLORS,
+  PROJECT_COLOR_OPTIONS,
+} from "./palette";
 
 /* ── Misc Patterns ──────────────────────────────────────── */
 

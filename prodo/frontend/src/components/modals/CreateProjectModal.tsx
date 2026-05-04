@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { X } from "lucide-react";
 import { pmBus } from "@/lib/events";
 import { usePMStore } from "@/lib/store";
-import { INPUT, LABEL, SECTION_TITLE, MODAL_OVERLAY, MODAL_CARD } from "@/design";
+import { INPUT, LABEL, SECTION_TITLE, MODAL_OVERLAY, MODAL_CARD, PROJECT_COLOR_OPTIONS } from "@/design";
 
 export default function CreateProjectModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
@@ -37,7 +37,7 @@ export default function CreateProjectModal({ onClose }: { onClose: () => void })
     }
   };
 
-  const COLORS = ["#6366F1", "#14B8A6", "#EC4899", "#8B5CF6"];
+  const COLORS = PROJECT_COLOR_OPTIONS;
 
   return (
     <div className={MODAL_OVERLAY} onClick={onClose}>

@@ -20,7 +20,8 @@ export default function RisksPage() {
   const [riskHistory, setRiskHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchRiskHistory().then(setRiskHistory).catch(() => {});
+    // Risk history requires project ID — skip if none available
+    // Will be empty until a project is selected
   }, []);
 
   const riskBadgeClass =

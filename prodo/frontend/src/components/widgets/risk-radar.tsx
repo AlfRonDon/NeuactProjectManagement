@@ -11,6 +11,9 @@ import {
   Tooltip,
 } from "recharts";
 import { Shield, AlertTriangle, CheckCircle2 } from "lucide-react";
+import {
+  RISK_COLOR_HEX, CHART_TOOLTIP_STYLE, NEUTRAL, STATUS_HEX, FONT_SANS, FONT_MONO,
+} from "@/design";
 
 interface RiskAxis {
   axis: string;
@@ -26,10 +29,10 @@ interface RiskRadarData {
 }
 
 const RISK_COLOR: Record<string, { fill: string; stroke: string; bg: string; text: string }> = {
-  low: { fill: "rgba(34, 197, 94, 0.12)", stroke: "#22C55E", bg: "bg-ok-bg", text: "text-ok-fg" },
-  medium: { fill: "rgba(245, 158, 11, 0.12)", stroke: "#F59E0B", bg: "bg-warn-bg", text: "text-warn-fg" },
-  high: { fill: "rgba(234, 88, 12, 0.12)", stroke: "#EA580C", bg: "bg-hot-bg", text: "text-hot-fg" },
-  critical: { fill: "rgba(239, 68, 68, 0.15)", stroke: "#EF4444", bg: "bg-bad-bg", text: "text-bad-fg" },
+  low:      { ...RISK_COLOR_HEX.low,      bg: "bg-ok-bg",   text: "text-ok-fg" },
+  medium:   { ...RISK_COLOR_HEX.medium,   bg: "bg-warn-bg", text: "text-warn-fg" },
+  high:     { ...RISK_COLOR_HEX.high,     bg: "bg-hot-bg",  text: "text-hot-fg" },
+  critical: { ...RISK_COLOR_HEX.critical, bg: "bg-bad-bg",  text: "text-bad-fg" },
 };
 
 /* CMD-style tooltip — white, subtle border, Geist font */
@@ -37,10 +40,10 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const data = payload[0]?.payload;
   return (
-    <div style={{ background: "#fff", border: "1px solid #E9E5E4", borderRadius: 8, padding: "8px 12px", fontFamily: "'Geist', sans-serif", fontSize: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.08)", maxWidth: 200 }}>
-      <div style={{ fontWeight: 600, color: "#1A1716", marginBottom: 4 }}>{data?.axis}</div>
-      <div style={{ fontFamily: "'Geist Mono', monospace", color: "#1A1716", marginBottom: 4 }}>Score: <b>{data?.score}</b>/100</div>
-      <div style={{ color: "#938A89", fontSize: 11 }}>{data?.description}</div>
+    <div style={{ ...CHART_TOOLTIP_STYLE, fontSize: 12, maxWidth: 200 }}>
+      <div style={{ fontWeight: 600, color: NEUTRAL[950], marginBottom: 4 }}>{data?.axis}</div>
+      <div style={{ fontFamily: FONT_MONO, color: NEUTRAL[950], marginBottom: 4 }}>Score: <b>{data?.score}</b>/100</div>
+      <div style={{ color: NEUTRAL[500], fontSize: 11 }}>{data?.description}</div>
     </div>
   );
 };
@@ -51,7 +54,7 @@ function RiskRadarTick(props: any) {
   const axis = data?.find((d: any) => d.axis === payload.value);
   const score = axis?.score ?? 0;
   // High scores = warm/red, low = green/muted
-  const fill = score >= 70 ? "#991B1B" : score >= 50 ? "#1A1716" : "#686160";
+  const fill = score >= 70 ? STATUS_HEX.bad.fg : score >= 50 ? NEUTRAL[950] : NEUTRAL[700];
   const dx = x - chartCx;
   const dy = y - chartCy;
   const len = Math.sqrt(dx * dx + dy * dy) || 1;
@@ -61,7 +64,7 @@ function RiskRadarTick(props: any) {
 
   return (
     <text x={lx} y={ly} textAnchor="middle" dominantBaseline="central"
-      fill={fill} fontSize={11} fontWeight={600} fontFamily="'Geist', sans-serif">
+      fill={fill} fontSize={11} fontWeight={600} fontFamily={FONT_SANS}>
       {payload.value}
     </text>
   );
@@ -153,7 +156,7 @@ export default function RiskRadar({ data }: { data: RiskRadarData }) {
                       className="h-full rounded-full"
                       style={{
                         width: `${a.score}%`,
-                        backgroundColor: a.score > 50 ? "#F59E0B" : "#22C55E",
+                        backgroundColor: a.score > 50 ? STATUS_HEX.warn.solid : STATUS_HEX.ok.solid,
                       }}
                     />
                   </div>

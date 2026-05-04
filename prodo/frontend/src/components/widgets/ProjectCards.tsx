@@ -1,36 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, MoreVertical } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePMStore, selectDashboardProjects } from "@/lib/store";
+import { HEALTH_CONFIG } from "@/design";
 
 /* ── Health config ────────────────────────────────────── */
 
-const HEALTH: Record<string, {
-  gradient: string; border: string; pillBg: string; pillBorder: string;
-  pillText: string; label: string; trendColor: string; sparkColor: string;
-  warningIcon: string;
-}> = {
-  critical: {
-    gradient: "from-[#fef2f2] to-white", border: "border-[#fca5a5] border-2",
-    pillBg: "bg-[#fee2e2]", pillBorder: "border-[#fca5a5]", pillText: "text-[#b91c1c]",
-    label: "Critical", trendColor: "#ef4444", sparkColor: "#ef4444",
-    warningIcon: "▲",
-  },
-  "at-risk": {
-    gradient: "from-[#fffbeb] to-white", border: "border-[#fde68a]",
-    pillBg: "bg-[#fef3c7]", pillBorder: "border-[#fcd34d]", pillText: "text-[#b45309]",
-    label: "At Risk", trendColor: "#f59e0b", sparkColor: "#f59e0b",
-    warningIcon: "▲",
-  },
-  "on-track": {
-    gradient: "from-[#f0fdf4] to-white", border: "border-[#86efac]",
-    pillBg: "bg-[#dcfce7]", pillBorder: "border-[#86efac]", pillText: "text-[#15803d]",
-    label: "On Track", trendColor: "#22c55e", sparkColor: "#22c55e",
-    warningIcon: "○",
-  },
-};
+const HEALTH = HEALTH_CONFIG;
 
 /* ── Sparkline SVG ────────────────────────────────────── */
 
@@ -78,8 +55,7 @@ function computeHealth(p: any): { health: string; deadline: number } {
   return { health, deadline };
 }
 
-export default function ProjectCards() {
-  const router = useRouter();
+export default function ProjectCards({ selected, onSelect }: { selected?: string; onSelect?: (short: string) => void } = {}) {
   const rawProjects = usePMStore(selectDashboardProjects);
   const [scrollIdx, setScrollIdx] = useState(0);
 
@@ -114,8 +90,10 @@ export default function ProjectCards() {
           return (
             <button
               key={p.id || p.short}
-              onClick={() => router.push(toSlug(p.name))}
-              className={`flex-1 min-w-0 bg-gradient-to-r ${h.gradient} ${h.border} border rounded-lg px-3 py-2 text-left transition-all hover:shadow-sm cursor-pointer`}
+              onClick={() => onSelect?.(p.short)}
+              className={`flex-1 min-w-0 bg-gradient-to-r ${h.gradient} border rounded-lg px-3 py-2 text-left transition-all cursor-pointer ${
+                selected === p.short ? `${h.border} border-2 shadow-sm` : "border border-neutral-200 hover:shadow-sm"
+              }`}
             >
               <div className="flex items-center gap-2">
                 {/* Left content */}

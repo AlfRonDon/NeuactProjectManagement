@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Users, AlertTriangle } from "lucide-react";
+import { CHART_TOOLTIP_STYLE, NEUTRAL, FONT_MONO } from "@/design";
 
 interface PersonWeek {
   week: string;
@@ -116,12 +117,12 @@ export default function PeopleHeatmap({ data }: { data: PeopleHeatmapData }) {
                       {hoveredCell?.person === person.name && hoveredCell?.week === week.week && (
                         <div
                           className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-10"
-                          style={{ background: "#fff", border: "1px solid #E9E5E4", borderRadius: 8, padding: "6px 10px", fontFamily: "'Geist', sans-serif", fontSize: 11, boxShadow: "0 4px 12px rgba(0,0,0,0.08)", whiteSpace: "nowrap" }}
+                          style={{ ...CHART_TOOLTIP_STYLE, padding: "6px 10px", whiteSpace: "nowrap" }}
                         >
-                          <span style={{ fontFamily: "'Geist Mono', monospace", fontWeight: 700, color: "#1A1716" }}>{week.hours}h</span>
-                          <span style={{ color: "#938A89" }}> / {person.capacity}h capacity</span>
+                          <span style={{ fontFamily: FONT_MONO, fontWeight: 700, color: NEUTRAL[950] }}>{week.hours}h</span>
+                          <span style={{ color: NEUTRAL[500] }}> / {person.capacity}h capacity</span>
                           <br />
-                          <span style={{ color: "#938A89" }}>{week.tasks} tasks</span>
+                          <span style={{ color: NEUTRAL[500] }}>{week.tasks} tasks</span>
                         </div>
                       )}
                     </div>

@@ -49,9 +49,9 @@ module.exports = {
         subtle:   '#FBFAFA',
       },
       fontFamily: {
-        sans:  ['Geist', 'system-ui', '-apple-system', 'sans-serif'],
+        sans:  ['var(--font-geist-sans)', 'Geist', 'system-ui', '-apple-system', 'sans-serif'],
         serif: ['"Source Serif 4"', 'Georgia', 'serif'],
-        mono:  ['"Geist Mono"', 'ui-monospace', 'Consolas', 'monospace'],
+        mono:  ['var(--font-geist-mono)', '"Geist Mono"', 'ui-monospace', 'Consolas', 'monospace'],
       },
       fontSize: {
         '2xs': ['9px',  { lineHeight: '12px' }],
