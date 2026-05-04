@@ -15,9 +15,15 @@ export const boardTasks: any[] = [
 export const burndownData = {
   title: "Sprint 12", totalTasks: 9, velocity: 1.2, projectedEndDate: "Apr 20",
   points: [
-    { date: "Apr 1", planned: 9, actual: 9 }, { date: "Apr 3", planned: 8, actual: 8 },
-    { date: "Apr 5", planned: 7, actual: 7 }, { date: "Apr 7", planned: 5, actual: 7, annotation: "Blocked on API" },
+    { date: "Apr 1", planned: 9, actual: 9 },
+    { date: "Apr 3", planned: 8, actual: 8 },
+    { date: "Apr 5", planned: 7, actual: 7, annotation: "Blocker hit" },
+    { date: "Apr 7", planned: 5, actual: 7, annotation: "Blocked on API" },
     { date: "Apr 9", planned: 4, actual: 6 },
+    { date: "Apr 12", planned: 3, actual: null as any },
+    { date: "Apr 16", planned: 2, actual: null as any },
+    { date: "Apr 20", planned: 0, actual: null as any },
+    { date: "Apr 24", planned: null as any, actual: null as any },
   ],
   annotations: [{ date: "Apr 7", label: "Blocked", type: "warning" as const }],
 };

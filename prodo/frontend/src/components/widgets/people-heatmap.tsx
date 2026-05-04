@@ -14,7 +14,7 @@ interface PersonData {
   role: string;
   weeks: PersonWeek[];
   totalHours: number;
-  capacity: number; // hours per week
+  capacity: number;
 }
 
 interface PeopleHeatmapData {
@@ -25,17 +25,17 @@ interface PeopleHeatmapData {
 const getHeatColor = (hours: number, capacity: number): string => {
   const ratio = hours / capacity;
   if (ratio === 0) return "bg-neutral-50";
-  if (ratio < 0.5) return "bg-green-100";
-  if (ratio < 0.75) return "bg-green-300";
-  if (ratio < 0.9) return "bg-yellow-300";
-  if (ratio <= 1) return "bg-orange-400";
-  return "bg-red-500";
+  if (ratio < 0.5) return "bg-ok-bg";
+  if (ratio < 0.75) return "bg-ok-solid/60";
+  if (ratio < 0.9) return "bg-warn-solid";
+  if (ratio <= 1) return "bg-hot-solid";
+  return "bg-bad-solid";
 };
 
 const getTextColor = (hours: number, capacity: number): string => {
   const ratio = hours / capacity;
   if (ratio > 0.9) return "text-white";
-  return "text-neutral-600";
+  return "text-neutral-700";
 };
 
 export default function PeopleHeatmap({ data }: { data: PeopleHeatmapData }) {
@@ -51,16 +51,15 @@ export default function PeopleHeatmap({ data }: { data: PeopleHeatmapData }) {
   );
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 h-full">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-neutral-400" />
-          <h3 className="text-xs uppercase font-bold tracking-widest text-neutral-400">
-            People Heatmap
-          </h3>
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-4 h-full">
+      {/* Header — CMD style: serif title, warm neutral */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-1.5">
+          <Users className="w-3.5 h-3.5 text-neutral-400" />
+          <span className="text-base font-serif font-semibold text-neutral-950">People Heatmap</span>
         </div>
         {overloaded.length > 0 && (
-          <div className="flex items-center gap-1 text-xs text-red-500 bg-red-50 px-2 py-1 rounded border border-red-100 font-medium">
+          <div className="flex items-center gap-1 text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-bad-bg text-bad-fg">
             <AlertTriangle className="w-3 h-3" />
             {overloaded.length} overloaded
           </div>
@@ -71,18 +70,15 @@ export default function PeopleHeatmap({ data }: { data: PeopleHeatmapData }) {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-left text-xs font-bold text-neutral-400 uppercase tracking-wider pb-2 pr-4 w-36">
+              <th className="text-left text-xs font-bold text-neutral-500 uppercase tracking-wider pb-2 pr-4 w-36">
                 Team Member
               </th>
               {data.weeks.map((week) => (
-                <th
-                  key={week}
-                  className="text-center text-xs font-bold text-neutral-400 uppercase tracking-wider pb-2 px-1"
-                >
+                <th key={week} className="text-center text-xs font-bold text-neutral-500 uppercase tracking-wider pb-2 px-1">
                   {week}
                 </th>
               ))}
-              <th className="text-center text-xs font-bold text-neutral-400 uppercase tracking-wider pb-2 pl-3 w-16">
+              <th className="text-center text-xs font-bold text-neutral-500 uppercase tracking-wider pb-2 pl-3 w-16">
                 Total
               </th>
             </tr>
@@ -92,10 +88,10 @@ export default function PeopleHeatmap({ data }: { data: PeopleHeatmapData }) {
               <tr key={person.name} className="group">
                 <td className="pr-4 py-1">
                   <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-neutral-700">
+                    <span className="text-sm font-semibold text-neutral-950">
                       {person.name}
                     </span>
-                    <span className="text-xs text-neutral-400">
+                    <span className="text-xs text-neutral-500">
                       {person.role} &middot; {person.capacity}h/wk
                     </span>
                   </div>
@@ -105,50 +101,37 @@ export default function PeopleHeatmap({ data }: { data: PeopleHeatmapData }) {
                     key={`${person.name}-${week.week}`}
                     className="px-0.5 py-1"
                     onMouseEnter={() =>
-                      setHoveredCell({
-                        person: person.name,
-                        week: week.week,
-                        hours: week.hours,
-                        tasks: week.tasks,
-                      })
+                      setHoveredCell({ person: person.name, week: week.week, hours: week.hours, tasks: week.tasks })
                     }
                     onMouseLeave={() => setHoveredCell(null)}
                   >
                     <div
-                      className={`relative w-full h-9 rounded flex items-center justify-center cursor-default transition-all hover:scale-105 ${getHeatColor(
-                        week.hours,
-                        person.capacity
-                      )}`}
+                      className={`relative w-full h-9 rounded-md flex items-center justify-center cursor-default transition-all hover:scale-105 ${getHeatColor(week.hours, person.capacity)}`}
                     >
-                      <span
-                        className={`text-xs font-bold tabular-nums ${getTextColor(
-                          week.hours,
-                          person.capacity
-                        )}`}
-                      >
+                      <span className={`text-sm font-mono font-bold tabular-nums ${getTextColor(week.hours, person.capacity)}`}>
                         {week.hours > 0 ? week.hours : ""}
                       </span>
 
-                      {/* Tooltip */}
-                      {hoveredCell?.person === person.name &&
-                        hoveredCell?.week === week.week && (
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-neutral-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 shadow-lg">
-                            {week.hours}h / {person.capacity}h capacity
-                            <br />
-                            {week.tasks} tasks
-                          </div>
-                        )}
+                      {/* CMD-style tooltip — white, subtle border */}
+                      {hoveredCell?.person === person.name && hoveredCell?.week === week.week && (
+                        <div
+                          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-10"
+                          style={{ background: "#fff", border: "1px solid #E9E5E4", borderRadius: 8, padding: "6px 10px", fontFamily: "'Geist', sans-serif", fontSize: 11, boxShadow: "0 4px 12px rgba(0,0,0,0.08)", whiteSpace: "nowrap" }}
+                        >
+                          <span style={{ fontFamily: "'Geist Mono', monospace", fontWeight: 700, color: "#1A1716" }}>{week.hours}h</span>
+                          <span style={{ color: "#938A89" }}> / {person.capacity}h capacity</span>
+                          <br />
+                          <span style={{ color: "#938A89" }}>{week.tasks} tasks</span>
+                        </div>
+                      )}
                     </div>
                   </td>
                 ))}
                 <td className="pl-3 py-1 text-center">
-                  <span
-                    className={`text-xs font-bold tabular-nums ${
-                      person.totalHours > person.capacity * data.weeks.length * 0.9
-                        ? "text-red-500"
-                        : "text-neutral-600"
-                    }`}
-                  >
+                  <span className={`text-sm font-mono font-bold tabular-nums ${
+                    person.totalHours > person.capacity * data.weeks.length * 0.9
+                      ? "text-bad-fg" : "text-neutral-700"
+                  }`}>
                     {person.totalHours}h
                   </span>
                 </td>
@@ -158,21 +141,19 @@ export default function PeopleHeatmap({ data }: { data: PeopleHeatmapData }) {
         </table>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-neutral-100">
-        <span className="text-xs text-neutral-400 font-bold uppercase tracking-wider">
-          Load:
-        </span>
+      {/* Legend — CMD style: 8px swatches, neutral-700 text */}
+      <div className="flex items-center gap-4 mt-3 pt-2 border-t border-neutral-100">
+        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Load:</span>
         {[
-          { label: "Light", cls: "bg-green-100" },
-          { label: "Normal", cls: "bg-green-300" },
-          { label: "Heavy", cls: "bg-yellow-300" },
-          { label: "Near Cap", cls: "bg-orange-400" },
-          { label: "Over", cls: "bg-red-500" },
+          { label: "Light", cls: "bg-ok-bg" },
+          { label: "Normal", cls: "bg-ok-solid/60" },
+          { label: "Heavy", cls: "bg-warn-solid" },
+          { label: "Near Cap", cls: "bg-hot-solid" },
+          { label: "Over", cls: "bg-bad-solid" },
         ].map((l) => (
-          <div key={l.label} className="flex items-center gap-1">
-            <div className={`w-3 h-3 rounded ${l.cls}`} />
-            <span className="text-xs text-neutral-400">{l.label}</span>
+          <div key={l.label} className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-sm ${l.cls}`} />
+            <span className="text-sm text-neutral-700">{l.label}</span>
           </div>
         ))}
       </div>

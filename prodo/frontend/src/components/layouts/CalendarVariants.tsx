@@ -10,15 +10,15 @@ import { boardTasks } from "./fixtures";
 /* ── Shared ────────────────────────────────────────────── */
 
 const STATUS: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  done:        { label: "Done",        bg: "bg-green-500",   text: "text-green-700",  border: "border-green-400" },
-  in_progress: { label: "In Progress", bg: "bg-amber-400",   text: "text-amber-700",  border: "border-amber-400" },
-  in_review:   { label: "In Review",   bg: "bg-purple-400",  text: "text-purple-700", border: "border-purple-400" },
-  todo:        { label: "To Do",       bg: "bg-blue-400",    text: "text-blue-700",   border: "border-blue-400" },
+  done:        { label: "Done",        bg: "bg-ok-solid",   text: "text-ok-fg",  border: "border-ok-solid" },
+  in_progress: { label: "In Progress", bg: "bg-warn-solid",   text: "text-warn-fg",  border: "border-warn-solid" },
+  in_review:   { label: "In Review",   bg: "bg-info-solid",  text: "text-info-fg", border: "border-info-solid" },
+  todo:        { label: "To Do",       bg: "bg-info-solid",    text: "text-info-fg",   border: "border-info-solid" },
   backlog:     { label: "Backlog",     bg: "bg-neutral-300", text: "text-neutral-500", border: "border-neutral-300" },
 };
 
 const PRIORITY_DOT: Record<string, string> = {
-  critical: "bg-red-500", high: "bg-orange-400", medium: "bg-yellow-400", low: "bg-neutral-300",
+  critical: "bg-bad-solid", high: "bg-hot-solid", medium: "bg-warn-solid", low: "bg-neutral-300",
 };
 
 const TODAY = new Date("2026-04-09");
@@ -74,13 +74,13 @@ export function CalendarAgendaLayout() {
   const hours = Array.from({ length: 12 }, (_, i) => i + 7); // 7am–6pm
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-3 shrink-0">
         <Clock className="w-5 h-5 text-neutral-400" />
-        <h3 className="text-sm font-bold text-neutral-900">Agenda</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Agenda</h3>
         <span className="text-xs text-neutral-400">
           {day.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
-          {isToday(day) && <span className="ml-1.5 text-blue-500 font-medium">Today</span>}
+          {isToday(day) && <span className="ml-1.5 text-info-solid font-medium">Today</span>}
         </span>
         <div className="flex-1" />
         <Legend />
@@ -156,10 +156,10 @@ export function CalendarTimelineLayout() {
   };
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-3 shrink-0">
         <Users className="w-5 h-5 text-neutral-400" />
-        <h3 className="text-sm font-bold text-neutral-900">Timeline</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Timeline</h3>
         <span className="text-xs text-neutral-400">4-week view by assignee</span>
         <div className="flex-1" />
         <Legend />
@@ -179,7 +179,7 @@ export function CalendarTimelineLayout() {
           {days.map((d, i) => (
             <div
               key={i}
-              className={`text-center py-1.5 border-r border-neutral-100 ${isToday(d) ? "bg-blue-50" : ""}`}
+              className={`text-center py-1.5 border-r border-neutral-100 ${isToday(d) ? "bg-info-bg" : ""}`}
               style={{ width: `${100 / TOTAL_DAYS}%` }}
             >
               {i % 7 === 0 ? (
@@ -211,7 +211,7 @@ export function CalendarTimelineLayout() {
                   {days.map((d, i) => (
                     <div
                       key={i}
-                      className={`border-r border-neutral-50 ${isToday(d) ? "bg-blue-50/30" : ""}`}
+                      className={`border-r border-neutral-50 ${isToday(d) ? "bg-info-bg/30" : ""}`}
                       style={{ width: `${100 / TOTAL_DAYS}%` }}
                     />
                   ))}
@@ -274,25 +274,25 @@ export function CalendarHeatmapLayout() {
 
   const heatColor = (count: number) => {
     if (count === 0) return "bg-neutral-50";
-    if (count === 1) return "bg-green-100";
-    if (count === 2) return "bg-amber-100";
-    if (count === 3) return "bg-orange-200";
-    return "bg-red-200";
+    if (count === 1) return "bg-ok-bg";
+    if (count === 2) return "bg-warn-bg";
+    if (count === 3) return "bg-hot-bg";
+    return "bg-bad-bg";
   };
 
   const heatLevels = [
     { label: "0", color: "bg-neutral-100" },
-    { label: "1", color: "bg-green-100" },
-    { label: "2", color: "bg-amber-100" },
-    { label: "3", color: "bg-orange-200" },
-    { label: "4+", color: "bg-red-200" },
+    { label: "1", color: "bg-ok-bg" },
+    { label: "2", color: "bg-warn-bg" },
+    { label: "3", color: "bg-hot-bg" },
+    { label: "4+", color: "bg-bad-bg" },
   ];
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-3 shrink-0">
         <BarChart3 className="w-5 h-5 text-neutral-400" />
-        <h3 className="text-sm font-bold text-neutral-900">Workload Heatmap</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Workload Heatmap</h3>
         <span className="text-xs text-neutral-400">Task density per day</span>
         <div className="flex-1" />
         <div className="flex items-center gap-1.5">
@@ -329,9 +329,9 @@ export function CalendarHeatmapLayout() {
           const rowBorder = i >= 7 ? "border-t border-neutral-100" : "";
           return (
             <div key={d.toISOString()} className={`${rowBorder} border-r border-neutral-100 p-2 flex flex-col ${heatColor(tasks.length)} ${!inMonth ? "opacity-40" : ""}`}>
-              <div className={`text-xs font-semibold mb-1 ${today ? "text-blue-600" : "text-neutral-700"}`}>
+              <div className={`text-xs font-semibold mb-1 ${today ? "text-info-fg" : "text-neutral-700"}`}>
                 {d.getDate()}
-                {today && <span className="ml-1 text-xs text-blue-400 font-normal">today</span>}
+                {today && <span className="ml-1 text-xs text-info-solid font-normal">today</span>}
               </div>
               <div className="flex-1 min-h-0 space-y-0.5 overflow-hidden">
                 {tasks.slice(0, 2).map(t => (
@@ -349,7 +349,7 @@ export function CalendarHeatmapLayout() {
 
       <div className="border-t px-5 py-2.5 bg-neutral-50 shrink-0 flex items-center gap-4">
         <span className="text-xs font-semibold text-neutral-500">Busiest day:</span>
-        <span className="text-xs text-amber-600 font-medium">Apr 12 (4 tasks)</span>
+        <span className="text-xs text-warn-fg font-medium">Apr 12 (4 tasks)</span>
         <span className="text-xs text-neutral-400">·</span>
         <span className="text-xs text-neutral-500">Avg: 1.6 tasks/day</span>
       </div>
@@ -363,12 +363,12 @@ export function CalendarHeatmapLayout() {
    ═══════════════════════════════════════════════════════════ */
 export function CalendarDeadlineLayout() {
   const bands = [
-    { label: "Overdue", color: "bg-red-50 border-red-200", textColor: "text-red-700", filter: (t: any) => t.due_date && t.due_date < "2026-04-09" && t.status !== "done" },
-    { label: "Due Today", color: "bg-amber-50 border-amber-200", textColor: "text-amber-700", filter: (t: any) => t.due_date === "2026-04-09" && t.status !== "done" },
-    { label: "This Week (Apr 10–13)", color: "bg-blue-50 border-blue-200", textColor: "text-blue-700", filter: (t: any) => t.due_date && t.due_date > "2026-04-09" && t.due_date <= "2026-04-13" && t.status !== "done" },
+    { label: "Overdue", color: "bg-bad-bg border-bad-solid/20", textColor: "text-bad-fg", filter: (t: any) => t.due_date && t.due_date < "2026-04-09" && t.status !== "done" },
+    { label: "Due Today", color: "bg-warn-bg border-warn-solid/20", textColor: "text-warn-fg", filter: (t: any) => t.due_date === "2026-04-09" && t.status !== "done" },
+    { label: "This Week (Apr 10–13)", color: "bg-info-bg border-info-solid/20", textColor: "text-info-fg", filter: (t: any) => t.due_date && t.due_date > "2026-04-09" && t.due_date <= "2026-04-13" && t.status !== "done" },
     { label: "Next Week (Apr 14–20)", color: "bg-neutral-50 border-neutral-200", textColor: "text-neutral-700", filter: (t: any) => t.due_date && t.due_date > "2026-04-13" && t.due_date <= "2026-04-20" && t.status !== "done" },
     { label: "Later", color: "bg-neutral-50 border-neutral-200", textColor: "text-neutral-500", filter: (t: any) => t.due_date && t.due_date > "2026-04-20" && t.status !== "done" },
-    { label: "Done", color: "bg-green-50 border-green-200", textColor: "text-green-700", filter: (t: any) => t.status === "done" },
+    { label: "Done", color: "bg-ok-bg border-ok-solid/20", textColor: "text-ok-fg", filter: (t: any) => t.status === "done" },
   ];
 
   const daysUntil = (d: string) => {
@@ -379,10 +379,10 @@ export function CalendarDeadlineLayout() {
   };
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-3 shrink-0">
         <AlertTriangle className="w-5 h-5 text-neutral-400" />
-        <h3 className="text-sm font-bold text-neutral-900">Deadline View</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Deadline View</h3>
         <span className="text-xs text-neutral-400">Tasks grouped by urgency</span>
         <div className="flex-1" />
         <Legend />
@@ -393,7 +393,7 @@ export function CalendarDeadlineLayout() {
           const tasks = boardTasks.filter(band.filter);
           if (tasks.length === 0) return null;
           return (
-            <div key={band.label} className={`rounded-xl border ${band.color} p-4`}>
+            <div key={band.label} className={`rounded-lg border ${band.color} p-4`}>
               <div className="flex items-center gap-2 mb-3">
                 <h4 className={`text-sm font-bold ${band.textColor}`}>{band.label}</h4>
                 <span className="text-xs text-neutral-400">{tasks.length} {tasks.length === 1 ? "task" : "tasks"}</span>
@@ -408,7 +408,7 @@ export function CalendarDeadlineLayout() {
                     </div>
                     {t.priority && <div className={`w-2 h-2 rounded-full ${PRIORITY_DOT[t.priority]}`} title={t.priority} />}
                     {t.due_date && <span className={`text-xs font-medium ${
-                      t.due_date < "2026-04-09" ? "text-red-500" : t.due_date <= "2026-04-13" ? "text-amber-500" : "text-neutral-400"
+                      t.due_date < "2026-04-09" ? "text-bad-fg" : t.due_date <= "2026-04-13" ? "text-warn-fg" : "text-neutral-400"
                     }`}>{daysUntil(t.due_date)}</span>}
                   </div>
                 ))}
@@ -419,11 +419,11 @@ export function CalendarDeadlineLayout() {
       </div>
 
       <div className="border-t px-5 py-2.5 bg-neutral-50 shrink-0 flex items-center gap-4">
-        <span className="text-xs font-semibold text-red-500">{boardTasks.filter(t => t.due_date && t.due_date < "2026-04-09" && t.status !== "done").length} overdue</span>
+        <span className="text-xs font-semibold text-bad-fg">{boardTasks.filter(t => t.due_date && t.due_date < "2026-04-09" && t.status !== "done").length} overdue</span>
         <span className="text-xs text-neutral-400">·</span>
-        <span className="text-xs font-semibold text-amber-500">{boardTasks.filter(t => t.due_date && t.due_date <= "2026-04-13" && t.status !== "done").length} due this week</span>
+        <span className="text-xs font-semibold text-warn-fg">{boardTasks.filter(t => t.due_date && t.due_date <= "2026-04-13" && t.status !== "done").length} due this week</span>
         <span className="text-xs text-neutral-400">·</span>
-        <span className="text-xs font-semibold text-green-600">{boardTasks.filter(t => t.status === "done").length} done</span>
+        <span className="text-xs font-semibold text-ok-fg">{boardTasks.filter(t => t.status === "done").length} done</span>
       </div>
     </div>
   );
@@ -444,10 +444,10 @@ export function CalendarSplitLayout() {
   const selTasks = getTasksForDay(selectedDay);
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-3 shrink-0">
         <Layers className="w-5 h-5 text-neutral-400" />
-        <h3 className="text-sm font-bold text-neutral-900">Split View</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Split View</h3>
         <span className="text-xs text-neutral-400">Week overview + day detail</span>
         <div className="flex-1" />
         <Legend />
@@ -472,14 +472,14 @@ export function CalendarSplitLayout() {
                   key={d.toISOString()}
                   onClick={() => setSelectedDay(new Date(d))}
                   className={`flex items-start gap-3 px-4 py-3 border-b border-neutral-100 cursor-pointer transition-colors ${
-                    isSel ? "bg-blue-50" : "hover:bg-neutral-50"
+                    isSel ? "bg-info-bg" : "hover:bg-neutral-50"
                   }`}
                 >
                   <div className="w-10 text-center shrink-0">
                     <div className="text-xs uppercase text-neutral-400 font-semibold">
                       {d.toLocaleDateString([], { weekday: "short" })}
                     </div>
-                    <div className={`text-lg font-bold ${today ? "text-blue-600" : "text-neutral-900"}`}>
+                    <div className={`text-lg font-bold ${today ? "text-info-fg" : "text-neutral-950"}`}>
                       {d.getDate()}
                     </div>
                   </div>
@@ -503,9 +503,9 @@ export function CalendarSplitLayout() {
         {/* Right: day detail */}
         <div className="flex-1 flex flex-col">
           <div className="px-4 py-3 border-b bg-neutral-50 shrink-0">
-            <div className="text-sm font-bold text-neutral-900">
+            <div className="text-sm font-serif font-bold text-neutral-950">
               {selectedDay.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
-              {isToday(selectedDay) && <span className="ml-2 text-xs text-blue-500 font-medium">Today</span>}
+              {isToday(selectedDay) && <span className="ml-2 text-xs text-info-solid font-medium">Today</span>}
             </div>
             <div className="text-xs text-neutral-500 mt-0.5">{selTasks.length} tasks · {selTasks.reduce((a, t) => a + (t.estimated_hours || 0), 0)}h estimated</div>
           </div>
@@ -514,7 +514,7 @@ export function CalendarSplitLayout() {
               <div className="text-sm text-neutral-300 text-center pt-12">No tasks for this day</div>
             )}
             {selTasks.map(t => (
-              <div key={t.id} className="rounded-xl border border-neutral-200 p-3 space-y-2">
+              <div key={t.id} className="rounded-lg border border-neutral-200 p-3 space-y-2">
                 <div className="flex items-start gap-2">
                   <div className={`w-2 h-full min-h-[32px] rounded-full shrink-0 ${STATUS[t.status]?.bg}`} />
                   <div className="flex-1 min-w-0">
@@ -522,9 +522,9 @@ export function CalendarSplitLayout() {
                     {t.description && <div className="text-xs text-neutral-500 mt-0.5">{t.description}</div>}
                   </div>
                   {t.priority && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    t.priority === "critical" ? "bg-red-100 text-red-700" :
-                    t.priority === "high" ? "bg-orange-100 text-orange-700" :
-                    t.priority === "medium" ? "bg-yellow-100 text-yellow-700" :
+                    t.priority === "critical" ? "bg-bad-bg text-bad-fg" :
+                    t.priority === "high" ? "bg-hot-bg text-hot-fg" :
+                    t.priority === "medium" ? "bg-warn-bg text-warn-fg" :
                     "bg-neutral-100 text-neutral-500"
                   }`}>{t.priority}</span>}
                 </div>

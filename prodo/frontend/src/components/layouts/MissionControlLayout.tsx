@@ -34,16 +34,16 @@ export default function MissionControlLayout() {
   };
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900 flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 flex flex-col">
       {/* Header */}
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3">
         <Gauge className="w-5 h-5 text-blue-400" />
         <h3 className="text-sm font-bold text-white">Mission Control</h3>
-        <span className="text-[10px] text-neutral-500">CC v5 — Sprint 12</span>
+        <span className="text-xs text-neutral-500">CC v5 — Sprint 12</span>
         <div className="flex-1" />
         <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-1.5 border border-white/10">
           <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-          <input placeholder="Ask AI..." className="bg-transparent text-[11px] text-white outline-none w-48 placeholder-neutral-500" />
+          <input placeholder="Ask AI..." className="bg-transparent text-sm text-white outline-none w-48 placeholder-neutral-500" />
         </div>
         <div className="flex gap-1">
           {["live", "1h", "1d", "1w"].map((t) => (

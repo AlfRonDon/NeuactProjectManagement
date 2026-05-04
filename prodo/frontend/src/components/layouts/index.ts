@@ -29,4 +29,13 @@ export { TaskDetailVariantA, TaskDetailVariantB, TaskDetailVariantC } from "./Ta
 export { AdminOverviewVariantA, AdminOverviewVariantB, AdminOverviewVariantC, AdminOverviewVariantD, AdminOverviewVariantE } from "./AdminOverviewVariants";
 export { ProjectSummaryVariantA, ProjectSummaryVariantB, ProjectSummaryVariantC, ProjectSummaryVariantD } from "./ProjectSummaryVariants";
 export { StageMapVariantA, StageMapVariantB, StageMapVariantC, StageMapVariantD } from "./StageMapVariants";
-export { BottomWidgetVariantA, BottomWidgetVariantB, BottomWidgetVariantC, BottomWidgetVariantD, BottomWidgetVariantE, BottomWidgetVariantF, BottomWidgetVariantG, BottomWidgetVariantH } from "./BottomWidgetVariants";
+export { BottomWidgetVariantA, PeopleVariantA, TaskWidgetVariantA, TaskWidgetVariantB, TaskWidgetVariantC, GanttChart, GanttEditView } from "./BottomWidgetVariants";
+export type { GanttRow } from "./BottomWidgetVariants";
+
+// StatusBoard — kanban-style status board with dependencies & mini timelines
+export { default as StatusBoard } from "./StatusBoard";
+export type { StatusBoardProps, StatusBoardTask } from "./StatusBoard";
+
+// CalendarView — tabbed calendar with weekly/monthly/split/timeline views
+export { default as CalendarView } from "./CalendarView";
+export type { CalendarViewProps, CalendarTask } from "./CalendarView";

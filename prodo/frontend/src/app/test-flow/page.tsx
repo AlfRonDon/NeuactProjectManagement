@@ -47,6 +47,7 @@ const TYPE_STYLES: Record<StepType, { bg: string; border: string; text: string; 
   notification: { bg: "bg-orange-50", border: "border-orange-300", text: "text-orange-700", label: "Notify" },
 };
 
+// Persona `color` values below are decorative navigation colors per Color System v1 §10 — not status indicators.
 const flows: UserFlow[] = [
   {
     id: "eng-lead",
@@ -147,7 +148,7 @@ export default function TestFlowPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-neutral-900">UX Flow Visualizer</h1>
+          <h1 className="text-3xl font-bold text-neutral-950">UX Flow Visualizer</h1>
           <p className="text-neutral-500 text-lg">6 user persona flows through the PM system</p>
         </div>
 
@@ -187,7 +188,7 @@ export default function TestFlowPage() {
         </div>
 
         {/* Flow Diagram */}
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+        <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-6">
           <h2 className="text-lg font-bold text-neutral-800 mb-6">
             {flow.persona}: {flow.scenario}
           </h2>
@@ -228,7 +229,7 @@ export default function TestFlowPage() {
         </div>
 
         {/* Narrative */}
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+        <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-6">
           <h3 className="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-3">
             Step-by-Step Narrative
           </h3>

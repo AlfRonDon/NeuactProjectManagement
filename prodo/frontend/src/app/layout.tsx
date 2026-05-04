@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-neutral-50 text-neutral-900 antialiased">
+      <body className="font-sans antialiased bg-neutral-50 text-neutral-950 m-0">
         <AuthWrapper>{children}</AuthWrapper>
       </body>
     </html>

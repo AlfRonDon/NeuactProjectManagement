@@ -13,17 +13,17 @@ import { Task } from "@/types";
 
 const COLUMNS = [
   { key: "backlog", label: "Backlog", color: "bg-neutral-100 text-neutral-600" },
-  { key: "todo", label: "To Do", color: "bg-blue-50 text-blue-700" },
-  { key: "in_progress", label: "In Progress", color: "bg-amber-50 text-amber-700" },
-  { key: "in_review", label: "In Review", color: "bg-purple-50 text-purple-700" },
-  { key: "done", label: "Done", color: "bg-green-50 text-green-700" },
+  { key: "todo", label: "To Do", color: "bg-info-bg text-info-fg" },
+  { key: "in_progress", label: "In Progress", color: "bg-warn-bg text-warn-fg" },
+  { key: "in_review", label: "In Review", color: "bg-info-bg text-info-fg" },
+  { key: "done", label: "Done", color: "bg-ok-bg text-ok-fg" },
 ];
 
 const PriorityBadge: React.FC<{ priority: string }> = ({ priority }) => {
   const styles: Record<string, string> = {
-    critical: "bg-red-100 text-red-700 border-red-200",
-    high: "bg-orange-100 text-orange-700 border-orange-200",
-    medium: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    critical: "bg-bad-bg text-bad-fg border-bad-solid/20",
+    high: "bg-hot-bg text-hot-fg border-hot-solid/20",
+    medium: "bg-warn-bg text-warn-fg border-warn-solid/20",
     low: "bg-neutral-100 text-neutral-500 border-neutral-200",
   };
   return (
@@ -42,7 +42,7 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
     !["done", "cancelled"].includes(task.status);
 
   return (
-    <div className="bg-white rounded-lg border border-neutral-200 p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+    <div className="bg-white rounded-lg border border-neutral-200 p-3 shadow-xsmall hover:shadow-md transition-shadow cursor-pointer">
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="text-xs font-semibold text-neutral-800 leading-snug line-clamp-2">
           {task.title}
@@ -60,7 +60,7 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
         {task.due_date && (
           <span
             className={`flex items-center gap-0.5 font-mono ${
-              isOverdue ? "text-red-500 font-bold" : "text-neutral-400"
+              isOverdue ? "text-bad-fg font-bold" : "text-neutral-400"
             }`}
           >
             {isOverdue ? (
@@ -71,7 +71,7 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
             {task.due_date}
           </span>
         )}
-        {task.depends_on.length > 0 && (
+        {(task.depends_on?.length ?? 0) > 0 && (
           <span className="text-neutral-300 flex items-center gap-0.5">
             <ArrowRight className="w-3 h-3" />
             {task.depends_on.length} dep
@@ -84,7 +84,7 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
 
 export default function TaskBoard({ tasks }: { tasks: Task[] }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xs uppercase font-bold tracking-widest text-neutral-400">
           Task Board

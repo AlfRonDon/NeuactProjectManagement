@@ -60,18 +60,18 @@ export default function TimeboxLayout() {
   const maxRemaining = Math.max(...burndownPoints.map((p) => p.remaining));
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       {/* Header */}
       <div className="px-6 py-3 border-b flex items-center gap-3 shrink-0">
-        <Timer className="w-5 h-5 text-orange-500" />
-        <h3 className="text-sm font-bold text-neutral-900">Timebox</h3>
-        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${mode === "focus" ? "bg-orange-100 text-orange-700" : "bg-green-100 text-green-700"}`}>
+        <Timer className="w-5 h-5 text-hot-solid" />
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Timebox</h3>
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${mode === "focus" ? "bg-hot-bg text-hot-fg" : "bg-ok-bg text-ok-fg"}`}>
           {mode === "focus" ? "Focus" : "Break"}
         </span>
         <div className="flex-1" />
         <div className="flex items-center gap-1.5">
-          <Flame className="w-3.5 h-3.5 text-orange-400" />
-          <span className="text-[10px] text-neutral-500">{sessions.length} sessions &middot; {totalFocusMin} min focused</span>
+          <Flame className="w-3.5 h-3.5 text-hot-solid" />
+          <span className="text-xs text-neutral-500">{sessions.length} sessions &middot; {totalFocusMin} min focused</span>
         </div>
       </div>
 
@@ -81,16 +81,16 @@ export default function TimeboxLayout() {
           {/* Timer ring */}
           <div className="relative w-48 h-48 mb-6">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#f5f5f5" strokeWidth="6" />
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border-subtle)" strokeWidth="6" />
               <circle cx="50" cy="50" r="45" fill="none"
-                stroke={mode === "focus" ? "#f97316" : "#22c55e"} strokeWidth="6"
+                stroke={mode === "focus" ? "var(--hot-solid)" : "var(--ok-solid)"} strokeWidth="6"
                 strokeLinecap="round" strokeDasharray={`${2 * Math.PI * 45}`}
                 strokeDashoffset={`${2 * Math.PI * 45 * (1 - progress / 100)}`}
                 className="transition-all duration-1000" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-bold text-neutral-900 tabular-nums">{formatTime(seconds)}</span>
-              <span className="text-[10px] text-neutral-400 mt-1 uppercase tracking-wider">{mode === "focus" ? "Focus time" : "Take a break"}</span>
+              <span className="text-4xl font-bold text-neutral-950 tabular-nums">{formatTime(seconds)}</span>
+              <span className="text-xs text-neutral-400 mt-1 uppercase tracking-wider">{mode === "focus" ? "Focus time" : "Take a break"}</span>
             </div>
           </div>
 
@@ -100,7 +100,7 @@ export default function TimeboxLayout() {
               <RotateCcw className="w-4 h-4 text-neutral-500" />
             </button>
             <button onClick={() => setRunning(!running)}
-              className={`w-14 h-14 rounded-full flex items-center justify-center text-white transition-colors ${mode === "focus" ? "bg-orange-500 hover:bg-orange-600" : "bg-green-500 hover:bg-green-600"}`}>
+              className={`w-14 h-14 rounded-full flex items-center justify-center text-white transition-colors ${mode === "focus" ? "bg-hot-solid hover:bg-hot-solid/90" : "bg-ok-solid hover:bg-ok-solid/90"}`}>
               {running ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
             </button>
             <button onClick={skip} className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center hover:bg-neutral-50 transition-colors">
@@ -110,10 +110,10 @@ export default function TimeboxLayout() {
 
           {/* Current task */}
           {currentTask && (
-            <div className="w-full max-w-sm bg-neutral-50 rounded-xl border border-neutral-200 p-4 text-center">
-              <div className="text-[9px] uppercase font-bold tracking-widest text-orange-500 mb-1">Current Task</div>
-              <div className="text-sm font-bold text-neutral-900">{currentTask.title}</div>
-              <div className="text-[10px] text-neutral-500 mt-1">
+            <div className="w-full max-w-sm bg-neutral-50 rounded-lg border border-neutral-200 p-4 text-center">
+              <div className="text-[9px] uppercase font-bold tracking-widest text-hot-solid mb-1">Current Task</div>
+              <div className="text-sm font-serif font-bold text-neutral-950">{currentTask.title}</div>
+              <div className="text-xs text-neutral-500 mt-1">
                 {currentTask.priority} priority &middot; {currentTask.estimated_hours}h estimated
                 {currentTask.assignee && ` \u00B7 ${currentTask.assignee}`}
               </div>
@@ -130,12 +130,12 @@ export default function TimeboxLayout() {
               {queue.slice(currentIdx + 1).map((task, i) => (
                 <div key={task.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-50 border border-neutral-100 hover:bg-neutral-100 transition-colors cursor-pointer">
                   <span className="text-[9px] text-neutral-400 font-bold w-4">{i + 1}</span>
-                  <span className="text-[10px] text-neutral-700 flex-1 truncate">{task.title}</span>
+                  <span className="text-xs text-neutral-700 flex-1 truncate">{task.title}</span>
                   <span className="text-[9px] text-neutral-400">{task.estimated_hours}h</span>
                 </div>
               ))}
               {queue.slice(currentIdx + 1).length === 0 && (
-                <div className="text-[10px] text-neutral-400 text-center py-2">No more tasks in queue</div>
+                <div className="text-xs text-neutral-400 text-center py-2">No more tasks in queue</div>
               )}
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function TimeboxLayout() {
         {/* Right: session history + mini burndown */}
         <div className="w-72 flex flex-col p-4 overflow-y-auto bg-neutral-50/50">
           {/* Mini burndown */}
-          <div className="bg-white rounded-xl border border-neutral-200 p-4 mb-4">
+          <div className="bg-white rounded-lg border border-neutral-200 p-4 mb-4">
             <div className="flex items-center gap-1.5 mb-3">
               <BarChart3 className="w-3 h-3 text-neutral-400" />
               <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">Daily Burndown</span>
@@ -152,7 +152,7 @@ export default function TimeboxLayout() {
             <div className="h-20 flex items-end gap-1">
               {burndownPoints.map((p, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className={`w-full rounded-t transition-all ${i === burndownPoints.length - 1 ? "bg-orange-400" : "bg-neutral-300"}`}
+                  <div className={`w-full rounded-t transition-all ${i === burndownPoints.length - 1 ? "bg-hot-solid" : "bg-neutral-300"}`}
                     style={{ height: `${(p.remaining / maxRemaining) * 100}%` }} />
                   <span className="text-[7px] text-neutral-400">{p.label}</span>
                 </div>
@@ -162,15 +162,15 @@ export default function TimeboxLayout() {
 
           {/* Session history */}
           <div className="flex items-center gap-1.5 mb-3">
-            <CheckCircle2 className="w-3 h-3 text-green-500" />
+            <CheckCircle2 className="w-3 h-3 text-ok-solid" />
             <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">Completed Sessions</span>
           </div>
           <div className="space-y-1.5 flex-1">
             {[...sessions].reverse().map((s, i) => (
               <div key={i} className="bg-white rounded-lg border border-neutral-100 px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
-                  <span className="text-[10px] text-neutral-700 flex-1 truncate">{s.task}</span>
+                  <CheckCircle2 className="w-3 h-3 text-ok-solid shrink-0" />
+                  <span className="text-xs text-neutral-700 flex-1 truncate">{s.task}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-1 ml-5">
                   <span className="text-[9px] text-neutral-400">{s.time}</span>

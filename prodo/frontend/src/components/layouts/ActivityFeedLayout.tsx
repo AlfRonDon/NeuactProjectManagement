@@ -31,10 +31,10 @@ export default function ActivityFeedLayout() {
   };
 
   return (
-    <div className="flex h-[700px] rounded-xl overflow-hidden border border-neutral-200">
+    <div className="flex h-[700px] rounded-lg overflow-hidden border border-neutral-200">
       {/* Thin rail */}
       <div className="w-12 bg-neutral-900 flex flex-col items-center py-3 gap-3 shrink-0">
-        <div className="w-7 h-7 rounded bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold">N</div>
+        <div className="w-7 h-7 rounded bg-blue-500 flex items-center justify-center text-white text-xs font-bold">N</div>
         <div className="w-6 h-px bg-white/10 my-1" />
         {[{ id: "inbox", icon: Inbox }, { id: "board", icon: LayoutGrid }, { id: "timeline", icon: Link2 }].map((n) => {
           const Icon = n.icon;
@@ -50,8 +50,8 @@ export default function ActivityFeedLayout() {
       <div className="flex-1 bg-white flex flex-col">
         {/* Header */}
         <div className="px-5 py-3 border-b flex items-center gap-3">
-          <h3 className="text-sm font-bold text-neutral-900">Activity</h3>
-          <span className="text-[10px] text-neutral-400">CC v5</span>
+          <h3 className="text-sm font-serif font-bold text-neutral-950">Activity</h3>
+          <span className="text-xs text-neutral-400">CC v5</span>
           <div className="flex-1" />
           {/* Context panels */}
           <div className="flex gap-1">
@@ -69,7 +69,7 @@ export default function ActivityFeedLayout() {
           <div className={`${panel ? "w-1/2 border-r" : "w-full"} overflow-y-auto transition-all`}>
             {/* AI prompt bar */}
             <div className="px-5 py-3 border-b bg-neutral-50">
-              <div className="flex items-center gap-2 bg-white border rounded-xl px-3 py-2">
+              <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2">
                 <Sparkles className="w-4 h-4 text-purple-400" />
                 <input placeholder={"Ask anything... \"What's blocking the release?\""} className="flex-1 text-xs outline-none placeholder-neutral-400" />
                 <Mic className="w-4 h-4 text-neutral-300 cursor-pointer hover:text-blue-500 transition-colors" />
@@ -87,11 +87,11 @@ export default function ActivityFeedLayout() {
                         <span className="text-[9px] text-neutral-400">{a.time}</span>
                         {a.tag && (
                           <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                            a.tag === "warning" ? "bg-amber-100 text-amber-700" :
-                            a.tag === "done" ? "bg-green-100 text-green-700" :
-                            a.tag === "blocked" ? "bg-red-100 text-red-700" :
-                            a.tag === "in_progress" ? "bg-blue-100 text-blue-700" :
-                            "bg-purple-100 text-purple-700"
+                            a.tag === "warning" ? "bg-warn-bg text-warn-fg" :
+                            a.tag === "done" ? "bg-ok-bg text-ok-fg" :
+                            a.tag === "blocked" ? "bg-bad-bg text-bad-fg" :
+                            a.tag === "in_progress" ? "bg-info-bg text-info-fg" :
+                            "bg-info-bg text-info-fg"
                           }`}>{a.tag}</span>
                         )}
                       </div>

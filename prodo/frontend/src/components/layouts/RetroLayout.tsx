@@ -30,16 +30,16 @@ function RetroLayout() {
   ];
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-6 py-4 border-b flex items-center gap-3">
         <RefreshCcw className="w-5 h-5 text-purple-500" />
-        <h3 className="text-sm font-bold text-neutral-900">Sprint 12 Retrospective</h3>
-        <span className="text-[10px] text-neutral-400">Apr 1 — Apr 9</span>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Sprint 12 Retrospective</h3>
+        <span className="text-xs text-neutral-400">Apr 1 — Apr 9</span>
         <div className="flex-1" />
         <div className="flex gap-1">
           {(["analysis", "actions", "vote"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`text-[10px] font-medium px-3 py-1.5 rounded-lg capitalize transition-all ${tab === t ? "bg-neutral-900 text-white" : "text-neutral-400 hover:bg-neutral-100"}`}>
+              className={`text-xs font-medium px-3 py-1.5 rounded-lg capitalize transition-all ${tab === t ? "bg-neutral-900 text-white" : "text-neutral-400 hover:bg-neutral-100"}`}>
               {t}
             </button>
           ))}
@@ -52,12 +52,12 @@ function RetroLayout() {
             {/* Score cards */}
             <div className="grid grid-cols-4 gap-3">
               {[
-                { label: "Estimation Accuracy", value: "68%", sub: "Target: 85%", color: "text-amber-600" },
-                { label: "Completion Rate", value: "33%", sub: "3/9 tasks done", color: "text-red-600" },
-                { label: "Avg Velocity", value: "1.2/day", sub: "Target: 1.8", color: "text-amber-600" },
-                { label: "Blocker Days", value: "3", sub: "Apr 5-8", color: "text-red-600" },
+                { label: "Estimation Accuracy", value: "68%", sub: "Target: 85%", color: "text-warn-fg" },
+                { label: "Completion Rate", value: "33%", sub: "3/9 tasks done", color: "text-bad-fg" },
+                { label: "Avg Velocity", value: "1.2/day", sub: "Target: 1.8", color: "text-warn-fg" },
+                { label: "Blocker Days", value: "3", sub: "Apr 5-8", color: "text-bad-fg" },
               ].map((s) => (
-                <div key={s.label} className="bg-neutral-50 rounded-xl border p-4">
+                <div key={s.label} className="bg-neutral-50 rounded-lg border p-4">
                   <div className="text-[9px] uppercase font-bold text-neutral-400 tracking-widest">{s.label}</div>
                   <div className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</div>
                   <div className="text-[9px] text-neutral-400 mt-0.5">{s.sub}</div>
@@ -75,9 +75,9 @@ function RetroLayout() {
                   const Icon = ins.icon;
                   return (
                     <div key={i} className={`flex items-start gap-3 rounded-lg p-3 border ${
-                      ins.type === "good" ? "bg-green-50 border-green-100" : ins.type === "bad" ? "bg-red-50 border-red-100" : "bg-neutral-50 border-neutral-100"
+                      ins.type === "good" ? "bg-ok-bg border-ok-solid/20" : ins.type === "bad" ? "bg-bad-bg border-bad-solid/20" : "bg-neutral-50 border-neutral-100"
                     }`}>
-                      <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${ins.type === "good" ? "text-green-500" : ins.type === "bad" ? "text-red-500" : "text-neutral-400"}`} />
+                      <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${ins.type === "good" ? "text-ok-fg" : ins.type === "bad" ? "text-bad-fg" : "text-neutral-400"}`} />
                       <span className="text-xs text-neutral-700">{ins.text}</span>
                     </div>
                   );
@@ -91,7 +91,7 @@ function RetroLayout() {
           <div className="space-y-3">
             <div className="text-xs text-neutral-500 mb-2">AI-generated action items for next sprint. Edit or add your own.</div>
             {actions.sort((a, b) => b.votes - a.votes).map((a, i) => (
-              <div key={i} className="flex items-center gap-3 bg-neutral-50 rounded-xl border p-4 hover:border-blue-300 transition-colors cursor-pointer">
+              <div key={i} className="flex items-center gap-3 bg-neutral-50 rounded-lg border p-4 hover:border-blue-300 transition-colors cursor-pointer">
                 <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4 text-purple-500" />
                 </div>
@@ -101,7 +101,7 @@ function RetroLayout() {
                 </div>
                 <div className="flex items-center gap-1 bg-white border rounded-full px-2 py-1">
                   <ThumbsUp className="w-3 h-3 text-neutral-400" />
-                  <span className="text-[10px] font-bold text-neutral-600">{a.votes}</span>
+                  <span className="text-xs font-bold text-neutral-600">{a.votes}</span>
                 </div>
               </div>
             ))}

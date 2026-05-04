@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Project, Milestone, Task, SubTask, Comment, Changelog, ChangelogEntry, Notification, Category, UserProfile, TaskDependency, Activity
+from .models import (
+    Project, Milestone, Task, SubTask, Comment, Changelog, ChangelogEntry,
+    Notification, Category, UserProfile, TaskDependency, Activity,
+    Sprint, SprintSnapshot, Blocker, TaskStatusLog,
+    RiskLabelLog, SuggestionDismissal,
+)
 
 
 class SubTaskSerializer(serializers.ModelSerializer):
@@ -94,12 +99,12 @@ class TaskListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = [
-            "id", "title", "description", "status", "priority",
+            "id", "title", "description", "status", "priority", "stage",
             "assignee", "assignee_detail", "assigner", "assigner_detail",
             "planned_start_date", "planned_end_date",
-            "start_date", "due_date", "estimated_hours", "actual_hours",
+            "start_date", "due_date", "completed_at", "estimated_hours", "actual_hours",
             "tags", "depends_on", "subtask_count", "subtask_done", "comment_count",
-            "project", "category", "created_at", "updated_at",
+            "project", "sprint", "category", "created_at", "updated_at",
         ]
 
     def get_depends_on(self, obj):
@@ -126,13 +131,13 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = [
-            "id", "title", "description", "status", "priority",
+            "id", "title", "description", "status", "priority", "stage",
             "assignee", "assignee_detail", "assigner", "assigner_detail",
             "planned_start_date", "planned_end_date",
-            "start_date", "due_date", "estimated_hours", "actual_hours",
+            "start_date", "due_date", "completed_at", "estimated_hours", "actual_hours",
             "tags", "dependencies", "dependents",
             "subtasks", "comments",
-            "project", "milestone", "category", "created_at", "updated_at",
+            "project", "sprint", "milestone", "category", "created_at", "updated_at",
         ]
 
 
@@ -297,5 +302,87 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = [
             "id", "project_short", "category", "title", "description",
-            "from_user", "time_ago", "read", "actions", "created_at",
+            "from_user", "time_ago", "read", "actions", "related_id", "created_at",
         ]
+
+
+# ──────────────────────────────────────────────────────────────
+# NEW SERIALIZERS for Portfolio Overview Dashboard
+# ──────────────────────────────────────────────────────────────
+
+class SprintSerializer(serializers.ModelSerializer):
+    days_left = serializers.IntegerField(read_only=True)
+    total_days = serializers.IntegerField(read_only=True)
+    task_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Sprint
+        fields = [
+            "id", "project", "name", "number", "start_date", "end_date",
+            "status", "backlog_locked", "review_sla_hours",
+            "days_left", "total_days", "task_count",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_task_count(self, obj):
+        return obj.tasks.count()
+
+
+class SprintSnapshotSerializer(serializers.ModelSerializer):
+    remaining = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = SprintSnapshot
+        fields = [
+            "id", "sprint", "date", "total_tasks", "done_tasks",
+            "blocked_tasks", "added_tasks", "remaining", "is_backfilled",
+        ]
+        read_only_fields = ["id"]
+
+
+class BlockerSerializer(serializers.ModelSerializer):
+    age_display = serializers.CharField(read_only=True)
+    task_title = serializers.CharField(source="task.title", read_only=True)
+    task_status = serializers.CharField(source="task.status", read_only=True)
+    project_name = serializers.CharField(source="project.name", read_only=True)
+    assigned_to_detail = UserProfileMinimalSerializer(source="assigned_to", read_only=True)
+    reported_by_detail = UserProfileMinimalSerializer(source="reported_by", read_only=True)
+
+    class Meta:
+        model = Blocker
+        fields = [
+            "id", "project", "project_name", "task", "task_title", "task_status",
+            "reason", "severity", "status", "escalated", "escalated_at",
+            "snooze_until", "snooze_count",
+            "assigned_to", "assigned_to_detail",
+            "reported_by", "reported_by_detail",
+            "downstream_count", "age_display",
+            "resolved_at", "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "age_display", "created_at", "updated_at"]
+
+
+class TaskStatusLogSerializer(serializers.ModelSerializer):
+    task_title = serializers.CharField(source="task.title", read_only=True)
+
+    class Meta:
+        model = TaskStatusLog
+        fields = ["id", "task", "task_title", "from_status", "to_status", "changed_by", "changed_at"]
+        read_only_fields = ["id"]
+
+
+class RiskLabelLogSerializer(serializers.ModelSerializer):
+    project_name = serializers.CharField(source="project.name", read_only=True)
+
+    class Meta:
+        model = RiskLabelLog
+        fields = ["id", "project", "project_name", "from_label", "to_label", "reason", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
+class SuggestionDismissalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SuggestionDismissal
+        fields = ["id", "project", "suggestion_type", "suggestion_data", "dismissed_by", "created_at"]
+        read_only_fields = ["id", "created_at"]

@@ -40,9 +40,25 @@ def users_list_view(request):
     return Response(data)
 
 
+from projects.views import (
+    calendar_view, portfolio_view, portfolio_dashboard_view,
+    workload_calendar_view, morning_brief_view,
+    pull_work_view, accept_suggestion_view, dismiss_suggestion_view,
+    risk_history_view,
+)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/projects/", include("projects.urls")),
+    path("api/portfolio/", portfolio_view),
+    path("api/portfolio/dashboard/", portfolio_dashboard_view),
+    path("api/calendar/", calendar_view),
+    path("api/workload/", workload_calendar_view),
+    path("api/workload/pull/", pull_work_view),
+    path("api/brief/", morning_brief_view),
+    path("api/suggestions/accept/", accept_suggestion_view),
+    path("api/suggestions/dismiss/", dismiss_suggestion_view),
+    path("api/risk-history/", risk_history_view),
     path("api/auth/me/", me_view),
     path("api/users/", users_list_view),
     path("oidc/", include("mozilla_django_oidc.urls")),

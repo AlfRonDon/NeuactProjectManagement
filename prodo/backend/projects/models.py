@@ -1,6 +1,7 @@
 import uuid
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class Project(models.Model):
@@ -23,6 +24,15 @@ class Project(models.Model):
     )
     start_date = models.DateField(null=True, blank=True)
     target_date = models.DateField(null=True, blank=True)
+    timezone_name = models.CharField(
+        max_length=50, default="Asia/Kolkata",
+        help_text="IANA timezone for day boundary calculations"
+    )
+    last_risk_label = models.CharField(
+        max_length=20, blank=True, default="",
+        help_text="Cached risk label for hysteresis — prevents flapping"
+    )
+    last_risk_changed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -31,6 +41,15 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_today(self):
+        """Return 'today' in the project's configured timezone."""
+        import zoneinfo
+        try:
+            tz = zoneinfo.ZoneInfo(self.timezone_name)
+        except (KeyError, Exception):
+            tz = zoneinfo.ZoneInfo("Asia/Kolkata")
+        return timezone.now().astimezone(tz).date()
 
 
 class Milestone(models.Model):
@@ -69,9 +88,19 @@ class Category(models.Model):
 
 class Task(models.Model):
     """A unit of work within a project."""
+    STAGE_CHOICES = [
+        ("research", "Research"),
+        ("design", "Design"),
+        ("build", "Build"),
+        ("test", "Test"),
+        ("ship", "Ship"),
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name="tasks"
+    )
+    sprint = models.ForeignKey(
+        "Sprint", on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks"
     )
     milestone = models.ForeignKey(
         Milestone, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks"
@@ -81,6 +110,7 @@ class Task(models.Model):
     )
     title = models.CharField(max_length=500)
     description = models.TextField(blank=True, default="")
+    stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default="build", blank=True)
     status = models.CharField(
         max_length=20,
         choices=[
@@ -116,6 +146,7 @@ class Task(models.Model):
     planned_end_date = models.DateField(null=True, blank=True, help_text="Original baseline end date")
     start_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True, help_text="When the task was marked done")
     estimated_hours = models.FloatField(null=True, blank=True)
     actual_hours = models.FloatField(null=True, blank=True)
     depends_on = models.ManyToManyField(
@@ -269,11 +300,43 @@ class UserProfile(models.Model):
         related_name="profile",
     )
     display_name = models.CharField(max_length=255, blank=True, default="")
+    weekly_capacity_hours = models.FloatField(
+        default=40.0,
+        help_text="Available hours per week (accounts for part-time, role, etc.)"
+    )
+    unavailable_dates = models.JSONField(
+        default=list, blank=True,
+        help_text="List of date ranges when unavailable: [{'start': 'YYYY-MM-DD', 'end': 'YYYY-MM-DD', 'reason': 'PTO'}]"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} ({self.keycloak_id})"
+
+    def capacity_for_week(self, week_start, week_end):
+        """Return available hours for a given week, accounting for PTO/unavailability."""
+        from datetime import date as dt_date
+        base = self.weekly_capacity_hours
+        if not self.unavailable_dates:
+            return base
+
+        unavailable_days = 0
+        for period in self.unavailable_dates:
+            try:
+                p_start = dt_date.fromisoformat(period["start"])
+                p_end = dt_date.fromisoformat(period["end"])
+            except (KeyError, ValueError):
+                continue
+            # Count overlap days
+            overlap_start = max(p_start, week_start)
+            overlap_end = min(p_end, week_end)
+            if overlap_start <= overlap_end:
+                unavailable_days += (overlap_end - overlap_start).days + 1
+
+        work_days = 5  # Mon-Fri
+        hours_per_day = base / work_days
+        return max(0, base - (unavailable_days * hours_per_day))
 
 
 class Activity(models.Model):
@@ -317,6 +380,7 @@ class Notification(models.Model):
     time_ago = models.CharField(max_length=20, default="")
     read = models.BooleanField(default=False)
     actions = models.JSONField(default=list, blank=True)
+    related_id = models.UUIDField(null=True, blank=True, help_text="UUID of related blocker or task")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -324,3 +388,298 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ──────────────────────────────────────────────────────────────
+# NEW MODELS for Portfolio Overview Dashboard
+# ──────────────────────────────────────────────────────────────
+
+class Sprint(models.Model):
+    """A time-boxed iteration within a project."""
+    STATUS_CHOICES = [
+        ("planning", "Planning"),
+        ("active", "Active"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="sprints")
+    name = models.CharField(max_length=255, blank=True, default="")
+    number = models.PositiveIntegerField(default=1)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="planning")
+    backlog_locked = models.BooleanField(default=False, help_text="Prevents new tasks from entering this sprint")
+    review_sla_hours = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Max hours a task can sit in review before triggering alert"
+    )
+    require_dri = models.BooleanField(
+        default=False,
+        help_text="Policy: every active task must have an assignee to advance"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-number"]
+        unique_together = [("project", "number")]
+
+    def __str__(self):
+        return f"Sprint {self.number} — {self.project.name}"
+
+    @property
+    def days_left(self):
+        return max(0, (self.end_date - timezone.now().date()).days)
+
+    @property
+    def total_days(self):
+        return max(1, (self.end_date - self.start_date).days)
+
+    def inherit_policies_from(self, previous_sprint):
+        """
+        Sprint-boundary policy persistence:
+        - review_sla_hours carries over (it's a team policy)
+        - require_dri carries over (it's a process rule)
+        - backlog_locked resets to False (it's an emergency measure per-sprint)
+        """
+        if previous_sprint.review_sla_hours and not self.review_sla_hours:
+            self.review_sla_hours = previous_sprint.review_sla_hours
+        if previous_sprint.require_dri:
+            self.require_dri = True
+        self.backlog_locked = False  # always reset
+        self.save(update_fields=["review_sla_hours", "require_dri", "backlog_locked", "updated_at"])
+
+
+class SprintSnapshot(models.Model):
+    """Daily snapshot for burndown charts — one row per sprint per day."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, related_name="snapshots")
+    date = models.DateField()
+    total_tasks = models.PositiveIntegerField(default=0)
+    done_tasks = models.PositiveIntegerField(default=0)
+    blocked_tasks = models.PositiveIntegerField(default=0)
+    added_tasks = models.PositiveIntegerField(default=0, help_text="Tasks added after sprint start (scope creep)")
+    is_backfilled = models.BooleanField(default=False, help_text="True if reconstructed from logs, not live")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["date"]
+        unique_together = [("sprint", "date")]
+
+    def __str__(self):
+        return f"{self.sprint} — {self.date}"
+
+    @property
+    def remaining(self):
+        return self.total_tasks - self.done_tasks
+
+
+class Blocker(models.Model):
+    """Explicit blocker tracking with escalation, snooze, and reassignment."""
+    SEVERITY_CHOICES = [
+        ("normal", "Normal"),
+        ("critical", "Critical"),
+    ]
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("snoozed", "Snoozed"),
+        ("resolved", "Resolved"),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="blockers")
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="blocker_records")
+    reason = models.TextField(help_text="Why this task is blocked")
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, default="normal")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="active")
+    escalated = models.BooleanField(default=False)
+    escalated_at = models.DateTimeField(null=True, blank=True)
+    snooze_until = models.DateTimeField(null=True, blank=True)
+    snooze_count = models.PositiveIntegerField(default=0, help_text="Times this blocker has been snoozed")
+    assigned_to = models.ForeignKey(
+        UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_blockers"
+    )
+    reported_by = models.ForeignKey(
+        UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name="reported_blockers"
+    )
+    downstream_count = models.PositiveIntegerField(default=0, help_text="Tasks waiting on this blocker")
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-severity", "-created_at"]
+
+    def __str__(self):
+        return f"[{self.severity}] {self.task.title} — {self.reason[:60]}"
+
+    @property
+    def age_seconds(self):
+        end = self.resolved_at or timezone.now()
+        return (end - self.created_at).total_seconds()
+
+    @property
+    def age_display(self):
+        secs = self.age_seconds
+        if secs < 3600:
+            return f"{int(secs // 60)}m"
+        elif secs < 86400:
+            return f"{int(secs // 3600)}h"
+        else:
+            return f"{int(secs // 86400)}d"
+
+    def check_auto_critical(self):
+        """Promote to critical based on aging/downstream/deadline rules (config-driven)."""
+        if self.severity == "critical":
+            return False
+        cfg = DashboardConfig.load()
+        should_promote = False
+        if self.age_seconds > cfg.blocker_age_critical_days * 86400:
+            should_promote = True
+        if self.downstream_count > cfg.blocker_downstream_critical:
+            should_promote = True
+        project = self.project
+        if project.target_date:
+            days_left = (project.target_date - timezone.now().date()).days
+            if days_left <= cfg.blocker_deadline_critical_days:
+                should_promote = True
+        if should_promote:
+            self.severity = "critical"
+            self.save(update_fields=["severity", "updated_at"])
+            return True
+        return False
+
+
+class TaskStatusLog(models.Model):
+    """Tracks every status change for pace/velocity/trend calculations."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="status_logs")
+    from_status = models.CharField(max_length=20, blank=True, default="")
+    to_status = models.CharField(max_length=20)
+    changed_by = models.ForeignKey(
+        UserProfile, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    changed_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-changed_at"]
+
+    def __str__(self):
+        return f"{self.task.title}: {self.from_status} → {self.to_status}"
+
+
+class RiskLabelLog(models.Model):
+    """Audit trail for risk label changes — answers 'why is this Critical?'"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="risk_logs")
+    from_label = models.CharField(max_length=20, blank=True, default="")
+    to_label = models.CharField(max_length=20)
+    reason = models.TextField(help_text="What signal triggered the change")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.project.name}: {self.from_label} → {self.to_label}"
+
+
+class SuggestionDismissal(models.Model):
+    """Tracks when users dismiss AI suggestions — inaction is a signal."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="suggestion_dismissals")
+    suggestion_type = models.CharField(max_length=50, help_text="Type of suggestion dismissed")
+    suggestion_data = models.JSONField(default=dict, blank=True)
+    dismissed_by = models.ForeignKey(
+        UserProfile, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Dismissed: {self.suggestion_type} on {self.project.name}"
+
+
+class DashboardConfig(models.Model):
+    """
+    Singleton configuration for tunable dashboard constants.
+    Avoids hardcoding values that will need adjustment once real users start using the system.
+    """
+    # Suggestion throttle
+    dismissal_throttle_count = models.PositiveIntegerField(
+        default=3, help_text="Dismissals of same type within window to suppress suggestion"
+    )
+    dismissal_throttle_window_days = models.PositiveIntegerField(
+        default=7, help_text="Rolling window (days) for dismissal throttle"
+    )
+    dismissal_decay_halflife_days = models.FloatField(
+        default=7.0, help_text="Half-life (days) for dismissal score decay"
+    )
+
+    # Risk label hysteresis
+    hysteresis_pace_threshold = models.FloatField(
+        default=0.8, help_text="Pace must reach this fraction of required to demote from Critical"
+    )
+
+    # Blocker auto-critical thresholds
+    blocker_age_critical_days = models.PositiveIntegerField(
+        default=2, help_text="Days before a blocker auto-promotes to critical"
+    )
+    blocker_downstream_critical = models.PositiveIntegerField(
+        default=3, help_text="Downstream task count to auto-promote blocker to critical"
+    )
+    blocker_deadline_critical_days = models.PositiveIntegerField(
+        default=7, help_text="Project deadline within N days auto-promotes blockers to critical"
+    )
+
+    # Escalation terminator
+    escalation_unignorable_days = models.PositiveIntegerField(
+        default=3, help_text="Escalated Critical blocker becomes unignorable after N days"
+    )
+
+    # Stale task detection
+    stale_dwell_research = models.PositiveIntegerField(default=5)
+    stale_dwell_design = models.PositiveIntegerField(default=4)
+    stale_dwell_build = models.PositiveIntegerField(default=3)
+    stale_dwell_test = models.PositiveIntegerField(default=2)
+    stale_dwell_ship = models.PositiveIntegerField(default=1)
+
+    # Workload
+    default_weekly_capacity = models.FloatField(
+        default=40.0, help_text="Default weekly capacity when UserProfile doesn't specify"
+    )
+
+    # Diagnostic
+    diagnostic_weighting_version = models.PositiveIntegerField(
+        default=2, help_text="Increment when weighting math changes — trends only compare within same version"
+    )
+    critical_path_weight_multiplier = models.FloatField(
+        default=2.0, help_text="Weight multiplier for tasks on the critical path in diagnostic scoring"
+    )
+
+    # Morning brief
+    brief_resurfacing_days = models.PositiveIntegerField(
+        default=3, help_text="Days a Critical project must persist before re-surfacing in brief"
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Dashboard Configuration"
+        verbose_name_plural = "Dashboard Configuration"
+
+    def __str__(self):
+        return "Dashboard Configuration"
+
+    def save(self, *args, **kwargs):
+        # Singleton: ensure only one instance exists
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        """Get or create the singleton config instance."""
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

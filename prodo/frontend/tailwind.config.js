@@ -6,53 +6,74 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Design System v4 — neutral (warm paper tones, overrides Tailwind defaults)
+        // Brand — warm taupe neutrals (do not replace with cool greys)
         neutral: {
-          50: '#fdfdfc',
-          100: '#f4f2ed',
-          200: '#d4d2cc',
-          300: '#d4d2cc',
-          400: '#9CA3AF',
-          500: '#6f6f69',
-          700: '#374151',
-          900: '#111827',
+          50:  '#F6F4F4',
+          100: '#E9E5E4',
+          200: '#D5CFCE',
+          300: '#C1B9B8',
+          400: '#ADA2A1',
+          500: '#938A89',
+          600: '#7E7675',
+          700: '#686160',
+          800: '#524C4B',
+          900: '#3D3837',
+          950: '#1A1716',
         },
-        // Design System v4 — primary (blue accent)
         primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          300: '#6A9EFA',
-          500: '#3B82F6',
-          600: '#2563EB',
-          900: '#1D4ED8',
+          400: '#818CF8',
+          500: '#6366F1',
+          600: '#4F46E5',
         },
-        // Design System v4 — status (semantic)
-        status: {
-          success: '#22C55E',
-          warning: '#F59E0B',
-          destructive: '#EF4444',
+
+        // ── Color System v1 — status tokens ──
+        ok:   { bg: '#DCFCE7', fg: '#166534', solid: '#22C55E' },
+        info: { bg: '#DBEAFE', fg: '#1E40AF', solid: '#3B82F6' },
+        warn: { bg: '#FEF3C7', fg: '#92400E', solid: '#F59E0B' },
+        hot:  { bg: '#FFEDD5', fg: '#9A3412', solid: '#EA580C' },
+        bad:  { bg: '#FEE2E2', fg: '#991B1B', solid: '#EF4444' },
+
+        // ── Color System v1 — chart series ──
+        series: {
+          1: '#6366F1',
+          2: '#14B8A6',
+          3: '#EC4899',
+          4: '#8B5CF6',
+          5: '#F59E0B',
+          planned: '#9CA3AF',
         },
+
+        // ── Color System v1 — foundation aliases ──
+        surface:  '#FFFFFF',
+        canvas:   '#F6F4F4',
+        subtle:   '#FBFAFA',
       },
       fontFamily: {
-        display: ['"Space Grotesk"', '"Inter"', 'system-ui', 'sans-serif'],
-        heading: ['"Inter"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        body: ['"Inter"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['"Courier New"', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        sans:  ['Geist', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+        mono:  ['"Geist Mono"', 'ui-monospace', 'Consolas', 'monospace'],
+      },
+      fontSize: {
+        '2xs': ['9px',  { lineHeight: '12px' }],
+        'xs':  ['10px', { lineHeight: '14px' }],
+        'sm':  ['11px', { lineHeight: '16px' }],
+        'md':  ['12px', { lineHeight: '16px' }],
+        'base':['14px', { lineHeight: '20px' }],
+        'lg':  ['16px', { lineHeight: '22px' }],
+        'xl':  ['20px', { lineHeight: '28px' }],
+        '2xl': ['24px', { lineHeight: '32px' }],
+        '3xl': ['28px', { lineHeight: '36px' }],
+      },
+      borderRadius: {
+        sm:   '3px',
+        md:   '5px',
+        lg:   '8px',
+        xl:   '12px',
+        full: '9999px',
+        card: '8px',
       },
       boxShadow: {
         xsmall: '0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
-        'ai-panel': '0px 4px 8.4px rgba(0,0,0,0.25)',
-      },
-      borderRadius: {
-        card: '8px',
-        button: '8px',
-        pill: '24px',
-      },
-      spacing: {
-        sidebar: '250px',
-        'sidebar-collapsed': '64px',
-        'details-panel': '320px',
-        taskbar: '48px',
       },
     },
   },

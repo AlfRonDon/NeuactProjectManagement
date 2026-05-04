@@ -10,20 +10,20 @@ import { boardTasks as fixtureTasks } from "./fixtures";
 type ViewMode = "week" | "month" | "split" | "timeline" | "agenda";
 
 const STATUS_META: Record<string, { label: string; bg: string; dot: string }> = {
-  done:        { label: "Done",        bg: "bg-green-500",   dot: "bg-green-500"   },
-  in_progress: { label: "In Progress", bg: "bg-amber-400",   dot: "bg-amber-400"   },
-  active:      { label: "Active",      bg: "bg-amber-400",   dot: "bg-amber-400"   },
-  blocked:     { label: "Blocked",     bg: "bg-red-400",     dot: "bg-red-400"     },
-  in_review:   { label: "In Review",   bg: "bg-purple-400",  dot: "bg-purple-400"  },
-  todo:        { label: "To Do",       bg: "bg-blue-400",    dot: "bg-blue-400"    },
+  done:        { label: "Done",        bg: "bg-ok-solid",   dot: "bg-ok-solid"   },
+  in_progress: { label: "In Progress", bg: "bg-warn-solid",   dot: "bg-warn-solid"   },
+  active:      { label: "Active",      bg: "bg-warn-solid",   dot: "bg-warn-solid"   },
+  blocked:     { label: "Blocked",     bg: "bg-bad-solid",     dot: "bg-bad-solid"     },
+  in_review:   { label: "In Review",   bg: "bg-info-solid",  dot: "bg-info-solid"  },
+  todo:        { label: "To Do",       bg: "bg-info-solid",    dot: "bg-info-solid"    },
   backlog:     { label: "Backlog",     bg: "bg-neutral-300", dot: "bg-neutral-300" },
 };
 
 const PRIORITY_BADGE: Record<string, string> = {
-  critical: "bg-red-100 text-red-700",
-  urgent: "bg-red-100 text-red-700",
-  high: "bg-orange-100 text-orange-700",
-  medium: "bg-yellow-100 text-yellow-700",
+  critical: "bg-bad-bg text-bad-fg",
+  urgent: "bg-bad-bg text-bad-fg",
+  high: "bg-hot-bg text-hot-fg",
+  medium: "bg-warn-bg text-warn-fg",
   low: "bg-neutral-100 text-neutral-500",
 };
 
@@ -61,7 +61,7 @@ function AgendaView({ day, onBack }: { day: Date; onBack: () => void }) {
         <span className="text-xs font-semibold text-neutral-700">
           {day.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
         </span>
-        {today && <span className="text-xs text-blue-500 font-medium">Today</span>}
+        {today && <span className="text-xs text-info-solid font-medium">Today</span>}
         <div className="flex-1" />
         <span className="text-xs text-neutral-400">{tasks.length} tasks · {tasks.reduce((a, t) => a + (t.estimated_hours || 0), 0)}h estimated</span>
       </div>
@@ -121,11 +121,11 @@ function WeekView({ weekOffset, setWeekOffset, onDayClick }: {
       </div>
       <div className="grid grid-cols-7 border-b shrink-0">
         {days.map((d) => (
-          <div key={d.toISOString()} onClick={() => onDayClick(d)} className={`text-center py-2.5 cursor-pointer hover:bg-blue-50 transition-colors ${isToday(d) ? "bg-blue-50" : ""}`}>
+          <div key={d.toISOString()} onClick={() => onDayClick(d)} className={`text-center py-2.5 cursor-pointer hover:bg-info-bg transition-colors ${isToday(d) ? "bg-info-bg" : ""}`}>
             <div className="text-xs uppercase text-neutral-400 font-semibold">{d.toLocaleDateString([], { weekday: "short" })}</div>
-            <div className={`text-lg font-bold mt-0.5 ${isToday(d) ? "text-blue-600" : "text-neutral-900"}`}>
+            <div className={`text-lg font-bold mt-0.5 ${isToday(d) ? "text-info-fg" : "text-neutral-950"}`}>
               {d.getDate()}
-              {isToday(d) && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mx-auto mt-0.5" />}
+              {isToday(d) && <div className="w-1.5 h-1.5 bg-info-bg0 rounded-full mx-auto mt-0.5" />}
             </div>
           </div>
         ))}
@@ -134,7 +134,7 @@ function WeekView({ weekOffset, setWeekOffset, onDayClick }: {
         {days.map((d) => {
           const dayTasks = getTasksForDay(d);
           return (
-            <div key={d.toISOString()} onClick={() => onDayClick(d)} className={`p-2 min-h-0 space-y-1.5 cursor-pointer hover:bg-blue-50/20 transition-colors ${isToday(d) ? "bg-blue-50/30" : ""}`}>
+            <div key={d.toISOString()} onClick={() => onDayClick(d)} className={`p-2 min-h-0 space-y-1.5 cursor-pointer hover:bg-info-bg/20 transition-colors ${isToday(d) ? "bg-info-bg/30" : ""}`}>
               {dayTasks.map((t) => (
                 <div key={t.id} className={`${STATUS_META[t.status]?.bg ?? "bg-neutral-300"} rounded-md px-2 py-1.5 text-white`}>
                   <div className="text-xs font-semibold truncate leading-tight">{t.title}</div>
@@ -188,10 +188,10 @@ function MonthView({ monthOffset, setMonthOffset, onDayClick }: {
           const today = isToday(d);
           const rowBorder = i >= 7 ? "border-t border-neutral-100" : "";
           return (
-            <div key={d.toISOString()} onClick={() => onDayClick(d)} className={`p-1.5 min-h-0 overflow-hidden flex flex-col cursor-pointer hover:bg-blue-50/30 transition-colors ${rowBorder} ${today ? "bg-blue-50/40" : !inMonth ? "bg-neutral-50/50" : ""}`}>
-              <div className={`text-xs font-semibold mb-1 ${today ? "text-blue-600" : inMonth ? "text-neutral-700" : "text-neutral-300"}`}>
+            <div key={d.toISOString()} onClick={() => onDayClick(d)} className={`p-1.5 min-h-0 overflow-hidden flex flex-col cursor-pointer hover:bg-info-bg/30 transition-colors ${rowBorder} ${today ? "bg-info-bg/40" : !inMonth ? "bg-neutral-50/50" : ""}`}>
+              <div className={`text-xs font-semibold mb-1 ${today ? "text-info-fg" : inMonth ? "text-neutral-700" : "text-neutral-300"}`}>
                 {d.getDate()}
-                {today && <span className="ml-1 text-xs font-normal text-blue-400">today</span>}
+                {today && <span className="ml-1 text-xs font-normal text-info-solid">today</span>}
               </div>
               <div className="flex-1 min-h-0 overflow-y-auto space-y-0.5">
                 {dayTasks.slice(0, 3).map((t) => (
@@ -256,12 +256,12 @@ function SplitView() {
                 <div
                   {...(today ? { "data-today": true } : {})}
                   onClick={() => setSelectedDay(new Date(d))}
-                  className={`flex items-start gap-3 px-4 py-3 border-b border-neutral-100 cursor-pointer transition-colors ${isSel ? "bg-blue-50" : "hover:bg-neutral-50"}`}
+                  className={`flex items-start gap-3 px-4 py-3 border-b border-neutral-100 cursor-pointer transition-colors ${isSel ? "bg-info-bg" : "hover:bg-neutral-50"}`}
                 >
                   <div className="w-10 text-center shrink-0">
                     <div className="text-xs uppercase text-neutral-400 font-semibold">{d.toLocaleDateString([], { weekday: "short" })}</div>
-                    <div className={`text-lg font-bold ${today ? "text-blue-600" : "text-neutral-900"}`}>{d.getDate()}</div>
-                    {today && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mx-auto mt-0.5" />}
+                    <div className={`text-lg font-bold ${today ? "text-info-fg" : "text-neutral-950"}`}>{d.getDate()}</div>
+                    {today && <div className="w-1.5 h-1.5 bg-info-bg0 rounded-full mx-auto mt-0.5" />}
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     {tasks.length === 0 && <span className="text-xs text-neutral-300">No tasks</span>}
@@ -283,16 +283,16 @@ function SplitView() {
         {/* Right: day detail */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-3 border-b bg-neutral-50 sticky top-0 z-10">
-            <div className="text-sm font-bold text-neutral-900">
+            <div className="text-sm font-serif font-bold text-neutral-950">
               {selectedDay.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
-              {isToday(selectedDay) && <span className="ml-2 text-xs text-blue-500 font-medium">Today</span>}
+              {isToday(selectedDay) && <span className="ml-2 text-xs text-info-solid font-medium">Today</span>}
             </div>
             <div className="text-xs text-neutral-500 mt-0.5">{selTasks.length} tasks · {selTasks.reduce((a, t) => a + (t.estimated_hours || 0), 0)}h estimated</div>
           </div>
           <div className="p-4 space-y-2">
             {selTasks.length === 0 && <div className="text-sm text-neutral-300 text-center pt-12">No tasks for this day</div>}
             {selTasks.map(t => (
-              <div key={t.id} className="rounded-xl border border-neutral-200 p-3 space-y-2">
+              <div key={t.id} className="rounded-lg border border-neutral-200 p-3 space-y-2">
                 <div className="flex items-start gap-2">
                   <div className={`w-2 min-h-[32px] rounded-full shrink-0 ${STATUS_META[t.status]?.bg}`} />
                   <div className="flex-1 min-w-0">
@@ -350,7 +350,7 @@ function TimelineView() {
         </div>
         <div className="flex-1 flex">
           {days.map((d, i) => (
-            <div key={i} className={`text-center py-1.5 border-r border-neutral-100 ${isToday(d) ? "bg-blue-50" : ""}`} style={{ width: `${100 / TOTAL_DAYS}%` }}>
+            <div key={i} className={`text-center py-1.5 border-r border-neutral-100 ${isToday(d) ? "bg-info-bg" : ""}`} style={{ width: `${100 / TOTAL_DAYS}%` }}>
               {i % 5 === 0 ? (
                 <div className="text-xs font-semibold text-neutral-500 truncate px-0.5">{d.toLocaleDateString([], { month: "short", day: "numeric" })}</div>
               ) : (
@@ -376,7 +376,7 @@ function TimelineView() {
                 {/* Grid lines */}
                 <div className="absolute inset-0 flex pointer-events-none">
                   {days.map((d, i) => (
-                    <div key={i} className={`border-r border-neutral-50 ${isToday(d) ? "bg-blue-50/30" : ""}`} style={{ width: `${100 / TOTAL_DAYS}%` }} />
+                    <div key={i} className={`border-r border-neutral-50 ${isToday(d) ? "bg-info-bg/30" : ""}`} style={{ width: `${100 / TOTAL_DAYS}%` }} />
                   ))}
                 </div>
                 {tasks.map((t, ti) => {
@@ -428,11 +428,11 @@ function CalendarLayout({ className, tasks }: { className?: string; tasks?: any[
   ];
 
   return (
-    <div className={`${className ?? "h-[700px]"} rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col`}>
+    <div className={`${className ?? "h-[700px]"} rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col`}>
       {/* Top bar */}
       <div className="px-5 py-2.5 border-b flex items-center gap-3 shrink-0">
         <CalendarIcon className="w-5 h-5 text-neutral-400" />
-        <h3 className="text-sm font-bold text-neutral-900">Calendar</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Calendar</h3>
 
         {/* View toggle */}
         <div className="flex bg-neutral-100 rounded-lg p-0.5 ml-2">
@@ -442,7 +442,7 @@ function CalendarLayout({ className, tasks }: { className?: string; tasks?: any[
               onClick={() => setView(key)}
               className={`text-xs font-medium px-3 py-1 rounded-md transition-all ${
                 (view === key || (view === "agenda" && prevView === key))
-                  ? "bg-white text-neutral-900 shadow-sm"
+                  ? "bg-white text-neutral-950shadow-xsmall"
                   : "text-neutral-500 hover:text-neutral-700"
               }`}
             >
@@ -452,7 +452,7 @@ function CalendarLayout({ className, tasks }: { className?: string; tasks?: any[
         </div>
 
         {view === "agenda" && (
-          <span className="text-xs text-blue-500 font-medium ml-1">
+          <span className="text-xs text-info-solid font-medium ml-1">
             → Agenda: {agendaDay.toLocaleDateString([], { month: "short", day: "numeric" })}
           </span>
         )}
@@ -487,10 +487,10 @@ function CalendarLayout({ className, tasks }: { className?: string; tasks?: any[
       <div className="border-t px-4 py-2 flex items-center gap-4 bg-neutral-50 shrink-0">
         <span className="text-xs uppercase font-semibold text-neutral-400">Due this week:</span>
         {_boardTasks.filter((t) => t.due_date && t.due_date <= "2026-04-13" && t.status !== "done").map((t) => (
-          <span key={t.id} className="text-xs text-amber-600 font-medium">{t.title}</span>
+          <span key={t.id} className="text-xs text-warn-fg font-medium">{t.title}</span>
         ))}
         {_boardTasks.filter((t) => t.due_date && t.due_date <= "2026-04-13" && t.status !== "done").length === 0 && (
-          <span className="text-xs text-green-600">Nothing overdue</span>
+          <span className="text-xs text-ok-fg">Nothing overdue</span>
         )}
       </div>
     </div>

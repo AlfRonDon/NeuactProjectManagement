@@ -1,3 +1,94 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Ensure html/body don't break height chain for full-viewport layouts */
+html, body { height: 100%; margin: 0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Color System v1 — CSS Custom Properties
+   See /COLOR_SYSTEM_v1.md for full spec.
+   ═══════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* Foundation — warm taupe neutrals (brand) */
+    --bg-canvas:      #F6F4F4;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #FBFAFA;
+    --border-subtle:  #E9E5E4;
+    --border-strong:  #D5CFCE;
+    --text-primary:   #3D3837;
+    --text-secondary: #7E7675;
+    --text-tertiary:  #938A89;
+    --text-inverse:   #FFFFFF;
+    --ink-button:     #3D3837;
+
+    /* Status — 5 tiers × 3 slots */
+    --ok-bg:    #DCFCE7;
+    --ok-fg:    #166534;
+    --ok-solid: #22C55E;
+
+    --info-bg:    #DBEAFE;
+    --info-fg:    #1E40AF;
+    --info-solid: #3B82F6;
+
+    --warn-bg:    #FEF3C7;
+    --warn-fg:    #92400E;
+    --warn-solid: #F59E0B;
+
+    --hot-bg:    #FFEDD5;
+    --hot-fg:    #9A3412;
+    --hot-solid: #EA580C;
+
+    --bad-bg:    #FEE2E2;
+    --bad-fg:    #991B1B;
+    --bad-solid: #EF4444;
+
+    /* Chart series */
+    --series-1: #6366F1;
+    --series-2: #14B8A6;
+    --series-3: #EC4899;
+    --series-4: #8B5CF6;
+    --series-5: #F59E0B;
+    --series-planned: #9CA3AF;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&display=swap');
+
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+  font-weight: 400; font-display: swap;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+  font-weight: 500; font-display: swap;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+  font-weight: 600; font-display: swap;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+  font-weight: 700; font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400; font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/GeistMono-Medium.woff2') format('woff2');
+  font-weight: 500; font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/GeistMono-Bold.woff2') format('woff2');
+  font-weight: 700; font-display: swap;
+}

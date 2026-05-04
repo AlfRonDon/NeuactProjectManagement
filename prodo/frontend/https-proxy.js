@@ -23,7 +23,7 @@ https.createServer(httpsOptions, (req, res) => {
     method: req.method,
     headers: {
       ...req.headers,
-      host: `127.0.0.1:${httpPort}`,
+      host: `localhost:${httpPort}`,
     },
   };
 

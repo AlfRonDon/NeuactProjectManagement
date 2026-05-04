@@ -10,16 +10,16 @@ import { boardTasks } from "./fixtures";
 const statuses = ["backlog", "todo", "in_progress", "in_review", "done"] as const;
 const statusMeta: Record<string, { label: string; color: string; bg: string }> = {
   backlog: { label: "Backlog", color: "text-neutral-400", bg: "bg-neutral-500/20" },
-  todo: { label: "To Do", color: "text-blue-400", bg: "bg-blue-500/20" },
-  in_progress: { label: "In Progress", color: "text-amber-400", bg: "bg-amber-500/20" },
-  in_review: { label: "In Review", color: "text-purple-400", bg: "bg-purple-500/20" },
-  done: { label: "Done", color: "text-green-400", bg: "bg-green-500/20" },
+  todo: { label: "To Do", color: "text-info-fg", bg: "bg-info-solid/20" },
+  in_progress: { label: "In Progress", color: "text-warn-fg", bg: "bg-warn-solid/20" },
+  in_review: { label: "In Review", color: "text-info-fg", bg: "bg-info-solid/20" },
+  done: { label: "Done", color: "text-ok-fg", bg: "bg-ok-solid/20" },
 };
 
 const priorityDot: Record<string, string> = {
-  critical: "bg-red-500",
-  high: "bg-amber-500",
-  medium: "bg-blue-400",
+  critical: "bg-bad-solid",
+  high: "bg-warn-solid",
+  medium: "bg-info-solid",
   low: "bg-neutral-400",
 };
 
@@ -40,16 +40,16 @@ export default function KanbanSwimlaneLayout() {
   const laneTaskCount = (lane: string) => boardTasks.filter((t) => (t.assignee || "Unassigned") === lane).length;
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex flex-col text-white">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-800 bg-neutral-950 flex flex-col text-white">
       {/* Header */}
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3 shrink-0">
         <Columns3 className="w-5 h-5 text-teal-400" />
         <h3 className="text-sm font-bold">Kanban Swimlanes</h3>
-        <span className="text-[10px] text-neutral-500">by person</span>
+        <span className="text-xs text-neutral-500">by person</span>
         <div className="flex-1" />
         <div className="flex items-center gap-1.5">
           <Users className="w-3.5 h-3.5 text-neutral-500" />
-          <span className="text-[10px] text-neutral-500">{assignees.length} people &middot; {boardTasks.length} tasks</span>
+          <span className="text-xs text-neutral-500">{assignees.length} people &middot; {boardTasks.length} tasks</span>
         </div>
       </div>
 
@@ -105,7 +105,7 @@ export default function KanbanSwimlaneLayout() {
                                 <div className="flex items-start gap-1.5">
                                   <GripVertical className="w-3 h-3 text-neutral-700 opacity-0 group-hover:opacity-100 mt-0.5 shrink-0 transition-opacity" />
                                   <div className="flex-1 min-w-0">
-                                    <div className="text-[10px] font-medium text-white truncate">{task.title}</div>
+                                    <div className="text-xs font-medium text-white truncate">{task.title}</div>
                                     <div className="flex items-center gap-1.5 mt-1">
                                       <div className={`w-1.5 h-1.5 rounded-full ${priorityDot[task.priority]}`} />
                                       <span className="text-[8px] text-neutral-500">{task.priority}</span>

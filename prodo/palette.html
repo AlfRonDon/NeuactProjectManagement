@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neuract — Color System Reference</title>
+<style>
+  :root {
+    /* Foundation */
+    --bg-canvas:        #F5F6F8;
+    --bg-surface:       #FFFFFF;
+    --bg-subtle:        #F9FAFB;
+    --border-subtle:    #E5E7EB;
+    --border-strong:    #D1D5DB;
+    --text-primary:     #111827;
+    --text-secondary:   #6B7280;
+    --text-tertiary:    #9CA3AF;
+    --text-inverse:     #FFFFFF;
+    --ink-button:       #111827;
+
+    /* Status — 5 tiers */
+    --ok-bg:   #DCFCE7;  --ok-fg:   #166534;  --ok-solid:   #22C55E;
+    --info-bg: #DBEAFE;  --info-fg: #1E40AF;  --info-solid: #3B82F6;
+    --warn-bg: #FEF3C7;  --warn-fg: #92400E;  --warn-solid: #F59E0B;
+    --hot-bg:  #FFEDD5;  --hot-fg:  #9A3412;  --hot-solid:  #EA580C;
+    --bad-bg:  #FEE2E2;  --bad-fg:  #991B1B;  --bad-solid:  #EF4444;
+
+    /* Chart series */
+    --series-1: #6366F1;
+    --series-2: #14B8A6;
+    --series-3: #EC4899;
+    --series-4: #8B5CF6;
+    --series-5: #F59E0B;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 56px 40px 80px; }
+
+  header { margin-bottom: 56px; padding-bottom: 24px; border-bottom: 1px solid var(--border-subtle); }
+  header .eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; }
+  header h1 { font-size: 28px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.02em; }
+  header p { color: var(--text-secondary); margin: 0; max-width: 640px; }
+
+  section { margin-bottom: 56px; }
+  section > h2 {
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-tertiary); font-weight: 600; margin: 0 0 4px;
+  }
+  section > .lede {
+    font-size: 18px; font-weight: 500; margin: 0 0 6px; letter-spacing: -0.01em;
+  }
+  section > .desc {
+    color: var(--text-secondary); margin: 0 0 24px; max-width: 720px; font-size: 13px;
+  }
+
+  /* Token rows */
+  .row {
+    display: grid;
+    grid-template-columns: 64px 1fr 110px 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .row:first-child { border-radius: 8px 8px 0 0; }
+  .row:last-child  { border-radius: 0 0 8px 8px; border-bottom: none; }
+  .row .swatch {
+    width: 56px; height: 36px; border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.05);
+  }
+  .row .swatch.ring { box-shadow: inset 0 0 0 1px var(--border-subtle); }
+  .row .name { font-weight: 500; font-size: 13px; }
+  .row .name .alias { color: var(--text-tertiary); font-weight: 400; margin-left: 8px; font-size: 12px; }
+  .row .hex { font-size: 12px; color: var(--text-secondary); }
+  .row .use { font-size: 12px; color: var(--text-secondary); }
+
+  /* Status grid (3 columns: bg / fg / solid) */
+  .status-grid {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .status-grid table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  .status-grid th {
+    text-align: left; font-weight: 500; color: var(--text-tertiary);
+    padding: 12px 16px; border-bottom: 1px solid var(--border-subtle);
+    font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .status-grid td {
+    padding: 12px 16px; border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+  }
+  .status-grid tr:last-child td { border-bottom: none; }
+  .status-grid .tier-name { font-weight: 500; font-size: 13px; }
+  .status-grid .tier-pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 500;
+  }
+  .status-grid .tier-pill .mono { margin-left: 8px; opacity: 0.65; font-size: 10px; }
+  .status-grid .swatch-cell {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .status-grid .sw-square {
+    width: 28px; height: 20px; border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.04);
+    flex-shrink: 0;
+  }
+  .status-grid .means { color: var(--text-secondary); font-size: 12px; }
+
+  /* Heatmap demo */
+  .heatmap {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .heat-cell {
+    padding: 18px 16px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .heat-cell .label { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 500; opacity: 0.85; }
+  .heat-cell .val { font-size: 22px; font-weight: 600; margin-top: 4px; }
+  .heat-cell .formula { font-size: 10px; opacity: 0.55; margin-top: 8px; font-family: ui-monospace, monospace; }
+
+  /* Chart series demo */
+  .series-row {
+    display: grid;
+    grid-template-columns: 64px 1fr 110px 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .series-row:first-child { border-radius: 8px 8px 0 0; }
+  .series-row:last-child { border-radius: 0 0 8px 8px; border-bottom: none; }
+  .series-line {
+    width: 56px; height: 3px; border-radius: 2px;
+  }
+  .series-line.dashed {
+    height: 0; border-top: 1.5px dashed currentColor; background: none;
+  }
+
+  /* Live UI samples */
+  .samples {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .sample {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .sample .sample-title {
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text-tertiary); margin-bottom: 14px; font-weight: 500;
+  }
+
+  /* Project card sample */
+  .proj-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 10px; }
+  .proj-card:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  .proj-name { font-weight: 500; font-size: 13px; }
+  .proj-pct { color: var(--text-secondary); font-size: 12px; margin-left: 8px; }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 500;
+  }
+
+  /* Avatar samples */
+  .avatars { display: flex; gap: 10px; }
+  .av {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500;
+  }
+
+  /* Mini chart */
+  .mini-chart { width: 100%; height: 100px; margin-top: 6px; }
+
+  /* Task bar samples */
+  .taskbar {
+    height: 24px; border-radius: 4px;
+    color: white; font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; padding: 0 10px;
+    margin-bottom: 6px;
+  }
+
+  /* Rule callout */
+  .rule {
+    background: var(--bg-surface);
+    border-left: 3px solid var(--ink-button);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+  .rule .head {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-tertiary); font-weight: 600; margin-bottom: 6px;
+  }
+  .rule p { margin: 0; font-size: 13px; color: var(--text-primary); }
+
+  /* Footer */
+  footer {
+    margin-top: 64px; padding-top: 24px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-tertiary); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Neuract EMS · Design System</div>
+    <h1>Color System v1</h1>
+    <p>One color, one meaning. Status colors signal severity; chart colors signal data. Never mix the two. All other tokens derive from this base.</p>
+  </header>
+
+  <!-- ============ FOUNDATION ============ -->
+  <section>
+    <h2>01 — Foundation</h2>
+    <div class="lede">Greys, surfaces, text</div>
+    <p class="desc">These do most of the work. Page chrome, body text, borders, dividers. If a UI element doesn't communicate status or data, it uses these tokens.</p>
+
+    <div>
+      <div class="row">
+        <div class="swatch ring" style="background:#F5F6F8"></div>
+        <div class="name">--bg-canvas <span class="alias">page background</span></div>
+        <div class="hex mono">#F5F6F8</div>
+        <div class="use">App background, behind cards</div>
+      </div>
+      <div class="row">
+        <div class="swatch ring" style="background:#FFFFFF"></div>
+        <div class="name">--bg-surface <span class="alias">card</span></div>
+        <div class="hex mono">#FFFFFF</div>
+        <div class="use">Cards, modals, dropdowns</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#F9FAFB"></div>
+        <div class="name">--bg-subtle <span class="alias">nested panel</span></div>
+        <div class="hex mono">#F9FAFB</div>
+        <div class="use">Identity columns, hover rows, secondary surfaces</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#E5E7EB"></div>
+        <div class="name">--border-subtle</div>
+        <div class="hex mono">#E5E7EB</div>
+        <div class="use">Card borders, dividers, axis lines, table rows</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#D1D5DB"></div>
+        <div class="name">--border-strong</div>
+        <div class="hex mono">#D1D5DB</div>
+        <div class="use">Inputs, selected states, focus rings</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#111827"></div>
+        <div class="name">--text-primary</div>
+        <div class="hex mono">#111827</div>
+        <div class="use">Headings, key numbers, primary buttons</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#6B7280"></div>
+        <div class="name">--text-secondary</div>
+        <div class="hex mono">#6B7280</div>
+        <div class="use">Labels, sublines, body text</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#9CA3AF"></div>
+        <div class="name">--text-tertiary</div>
+        <div class="hex mono">#9CA3AF</div>
+        <div class="use">Axis ticks, captions, "stale" or low-priority data</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATUS ============ -->
+  <section>
+    <h2>02 — Status</h2>
+    <div class="lede">Five severity tiers</div>
+    <p class="desc">Used wherever the UI communicates "how is this going?" — project pills, alert badges, blocker callouts, task urgency. Five tiers, not four: <span class="mono">warn</span> (amber) and <span class="mono">hot</span> (orange) are different so "needs attention" doesn't read as urgently as "in trouble."</p>
+
+    <div class="status-grid">
+      <table>
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Means</th>
+            <th>--*-bg</th>
+            <th>--*-fg</th>
+            <th>--*-solid</th>
+            <th>Pill preview</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tier-name">ok</span></td>
+            <td class="means">On track, complete, healthy</td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#DCFCE7"></div><span class="mono">#DCFCE7</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#166534"></div><span class="mono">#166534</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#22C55E"></div><span class="mono">#22C55E</span></div></td>
+            <td><span class="tier-pill" style="background:#DCFCE7;color:#166534">On Track</span></td>
+          </tr>
+          <tr>
+            <td><span class="tier-name">info</span></td>
+            <td class="means">Neutral, in progress, informational</td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#DBEAFE"></div><span class="mono">#DBEAFE</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#1E40AF"></div><span class="mono">#1E40AF</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#3B82F6"></div><span class="mono">#3B82F6</span></div></td>
+            <td><span class="tier-pill" style="background:#DBEAFE;color:#1E40AF">In Progress</span></td>
+          </tr>
+          <tr>
+            <td><span class="tier-name">warn</span></td>
+            <td class="means">Needs attention, at-risk, behind</td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#FEF3C7"></div><span class="mono">#FEF3C7</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#92400E"></div><span class="mono">#92400E</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#F59E0B"></div><span class="mono">#F59E0B</span></div></td>
+            <td><span class="tier-pill" style="background:#FEF3C7;color:#92400E">At Risk</span></td>
+          </tr>
+          <tr>
+            <td><span class="tier-name">hot</span></td>
+            <td class="means">Urgent, full capacity, escalating</td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#FFEDD5"></div><span class="mono">#FFEDD5</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#9A3412"></div><span class="mono">#9A3412</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#EA580C"></div><span class="mono">#EA580C</span></div></td>
+            <td><span class="tier-pill" style="background:#FFEDD5;color:#9A3412">Critical</span></td>
+          </tr>
+          <tr>
+            <td><span class="tier-name">bad</span></td>
+            <td class="means">Blocked, failed, over capacity</td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#FEE2E2"></div><span class="mono">#FEE2E2</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#991B1B"></div><span class="mono">#991B1B</span></div></td>
+            <td><div class="swatch-cell"><div class="sw-square" style="background:#EF4444"></div><span class="mono">#EF4444</span></div></td>
+            <td><span class="tier-pill" style="background:#FEE2E2;color:#991B1B">Blocked</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rule">
+      <div class="head">The Rule</div>
+      <p>Every place in the UI that communicates status uses one of these five tiers. "Behind by 4 days" → warn. "Overloaded" → bad. "Critical priority" → hot. No invented intermediate colors, no project-specific reds.</p>
+    </div>
+  </section>
+
+  <!-- ============ HEATMAP ============ -->
+  <section>
+    <h2>03 — Workload Heatmap</h2>
+    <div class="lede">Derived from status — not invented</div>
+    <p class="desc">The four heatmap tiers in the workload calendar are status colors at a fixed opacity. Don't pick new hex values for these. Same logic applies to any tinted background that signals load (timeline backgrounds, capacity gauges, dashboard tiles).</p>
+
+    <div class="heatmap">
+      <div class="heat-cell" style="background:rgba(34,197,94,0.20);color:#166534">
+        <div class="label">Light</div>
+        <div class="val">28h</div>
+        <div class="formula">--ok-solid @ 0.20</div>
+      </div>
+      <div class="heat-cell" style="background:rgba(245,158,11,0.25);color:#92400E">
+        <div class="label">Busy</div>
+        <div class="val">35h</div>
+        <div class="formula">--warn-solid @ 0.25</div>
+      </div>
+      <div class="heat-cell" style="background:rgba(234,88,12,0.25);color:#9A3412">
+        <div class="label">Full</div>
+        <div class="val">38h</div>
+        <div class="formula">--hot-solid @ 0.25</div>
+      </div>
+      <div class="heat-cell" style="background:rgba(239,68,68,0.20);color:#991B1B">
+        <div class="label">Over</div>
+        <div class="val">48h</div>
+        <div class="formula">--bad-solid @ 0.20</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHART SERIES ============ -->
+  <section>
+    <h2>04 — Chart Series</h2>
+    <div class="lede">Reserved for data, never for status</div>
+    <p class="desc">Use these for line charts, multi-series comparisons, anywhere the eye needs to track distinct quantities. Status colors overlay the chart for events (red dot = blocker, amber band = at-risk window) but the underlying series stay neutral. Planned/forecast/baseline lines are always dashed grey, never colored.</p>
+
+    <div>
+      <div class="series-row">
+        <div class="series-line" style="background:#6366F1"></div>
+        <div class="name">--series-1 <span class="alias">indigo</span></div>
+        <div class="hex mono">#6366F1</div>
+        <div class="use">Primary metric, "Actual"</div>
+      </div>
+      <div class="series-row">
+        <div class="series-line" style="background:#14B8A6"></div>
+        <div class="name">--series-2 <span class="alias">teal</span></div>
+        <div class="hex mono">#14B8A6</div>
+        <div class="use">Comparison series, "Last sprint"</div>
+      </div>
+      <div class="series-row">
+        <div class="series-line" style="background:#EC4899"></div>
+        <div class="name">--series-3 <span class="alias">pink</span></div>
+        <div class="hex mono">#EC4899</div>
+        <div class="use">Tertiary series</div>
+      </div>
+      <div class="series-row">
+        <div class="series-line" style="background:#8B5CF6"></div>
+        <div class="name">--series-4 <span class="alias">violet</span></div>
+        <div class="hex mono">#8B5CF6</div>
+        <div class="use">Quaternary series</div>
+      </div>
+      <div class="series-row">
+        <div class="series-line" style="background:#F59E0B"></div>
+        <div class="name">--series-5 <span class="alias">amber</span></div>
+        <div class="hex mono">#F59E0B</div>
+        <div class="use">Quinary series (note: same hex as warn-solid; only use when status meaning isn't present in the chart)</div>
+      </div>
+      <div class="series-row">
+        <div class="series-line dashed" style="color:#9CA3AF"></div>
+        <div class="name">--series-planned <span class="alias">dashed grey</span></div>
+        <div class="hex mono">#9CA3AF</div>
+        <div class="use">Planned, forecast, baseline, target lines</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TASK CATEGORIES ============ -->
+  <section>
+    <h2>05 — Task Categories</h2>
+    <div class="lede">By team, derived from chart series</div>
+    <p class="desc">Task bars in the workload calendar use chart-series colors keyed to the owning team. Priority is shown separately (a small dot or label), not by changing the bar color.</p>
+
+    <div>
+      <div class="row">
+        <div class="swatch" style="background:#6366F1"></div>
+        <div class="name">platform <span class="alias">indigo</span></div>
+        <div class="hex mono">--series-1</div>
+        <div class="use">Backend, infra, auth, data pipelines</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#14B8A6"></div>
+        <div class="name">frontend <span class="alias">teal</span></div>
+        <div class="hex mono">--series-2</div>
+        <div class="use">Web, mobile, UI work</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#EC4899"></div>
+        <div class="name">design <span class="alias">pink</span></div>
+        <div class="hex mono">--series-3</div>
+        <div class="use">Visual design, UX, research</div>
+      </div>
+      <div class="row">
+        <div class="swatch" style="background:#8B5CF6"></div>
+        <div class="name">data <span class="alias">violet</span></div>
+        <div class="hex mono">--series-4</div>
+        <div class="use">Analytics, ML, reporting</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AVATARS ============ -->
+  <section>
+    <h2>06 — Avatars</h2>
+    <div class="lede">Hashed to chart series, never status</div>
+    <p class="desc">A user's avatar color is deterministic — hash their name into the five chart-series buckets. This keeps avatars visually distinct from status pills, so a person's identity color never gets mistaken for "this person is in trouble."</p>
+
+    <div class="avatars" style="margin-top: 16px;">
+      <div class="av" style="background:#E0E7FF;color:#3730A3">RS</div>
+      <div class="av" style="background:#CCFBF1;color:#115E59">PA</div>
+      <div class="av" style="background:#FCE7F3;color:#9D174D">AK</div>
+      <div class="av" style="background:#EDE9FE;color:#5B21B6">DM</div>
+      <div class="av" style="background:#FEF3C7;color:#92400E">JN</div>
+    </div>
+  </section>
+
+  <!-- ============ LIVE SAMPLES ============ -->
+  <section>
+    <h2>07 — In Context</h2>
+    <div class="lede">How the tokens compose</div>
+    <p class="desc">Real card patterns from the dashboard, rebuilt with the system above. Compare against the live page to spot anything still using off-system colors.</p>
+
+    <div class="samples">
+
+      <!-- Project pills -->
+      <div class="sample">
+        <div class="sample-title">Portfolio cards · status pills</div>
+        <div class="proj-card">
+          <div><span class="proj-name">Command Center v5</span><span class="proj-pct">42%</span></div>
+          <span class="pill" style="background:#DCFCE7;color:#166534">On Track</span>
+        </div>
+        <div class="proj-card">
+          <div><span class="proj-name">NeuactReport v3</span><span class="proj-pct">31%</span></div>
+          <span class="pill" style="background:#FEF3C7;color:#92400E">At Risk</span>
+        </div>
+        <div class="proj-card">
+          <div><span class="proj-name">Spot Particle</span><span class="proj-pct">68%</span></div>
+          <span class="pill" style="background:#FFEDD5;color:#9A3412">Critical</span>
+        </div>
+        <div class="proj-card">
+          <div><span class="proj-name">Phase B — Fill/RAG</span><span class="proj-pct">100%</span></div>
+          <span class="pill" style="background:#FEE2E2;color:#991B1B">Overloaded</span>
+        </div>
+      </div>
+
+      <!-- Burndown -->
+      <div class="sample">
+        <div class="sample-title">Burndown · series + status overlay</div>
+        <svg viewBox="0 0 380 110" class="mini-chart" xmlns="http://www.w3.org/2000/svg">
+          <!-- blocked tint -->
+          <rect x="155" y="10" width="50" height="90" fill="#EF4444" opacity="0.10"/>
+          <!-- planned dashed -->
+          <line x1="20" y1="20" x2="360" y2="95" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <!-- actual (series-1) -->
+          <polyline points="20,22 60,32 100,40 140,46 180,55 220,55 260,55 300,68" fill="none" stroke="#6366F1" stroke-width="2.5"/>
+          <!-- forecast dashed (series-1) -->
+          <polyline points="300,68 360,90" fill="none" stroke="#6366F1" stroke-width="2" stroke-dasharray="6 4"/>
+          <!-- blocker dot -->
+          <circle cx="155" cy="49" r="4" fill="#EF4444" stroke="white" stroke-width="2"/>
+        </svg>
+        <div style="display:flex;gap:14px;font-size:11px;color:#6B7280;margin-top:6px;flex-wrap:wrap">
+          <span>━ <span style="color:#6366F1">series-1</span> Actual</span>
+          <span>┄ <span style="color:#9CA3AF">planned</span></span>
+          <span>● <span style="color:#991B1B">bad-solid</span> Blocker</span>
+        </div>
+      </div>
+
+      <!-- Workload row -->
+      <div class="sample" style="grid-column: 1 / -1;">
+        <div class="sample-title">Workload calendar · heatmap + task bars</div>
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:0;align-items:stretch;">
+          <div style="background:#F9FAFB;border-radius:8px 0 0 8px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+            <div class="av" style="width:28px;height:28px;background:#E0E7FF;color:#3730A3;font-size:11px">RS</div>
+            <div>
+              <div style="font-size:12px;font-weight:500">Rohith</div>
+              <div style="font-size:11px;color:#991B1B;font-weight:500">+19h</div>
+            </div>
+          </div>
+          <div style="position:relative;height:90px;border:1px solid #E5E7EB;border-left:0;border-radius:0 8px 8px 0;overflow:hidden;">
+            <div style="position:absolute;inset:0;display:grid;grid-template-columns:45fr 48fr 42fr 44fr;">
+              <div style="background:rgba(239,68,68,0.20);border-right:1px dashed rgba(0,0,0,0.05);position:relative;"><div style="position:absolute;bottom:4px;right:8px;font-size:10px;color:#991B1B;font-weight:500">W1·45h</div></div>
+              <div style="background:rgba(239,68,68,0.20);border-right:1px dashed rgba(0,0,0,0.05);position:relative;"><div style="position:absolute;bottom:4px;right:8px;font-size:10px;color:#991B1B;font-weight:500">W2·48h↑</div></div>
+              <div style="background:rgba(239,68,68,0.20);border-right:1px dashed rgba(0,0,0,0.05);position:relative;"><div style="position:absolute;bottom:4px;right:8px;font-size:10px;color:#991B1B;font-weight:500">W3·42h</div></div>
+              <div style="background:rgba(239,68,68,0.20);position:relative;"><div style="position:absolute;bottom:4px;right:8px;font-size:10px;color:#991B1B;font-weight:500">W4·44h</div></div>
+            </div>
+            <div style="position:absolute;left:4px;right:4px;top:6px;">
+              <div class="taskbar" style="background:#6366F1">Phase B — Fill/RAG · platform</div>
+              <div class="taskbar" style="background:#14B8A6;width:24%">Fix bento bug · frontend</div>
+              <div class="taskbar" style="background:#6366F1;margin-left:24%;width:50%">Pipeline review · platform</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CHEATSHEET ============ -->
+  <section>
+    <h2>08 — Cheatsheet</h2>
+    <div class="lede">Decision tree</div>
+    <p class="desc">When you reach for a color, walk this list top-down.</p>
+
+    <div style="background:var(--bg-surface);border-radius:8px;padding:20px 24px;font-size:13px;line-height:1.9;">
+      <div><span class="mono" style="color:#9CA3AF">01</span> &nbsp; Is it text, a border, or a surface? → <strong>foundation</strong></div>
+      <div><span class="mono" style="color:#9CA3AF">02</span> &nbsp; Does it communicate "how is this going?" → <strong>status</strong> (ok/info/warn/hot/bad)</div>
+      <div><span class="mono" style="color:#9CA3AF">03</span> &nbsp; Is it a tinted background showing a load level? → <strong>status @ 0.20–0.25 opacity</strong></div>
+      <div><span class="mono" style="color:#9CA3AF">04</span> &nbsp; Is it a line, bar, or area in a chart? → <strong>chart series</strong></div>
+      <div><span class="mono" style="color:#9CA3AF">05</span> &nbsp; Is it a task bar identifying a team? → <strong>chart series, keyed to team</strong></div>
+      <div><span class="mono" style="color:#9CA3AF">06</span> &nbsp; Is it an avatar? → <strong>chart series @ -bg / -fg pair, hashed from name</strong></div>
+      <div><span class="mono" style="color:#9CA3AF">07</span> &nbsp; None of the above? → <strong>you're inventing a color. Stop.</strong></div>
+    </div>
+  </section>
+
+  <footer>
+    Neuract EMS Color System v1 · Generated reference · 25 tokens, 5 status tiers, 6 chart series
+  </footer>
+
+</div>
+</body>
+</html>

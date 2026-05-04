@@ -10,9 +10,9 @@ import {
 /* ── SHARED DATA ─────────────────────────────────────── */
 
 const PROJECTS = [
-  { name: "Command Center v5", short: "CCv5", color: "#3b82f6", progress: 20, done: 2, total: 10, active: 3, blocked: 1, target: "2026-07-31", health: "at-risk" },
-  { name: "NeuactReport v3", short: "NRv3", color: "#8b5cf6", progress: 33, done: 2, total: 6, active: 2, blocked: 0, target: "2026-06-01", health: "on-track" },
-  { name: "Spot Particle", short: "Spot", color: "#f59e0b", progress: 50, done: 3, total: 6, active: 1, blocked: 1, target: "2026-04-30", health: "behind" },
+  { name: "Command Center v5", short: "CCv5", color: "#6366F1", progress: 20, done: 2, total: 10, active: 3, blocked: 1, target: "2026-07-31", health: "at-risk" },
+  { name: "NeuactReport v3", short: "NRv3", color: "#8B5CF6", progress: 33, done: 2, total: 6, active: 2, blocked: 0, target: "2026-06-01", health: "on-track" },
+  { name: "Spot Particle", short: "Spot", color: "#EC4899", progress: 50, done: 3, total: 6, active: 1, blocked: 1, target: "2026-04-30", health: "behind" },
 ];
 
 const TEAM = [
@@ -52,9 +52,9 @@ const totalTasks = PROJECTS.reduce((s, p) => s + p.total, 0);
 const totalBlocked = PROJECTS.reduce((s, p) => s + p.blocked, 0);
 const overallProgress = Math.round((totalDone / totalTasks) * 100);
 
-const healthColor = (h: string) => h === "on-track" ? "text-green-600" : h === "at-risk" ? "text-amber-600" : "text-red-600";
-const healthBg = (h: string) => h === "on-track" ? "bg-green-50 border-green-200" : h === "at-risk" ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200";
-const healthDot = (h: string) => h === "on-track" ? "bg-green-500" : h === "at-risk" ? "bg-amber-400" : "bg-red-500";
+const healthColor = (h: string) => h === "on-track" ? "text-ok-fg" : h === "at-risk" ? "text-warn-fg" : "text-bad-fg";
+const healthBg = (h: string) => h === "on-track" ? "bg-ok-bg border-ok-fg/20" : h === "at-risk" ? "bg-warn-bg border-warn-fg/20" : "bg-bad-bg border-bad-fg/20";
+const healthDot = (h: string) => h === "on-track" ? "bg-ok-fg" : h === "at-risk" ? "bg-warn-fg" : "bg-bad-fg";
 
 
 /* ═══════════════════════════════════════════════════════════
@@ -64,10 +64,10 @@ const healthDot = (h: string) => h === "on-track" ? "bg-green-500" : h === "at-r
    ═══════════════════════════════════════════════════════════ */
 export function AdminOverviewVariantA() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-2 shrink-0">
         <BarChart3 className="w-5 h-5 text-blue-500" />
-        <h3 className="text-sm font-bold text-neutral-900">Executive Summary</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Executive Summary</h3>
       </div>
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {/* Big KPIs */}
@@ -77,33 +77,33 @@ export function AdminOverviewVariantA() {
             <div className="text-3xl font-black mt-1">{overallProgress}%</div>
             <div className="w-full h-1.5 bg-white/20 rounded-full mt-2"><div className="h-full bg-white rounded-full" style={{ width: `${overallProgress}%` }} /></div>
           </div>
-          <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
-            <div className="text-xs text-green-600 uppercase font-semibold">Completed</div>
-            <div className="text-3xl font-black text-green-700 mt-1">{totalDone}</div>
-            <div className="flex items-center gap-1 mt-1"><ArrowUp className="w-3 h-3 text-green-500" /><span className="text-xs text-green-600">+3 this week</span></div>
+          <div className="bg-ok-bg rounded-2xl p-4 border border-ok-fg/20">
+            <div className="text-xs text-ok-fg uppercase font-semibold">Completed</div>
+            <div className="text-3xl font-black text-ok-fg mt-1">{totalDone}</div>
+            <div className="flex items-center gap-1 mt-1"><ArrowUp className="w-3 h-3 text-ok-fg" /><span className="text-xs text-ok-fg">+3 this week</span></div>
           </div>
-          <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-            <div className="text-xs text-amber-600 uppercase font-semibold">In Flight</div>
-            <div className="text-3xl font-black text-amber-700 mt-1">{PROJECTS.reduce((s, p) => s + p.active, 0)}</div>
-            <div className="text-xs text-amber-500 mt-1">across {PROJECTS.length} projects</div>
+          <div className="bg-warn-bg rounded-2xl p-4 border border-warn-fg/20">
+            <div className="text-xs text-warn-fg uppercase font-semibold">In Flight</div>
+            <div className="text-3xl font-black text-warn-fg mt-1">{PROJECTS.reduce((s, p) => s + p.active, 0)}</div>
+            <div className="text-xs text-warn-fg mt-1">across {PROJECTS.length} projects</div>
           </div>
-          <div className={`rounded-2xl p-4 border ${totalBlocked > 0 ? "bg-red-50 border-red-200" : "bg-neutral-50 border-neutral-200"}`}>
-            <div className={`text-xs uppercase font-semibold ${totalBlocked > 0 ? "text-red-600" : "text-neutral-400"}`}>Blocked</div>
-            <div className={`text-3xl font-black mt-1 ${totalBlocked > 0 ? "text-red-700" : "text-neutral-300"}`}>{totalBlocked}</div>
-            {totalBlocked > 0 && <div className="text-xs text-red-500 mt-1">needs attention</div>}
+          <div className={`rounded-2xl p-4 border ${totalBlocked > 0 ? "bg-bad-bg border-bad-fg/20" : "bg-neutral-50 border-neutral-200"}`}>
+            <div className={`text-xs uppercase font-semibold ${totalBlocked > 0 ? "text-bad-fg" : "text-neutral-400"}`}>Blocked</div>
+            <div className={`text-3xl font-black mt-1 ${totalBlocked > 0 ? "text-bad-fg" : "text-neutral-300"}`}>{totalBlocked}</div>
+            {totalBlocked > 0 && <div className="text-xs text-bad-fg mt-1">needs attention</div>}
           </div>
         </div>
 
         {/* Project health cards */}
         <div className="grid grid-cols-3 gap-3">
           {PROJECTS.map(p => (
-            <div key={p.short} className={`rounded-xl border p-4 ${healthBg(p.health)}`}>
+            <div key={p.short} className={`rounded-lg border p-4 ${healthBg(p.health)}`}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
-                <span className="text-sm font-bold text-neutral-900">{p.name}</span>
+                <span className="text-sm font-serif font-bold text-neutral-950">{p.name}</span>
               </div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl font-black text-neutral-800">{p.progress}%</span>
+                <span className="text-2xl font-mono font-black text-neutral-800">{p.progress}%</span>
                 <span className={`text-xs font-bold uppercase ${healthColor(p.health)}`}>{p.health.replace("-", " ")}</span>
               </div>
               <div className="w-full h-1.5 bg-white/60 rounded-full"><div className="h-full rounded-full" style={{ width: `${p.progress}%`, backgroundColor: p.color }} /></div>
@@ -118,11 +118,11 @@ export function AdminOverviewVariantA() {
         {/* Velocity + Team side by side */}
         <div className="grid grid-cols-2 gap-4">
           {/* Velocity */}
-          <div className="rounded-xl border border-neutral-200 p-4">
+          <div className="rounded-lg border border-neutral-200 p-4">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-bold text-neutral-900">Velocity</span>
-              <span className="text-xs text-green-500 font-medium ml-auto">↑ 18%</span>
+              <span className="text-sm font-serif font-bold text-neutral-950">Velocity</span>
+              <span className="text-xs text-ok-fg font-medium ml-auto">↑ 18%</span>
             </div>
             <div className="flex items-end gap-1.5 h-20">
               {VELOCITY.map((v, i) => (
@@ -136,10 +136,10 @@ export function AdminOverviewVariantA() {
           </div>
 
           {/* Team utilization */}
-          <div className="rounded-xl border border-neutral-200 p-4">
+          <div className="rounded-lg border border-neutral-200 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Users className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-bold text-neutral-900">Team Load</span>
+              <span className="text-sm font-serif font-bold text-neutral-950">Team Load</span>
             </div>
             <div className="space-y-3">
               {TEAM.map(t => {
@@ -152,10 +152,10 @@ export function AdminOverviewVariantA() {
                         <div className="w-6 h-6 rounded-full bg-neutral-900 flex items-center justify-center text-xs font-bold text-white">{t.avatar}</div>
                         <span className="text-xs font-medium text-neutral-800">{t.name}</span>
                       </div>
-                      <span className={`text-xs font-semibold ${overloaded ? "text-red-500" : "text-neutral-500"}`}>{pct}%</span>
+                      <span className={`text-xs font-semibold ${overloaded ? "text-bad-fg" : "text-neutral-500"}`}>{pct}%</span>
                     </div>
                     <div className="w-full h-2 bg-neutral-100 rounded-full">
-                      <div className={`h-full rounded-full ${overloaded ? "bg-red-400" : pct > 70 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                      <div className={`h-full rounded-full ${overloaded ? "bg-bad-fg" : pct > 70 ? "bg-warn-fg" : "bg-ok-fg"}`} style={{ width: `${Math.min(100, pct)}%` }} />
                     </div>
                   </div>
                 );
@@ -165,10 +165,10 @@ export function AdminOverviewVariantA() {
         </div>
 
         {/* Milestones countdown */}
-        <div className="rounded-xl border border-neutral-200 p-4">
+        <div className="rounded-lg border border-neutral-200 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Flag className="w-4 h-4 text-amber-500" />
-            <span className="text-sm font-bold text-neutral-900">Upcoming Milestones</span>
+            <Flag className="w-4 h-4 text-warn-solid" />
+            <span className="text-sm font-serif font-bold text-neutral-950">Upcoming Milestones</span>
           </div>
           <div className="flex gap-3">
             {MILESTONES.map(m => (
@@ -193,13 +193,13 @@ export function AdminOverviewVariantA() {
    ═══════════════════════════════════════════════════════════ */
 export function AdminOverviewVariantB() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900 flex flex-col text-white">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 flex flex-col text-white">
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2 shrink-0">
-        <Shield className="w-5 h-5 text-emerald-400" />
+        <Shield className="w-5 h-5 text-ok-solid" />
         <h3 className="text-sm font-bold">Health Monitor</h3>
         <div className="flex-1" />
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-ok-solid animate-pulse" />
           <span className="text-xs text-neutral-400">Live</span>
         </div>
       </div>
@@ -207,7 +207,7 @@ export function AdminOverviewVariantB() {
         {/* Project health row */}
         <div className="grid grid-cols-3 gap-3">
           {PROJECTS.map(p => (
-            <div key={p.short} className="bg-white/5 rounded-xl border border-white/10 p-4">
+            <div key={p.short} className="bg-white/5 rounded-lg border border-white/10 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className={`w-3 h-3 rounded-full ${healthDot(p.health)}`} />
                 <span className="text-sm font-bold">{p.short}</span>
@@ -225,7 +225,7 @@ export function AdminOverviewVariantB() {
                 <div className="text-xs space-y-1 text-neutral-400">
                   <div><span className="text-white font-semibold">{p.done}</span> done</div>
                   <div><span className="text-white font-semibold">{p.active}</span> active</div>
-                  <div className={p.blocked > 0 ? "text-red-400" : ""}><span className="font-semibold">{p.blocked}</span> blocked</div>
+                  <div className={p.blocked > 0 ? "text-bad-fg" : ""}><span className="font-semibold">{p.blocked}</span> blocked</div>
                 </div>
               </div>
             </div>
@@ -233,20 +233,20 @@ export function AdminOverviewVariantB() {
         </div>
 
         {/* Risk bars */}
-        <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+        <div className="bg-white/5 rounded-lg border border-white/10 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <AlertTriangle className="w-4 h-4 text-warn-solid" />
             <span className="text-sm font-bold">Risk Assessment</span>
-            <span className="text-xs text-red-400 font-bold ml-auto">HIGH</span>
+            <span className="text-xs text-bad-fg font-bold ml-auto">HIGH</span>
           </div>
           <div className="space-y-2">
             {RISKS.map(r => (
               <div key={r.label} className="flex items-center gap-3">
                 <span className="text-xs text-neutral-400 w-20 shrink-0">{r.label}</span>
                 <div className="flex-1 h-2 bg-white/10 rounded-full">
-                  <div className={`h-full rounded-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} />
+                  <div className={`h-full rounded-full ${r.score > 70 ? "bg-bad-fg" : r.score > 50 ? "bg-warn-fg" : "bg-ok-fg"}`} style={{ width: `${r.score}%` }} />
                 </div>
-                <span className={`text-xs font-bold w-8 text-right ${r.score > 70 ? "text-red-400" : r.score > 50 ? "text-amber-400" : "text-green-400"}`}>{r.score}</span>
+                <span className={`text-xs font-bold w-8 text-right ${r.score > 70 ? "text-bad-fg" : r.score > 50 ? "text-warn-fg" : "text-ok-fg"}`}>{r.score}</span>
               </div>
             ))}
           </div>
@@ -254,11 +254,11 @@ export function AdminOverviewVariantB() {
 
         {/* Blockers + Velocity side by side */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-red-500/10 rounded-xl border border-red-500/20 p-4">
+          <div className="bg-bad-bg/10 rounded-lg border border-bad-fg/20 p-4">
             <div className="flex items-center gap-2 mb-3">
-              <OctagonAlert className="w-4 h-4 text-red-400" />
+              <OctagonAlert className="w-4 h-4 text-bad-fg" />
               <span className="text-sm font-bold">Blockers</span>
-              <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold ml-auto">{BLOCKERS.length}</span>
+              <span className="text-xs bg-bad-fg text-white px-2 py-0.5 rounded-full font-bold ml-auto">{BLOCKERS.length}</span>
             </div>
             <div className="space-y-2">
               {BLOCKERS.map((b, i) => (
@@ -269,16 +269,16 @@ export function AdminOverviewVariantB() {
               ))}
             </div>
           </div>
-          <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+          <div className="bg-white/5 rounded-lg border border-white/10 p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-4 h-4 text-yellow-400" />
+              <Zap className="w-4 h-4 text-warn-solid" />
               <span className="text-sm font-bold">Sprint Velocity</span>
             </div>
             <div className="flex items-end gap-2 h-24">
               {VELOCITY.map((v, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
                   <span className="text-xs text-neutral-500">{v.done}</span>
-                  <div className={`w-full rounded-t ${i === VELOCITY.length - 1 ? "bg-emerald-500" : "bg-white/20"}`} style={{ height: `${(v.done / 6) * 100}%` }} />
+                  <div className={`w-full rounded-t ${i === VELOCITY.length - 1 ? "bg-ok-solid" : "bg-white/20"}`} style={{ height: `${(v.done / 6) * 100}%` }} />
                   <span className="text-xs text-neutral-500">{v.week}</span>
                 </div>
               ))}
@@ -287,7 +287,7 @@ export function AdminOverviewVariantB() {
         </div>
 
         {/* Milestone proximity */}
-        <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+        <div className="bg-white/5 rounded-lg border border-white/10 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-4 h-4 text-blue-400" />
             <span className="text-sm font-bold">Deadline Proximity</span>
@@ -295,7 +295,7 @@ export function AdminOverviewVariantB() {
           <div className="flex gap-3">
             {MILESTONES.map(m => (
               <div key={m.name} className="flex-1 text-center">
-                <div className={`text-2xl font-black ${m.daysLeft < 10 ? "text-red-400" : m.daysLeft < 20 ? "text-amber-400" : "text-green-400"}`}>{m.daysLeft}d</div>
+                <div className={`text-2xl font-black ${m.daysLeft < 10 ? "text-bad-fg" : m.daysLeft < 20 ? "text-warn-fg" : "text-ok-fg"}`}>{m.daysLeft}d</div>
                 <div className="text-xs text-neutral-400 mt-1">{m.name}</div>
                 <div className="text-xs text-neutral-500">{m.project}</div>
               </div>
@@ -315,30 +315,30 @@ export function AdminOverviewVariantB() {
    ═══════════════════════════════════════════════════════════ */
 export function AdminOverviewVariantC() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 flex flex-col">
       <div className="px-5 py-3 border-b bg-white flex items-center gap-2 shrink-0">
         <Users className="w-5 h-5 text-purple-500" />
-        <h3 className="text-sm font-bold text-neutral-900">Team & Workload</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Team & Workload</h3>
         <div className="flex-1" />
         <span className="text-xs text-neutral-400">{TEAM.length} members · {PROJECTS.length} projects</span>
       </div>
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
         {/* Overall pulse */}
         <div className="flex gap-3">
-          <div className="flex-1 bg-white rounded-xl border border-neutral-200 p-4 text-center">
-            <div className="text-3xl font-black text-neutral-900">{overallProgress}%</div>
+          <div className="flex-1 bg-white rounded-lg border border-neutral-200 p-4 text-center">
+            <div className="text-3xl font-mono font-black text-neutral-950">{overallProgress}%</div>
             <div className="text-xs text-neutral-500 mt-1">Overall Progress</div>
           </div>
-          <div className="flex-1 bg-white rounded-xl border border-neutral-200 p-4 text-center">
-            <div className="text-3xl font-black text-green-600">{totalDone}/{totalTasks}</div>
+          <div className="flex-1 bg-white rounded-lg border border-neutral-200 p-4 text-center">
+            <div className="text-3xl font-black text-ok-fg">{totalDone}/{totalTasks}</div>
             <div className="text-xs text-neutral-500 mt-1">Tasks Done</div>
           </div>
-          <div className="flex-1 bg-white rounded-xl border border-neutral-200 p-4 text-center">
-            <div className={`text-3xl font-black ${totalBlocked > 0 ? "text-red-600" : "text-neutral-300"}`}>{totalBlocked}</div>
+          <div className="flex-1 bg-white rounded-lg border border-neutral-200 p-4 text-center">
+            <div className={`text-3xl font-black ${totalBlocked > 0 ? "text-bad-fg" : "text-neutral-300"}`}>{totalBlocked}</div>
             <div className="text-xs text-neutral-500 mt-1">Blocked</div>
           </div>
-          <div className="flex-1 bg-white rounded-xl border border-neutral-200 p-4 text-center">
-            <div className="text-3xl font-black text-blue-600">{(VELOCITY.reduce((s, v) => s + v.done, 0) / VELOCITY.length).toFixed(1)}</div>
+          <div className="flex-1 bg-white rounded-lg border border-neutral-200 p-4 text-center">
+            <div className="text-3xl font-black text-info-fg">{(VELOCITY.reduce((s, v) => s + v.done, 0) / VELOCITY.length).toFixed(1)}</div>
             <div className="text-xs text-neutral-500 mt-1">Avg Velocity</div>
           </div>
         </div>
@@ -348,13 +348,13 @@ export function AdminOverviewVariantC() {
           {TEAM.map(t => {
             const pct = Math.round((t.hoursLogged / t.capacity) * 100);
             const status = pct > 90 ? "Overloaded" : pct > 70 ? "Full" : "Available";
-            const statusColor = pct > 90 ? "text-red-600 bg-red-50 border-red-200" : pct > 70 ? "text-amber-600 bg-amber-50 border-amber-200" : "text-green-600 bg-green-50 border-green-200";
+            const statusColor = pct > 90 ? "text-bad-fg bg-bad-bg border-bad-fg/20" : pct > 70 ? "text-warn-fg bg-warn-bg border-warn-fg/20" : "text-ok-fg bg-ok-bg border-ok-fg/20";
             return (
-              <div key={t.name} className="bg-white rounded-xl border border-neutral-200 p-4 space-y-3">
+              <div key={t.name} className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center text-sm font-bold text-white">{t.avatar}</div>
                   <div>
-                    <div className="text-sm font-bold text-neutral-900">{t.name}</div>
+                    <div className="text-sm font-serif font-bold text-neutral-950">{t.name}</div>
                     <div className="text-xs text-neutral-400">{t.role}</div>
                   </div>
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ml-auto border ${statusColor}`}>{status}</span>
@@ -366,18 +366,18 @@ export function AdminOverviewVariantC() {
                     <span className="font-semibold text-neutral-700">{t.hoursLogged}/{t.capacity}h</span>
                   </div>
                   <div className="w-full h-3 bg-neutral-100 rounded-full">
-                    <div className={`h-full rounded-full ${pct > 90 ? "bg-red-400" : pct > 70 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                    <div className={`h-full rounded-full ${pct > 90 ? "bg-bad-fg" : pct > 70 ? "bg-warn-fg" : "bg-ok-fg"}`} style={{ width: `${Math.min(100, pct)}%` }} />
                   </div>
                 </div>
                 {/* Task breakdown */}
                 <div className="flex gap-2">
-                  <div className="flex-1 bg-green-50 rounded-lg p-2 text-center">
-                    <div className="text-lg font-black text-green-600">{t.done}</div>
-                    <div className="text-xs text-green-500">Done</div>
+                  <div className="flex-1 bg-ok-bg rounded-lg p-2 text-center">
+                    <div className="text-lg font-black text-ok-fg">{t.done}</div>
+                    <div className="text-xs text-ok-fg">Done</div>
                   </div>
-                  <div className="flex-1 bg-amber-50 rounded-lg p-2 text-center">
-                    <div className="text-lg font-black text-amber-600">{t.active}</div>
-                    <div className="text-xs text-amber-500">Active</div>
+                  <div className="flex-1 bg-warn-bg rounded-lg p-2 text-center">
+                    <div className="text-lg font-black text-warn-fg">{t.active}</div>
+                    <div className="text-xs text-warn-fg">Active</div>
                   </div>
                 </div>
               </div>
@@ -386,8 +386,8 @@ export function AdminOverviewVariantC() {
         </div>
 
         {/* Project breakdown per person */}
-        <div className="bg-white rounded-xl border border-neutral-200 p-4">
-          <div className="text-sm font-bold text-neutral-900 mb-3">Project Contribution</div>
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <div className="text-sm font-bold text-neutral-950 mb-3">Project Contribution</div>
           <div className="space-y-2">
             {TEAM.map(t => (
               <div key={t.name} className="flex items-center gap-3">
@@ -417,61 +417,61 @@ export function AdminOverviewVariantC() {
    ═══════════════════════════════════════════════════════════ */
 export function AdminOverviewVariantD() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 flex flex-col">
       <div className="px-5 py-3 border-b bg-white flex items-center gap-2 shrink-0">
-        <Flame className="w-5 h-5 text-red-500" />
-        <h3 className="text-sm font-bold text-neutral-900">Triage — Action Required</h3>
+        <Flame className="w-5 h-5 text-bad-solid" />
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Triage — Action Required</h3>
         <div className="flex-1" />
-        <span className="text-xs bg-red-500 text-white px-2.5 py-0.5 rounded-full font-bold">{BLOCKERS.length + 2} items need attention</span>
+        <span className="text-xs bg-bad-fg text-white px-2.5 py-0.5 rounded-full font-bold">{BLOCKERS.length + 2} items need attention</span>
       </div>
       <div className="flex-1 overflow-y-auto p-5 space-y-4">
         {/* Priority summary */}
         <div className="grid grid-cols-4 gap-3">
-          <div className="bg-red-50 rounded-xl border border-red-200 p-3 text-center">
-            <OctagonAlert className="w-5 h-5 text-red-500 mx-auto" />
-            <div className="text-2xl font-black text-red-700 mt-1">{BLOCKERS.length}</div>
-            <div className="text-xs font-semibold text-red-600">Blocked</div>
+          <div className="bg-bad-bg rounded-lg border border-bad-fg/20 p-3 text-center">
+            <OctagonAlert className="w-5 h-5 text-bad-fg mx-auto" />
+            <div className="text-2xl font-black text-bad-fg mt-1">{BLOCKERS.length}</div>
+            <div className="text-xs font-semibold text-bad-fg">Blocked</div>
           </div>
-          <div className="bg-amber-50 rounded-xl border border-amber-200 p-3 text-center">
-            <Clock className="w-5 h-5 text-amber-500 mx-auto" />
-            <div className="text-2xl font-black text-amber-700 mt-1">2</div>
-            <div className="text-xs font-semibold text-amber-600">Overdue</div>
+          <div className="bg-warn-bg rounded-lg border border-warn-fg/20 p-3 text-center">
+            <Clock className="w-5 h-5 text-warn-fg mx-auto" />
+            <div className="text-2xl font-black text-warn-fg mt-1">2</div>
+            <div className="text-xs font-semibold text-warn-fg">Overdue</div>
           </div>
-          <div className="bg-blue-50 rounded-xl border border-blue-200 p-3 text-center">
-            <Users className="w-5 h-5 text-blue-500 mx-auto" />
-            <div className="text-2xl font-black text-blue-700 mt-1">3</div>
-            <div className="text-xs font-semibold text-blue-600">Unassigned</div>
+          <div className="bg-info-bg rounded-lg border border-info-fg/20 p-3 text-center">
+            <Users className="w-5 h-5 text-info-fg mx-auto" />
+            <div className="text-2xl font-black text-info-fg mt-1">3</div>
+            <div className="text-xs font-semibold text-info-fg">Unassigned</div>
           </div>
-          <div className="bg-purple-50 rounded-xl border border-purple-200 p-3 text-center">
-            <AlertTriangle className="w-5 h-5 text-purple-500 mx-auto" />
-            <div className="text-2xl font-black text-purple-700 mt-1">1</div>
-            <div className="text-xs font-semibold text-purple-600">At Risk</div>
+          <div className="bg-info-bg rounded-lg border border-info-fg/20 p-3 text-center">
+            <AlertTriangle className="w-5 h-5 text-info-fg mx-auto" />
+            <div className="text-2xl font-black text-info-fg mt-1">1</div>
+            <div className="text-xs font-semibold text-info-fg">At Risk</div>
           </div>
         </div>
 
         {/* Blocker cards */}
-        <div className="bg-red-50 rounded-2xl border border-red-200 p-4">
-          <div className="text-sm font-bold text-red-700 flex items-center gap-2 mb-3"><OctagonAlert className="w-4 h-4" /> Resolve Now</div>
+        <div className="bg-bad-bg rounded-2xl border border-bad-fg/20 p-4">
+          <div className="text-sm font-bold text-bad-fg flex items-center gap-2 mb-3"><OctagonAlert className="w-4 h-4" /> Resolve Now</div>
           <div className="space-y-2">
             {BLOCKERS.map((b, i) => (
-              <div key={i} className="bg-white rounded-xl p-3 border border-red-100 flex items-center gap-3">
-                <div className="w-2 h-8 rounded-full bg-red-500 shrink-0" />
+              <div key={i} className="bg-white rounded-lg p-3 border border-bad-fg/10 flex items-center gap-3">
+                <div className="w-2 h-8 rounded-full bg-bad-fg shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-neutral-800">{b.task}</div>
                   <div className="text-xs text-neutral-500 mt-0.5">{b.project} · blocked {b.days}d</div>
                 </div>
-                <span className="text-xs font-semibold text-red-500 shrink-0">{b.assignee || "Needs owner"}</span>
+                <span className="text-xs font-semibold text-bad-fg shrink-0">{b.assignee || "Needs owner"}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* At-risk projects */}
-        <div className="bg-amber-50 rounded-2xl border border-amber-200 p-4">
-          <div className="text-sm font-bold text-amber-700 flex items-center gap-2 mb-3"><AlertTriangle className="w-4 h-4" /> Project Health Alerts</div>
+        <div className="bg-warn-bg rounded-2xl border border-warn-fg/20 p-4">
+          <div className="text-sm font-bold text-warn-fg flex items-center gap-2 mb-3"><AlertTriangle className="w-4 h-4" /> Project Health Alerts</div>
           <div className="space-y-2">
             {PROJECTS.filter(p => p.health !== "on-track").map(p => (
-              <div key={p.short} className="bg-white rounded-xl p-3 border border-amber-100 flex items-center gap-3">
+              <div key={p.short} className="bg-white rounded-lg p-3 border border-warn-fg/10 flex items-center gap-3">
                 <div className="w-2 h-8 rounded-full" style={{ backgroundColor: p.color }} />
                 <div className="flex-1">
                   <div className="text-sm font-medium text-neutral-800">{p.name}</div>
@@ -484,12 +484,12 @@ export function AdminOverviewVariantD() {
         </div>
 
         {/* Milestone warnings */}
-        <div className="bg-blue-50 rounded-2xl border border-blue-200 p-4">
-          <div className="text-sm font-bold text-blue-700 flex items-center gap-2 mb-3"><Flag className="w-4 h-4" /> Upcoming Deadlines</div>
+        <div className="bg-info-bg rounded-2xl border border-info-fg/20 p-4">
+          <div className="text-sm font-bold text-info-fg flex items-center gap-2 mb-3"><Flag className="w-4 h-4" /> Upcoming Deadlines</div>
           <div className="flex gap-3">
             {MILESTONES.map(m => (
-              <div key={m.name} className={`flex-1 bg-white rounded-xl p-3 border ${m.daysLeft < 10 ? "border-red-200" : "border-neutral-100"}`}>
-                <div className={`text-xl font-black ${m.daysLeft < 10 ? "text-red-600" : "text-neutral-800"}`}>{m.daysLeft}d</div>
+              <div key={m.name} className={`flex-1 bg-white rounded-lg p-3 border ${m.daysLeft < 10 ? "border-bad-fg/20" : "border-neutral-100"}`}>
+                <div className={`text-xl font-black ${m.daysLeft < 10 ? "text-bad-fg" : "text-neutral-800"}`}>{m.daysLeft}d</div>
                 <div className="text-xs font-medium text-neutral-700 mt-1">{m.name}</div>
                 <div className="text-xs text-neutral-400">{m.project}</div>
               </div>
@@ -509,10 +509,10 @@ export function AdminOverviewVariantD() {
    ═══════════════════════════════════════════════════════════ */
 export function AdminOverviewVariantE() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-2 shrink-0">
         <Layers className="w-5 h-5 text-indigo-500" />
-        <h3 className="text-sm font-bold text-neutral-900">Compact Dashboard</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Compact Dashboard</h3>
       </div>
       <div className="flex-1 overflow-y-auto">
         {/* Top strip: overall + blockers + velocity inline */}
@@ -520,19 +520,19 @@ export function AdminOverviewVariantE() {
           <div>
             <div className="text-xs text-neutral-400 uppercase font-semibold">Progress</div>
             <div className="flex items-center gap-2 mt-1">
-              <div className="text-2xl font-black text-neutral-900">{overallProgress}%</div>
+              <div className="text-2xl font-mono font-black text-neutral-950">{overallProgress}%</div>
               <div className="w-32 h-2 bg-neutral-100 rounded-full"><div className="h-full bg-blue-500 rounded-full" style={{ width: `${overallProgress}%` }} /></div>
             </div>
           </div>
           <div className="h-10 w-px bg-neutral-200" />
           <div>
             <div className="text-xs text-neutral-400 uppercase font-semibold">Tasks</div>
-            <div className="text-2xl font-black text-neutral-900 mt-1">{totalDone}<span className="text-neutral-300">/{totalTasks}</span></div>
+            <div className="text-2xl font-mono font-black text-neutral-950 mt-1">{totalDone}<span className="text-neutral-300">/{totalTasks}</span></div>
           </div>
           <div className="h-10 w-px bg-neutral-200" />
           <div>
             <div className="text-xs text-neutral-400 uppercase font-semibold">Blocked</div>
-            <div className={`text-2xl font-black mt-1 ${totalBlocked > 0 ? "text-red-600" : "text-neutral-300"}`}>{totalBlocked}</div>
+            <div className={`text-2xl font-black mt-1 ${totalBlocked > 0 ? "text-bad-fg" : "text-neutral-300"}`}>{totalBlocked}</div>
           </div>
           <div className="h-10 w-px bg-neutral-200" />
           <div>
@@ -579,7 +579,7 @@ export function AdminOverviewVariantE() {
                 <div key={r.label} className="flex items-center gap-2">
                   <span className="text-xs text-neutral-500 w-16 shrink-0">{r.label}</span>
                   <div className="flex-1 h-1.5 bg-neutral-100 rounded-full">
-                    <div className={`h-full rounded-full ${r.score > 70 ? "bg-red-400" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} />
+                    <div className={`h-full rounded-full ${r.score > 70 ? "bg-bad-fg" : r.score > 50 ? "bg-warn-fg" : "bg-ok-fg"}`} style={{ width: `${r.score}%` }} />
                   </div>
                   <span className="text-xs font-bold text-neutral-500 w-6 text-right">{r.score}</span>
                 </div>
@@ -597,7 +597,7 @@ export function AdminOverviewVariantE() {
                     <div className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center text-xs font-bold text-white shrink-0">{t.avatar}</div>
                     <span className="text-xs text-neutral-700 w-12 shrink-0">{t.name}</span>
                     <div className="flex-1 h-1.5 bg-neutral-100 rounded-full">
-                      <div className={`h-full rounded-full ${pct > 90 ? "bg-red-400" : pct > 70 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                      <div className={`h-full rounded-full ${pct > 90 ? "bg-bad-fg" : pct > 70 ? "bg-warn-fg" : "bg-ok-fg"}`} style={{ width: `${Math.min(100, pct)}%` }} />
                     </div>
                     <span className="text-xs font-bold text-neutral-500 w-8 text-right">{pct}%</span>
                   </div>
@@ -610,25 +610,25 @@ export function AdminOverviewVariantE() {
         {/* Blockers + Milestones */}
         <div className="flex">
           <div className="flex-1 px-5 py-4 border-r">
-            <div className="text-xs text-red-500 uppercase font-semibold mb-2">Blockers</div>
+            <div className="text-xs text-bad-fg uppercase font-semibold mb-2">Blockers</div>
             <div className="space-y-1.5">
               {BLOCKERS.map((b, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-bad-fg shrink-0" />
                   <span className="text-xs text-neutral-700 truncate flex-1">{b.task}</span>
-                  <span className="text-xs text-red-400 shrink-0">{b.days}d</span>
+                  <span className="text-xs text-bad-fg shrink-0">{b.days}d</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="flex-1 px-5 py-4">
-            <div className="text-xs text-amber-500 uppercase font-semibold mb-2">Milestones</div>
+            <div className="text-xs text-warn-fg uppercase font-semibold mb-2">Milestones</div>
             <div className="space-y-1.5">
               {MILESTONES.map(m => (
                 <div key={m.name} className="flex items-center gap-2">
                   <div className={`w-1.5 h-1.5 rounded-full ${healthDot(m.status)}`} />
                   <span className="text-xs text-neutral-700 truncate flex-1">{m.name}</span>
-                  <span className={`text-xs font-bold ${m.daysLeft < 10 ? "text-red-500" : "text-neutral-400"}`}>{m.daysLeft}d</span>
+                  <span className={`text-xs font-bold ${m.daysLeft < 10 ? "text-bad-fg" : "text-neutral-400"}`}>{m.daysLeft}d</span>
                 </div>
               ))}
             </div>

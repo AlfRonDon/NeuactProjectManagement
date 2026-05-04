@@ -134,12 +134,12 @@ export default function WidgetShowcasePage() {
     <div className="min-h-screen bg-neutral-50 p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-neutral-900">Widget Showcase</h1>
+          <h1 className="text-3xl font-bold text-neutral-950">Widget Showcase</h1>
           <p className="text-neutral-500 text-lg">All 6 PM widgets with fixture data</p>
         </div>
 
         {widgets.map((w, i) => (
-          <section key={i} className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+          <section key={i} className="bg-white rounded-lg border border-neutral-200 shadow-xsmall overflow-hidden">
             <div className="px-6 py-3 bg-neutral-50 border-b border-neutral-200">
               <h2 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide">
                 {i + 1}. {w.name}

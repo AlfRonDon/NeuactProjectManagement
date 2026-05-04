@@ -22,15 +22,15 @@ interface StoryMapRow {
 
 const STATUS_DOT: Record<string, string> = {
   backlog: "bg-neutral-300",
-  todo: "bg-blue-400",
-  in_progress: "bg-amber-400",
-  in_review: "bg-purple-400",
-  done: "bg-green-500",
+  todo: "bg-info-solid",
+  in_progress: "bg-warn-solid",
+  in_review: "bg-info-solid/70",
+  done: "bg-ok-solid",
 };
 
 const PRIORITY_RING: Record<string, string> = {
-  critical: "ring-2 ring-red-400",
-  high: "ring-2 ring-orange-300",
+  critical: "ring-2 ring-bad-solid",
+  high: "ring-2 ring-hot-solid",
   medium: "",
   low: "opacity-70",
 };
@@ -40,7 +40,7 @@ export default function StoryMap({ data }: { data: StoryMapRow[] }) {
   const phases = data[0]?.phases.map((p) => p.name) || [];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 overflow-x-auto">
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-5 overflow-x-auto">
       <div className="flex items-center gap-2 mb-4">
         <Layers className="w-4 h-4 text-neutral-400" />
         <h3 className="text-xs uppercase font-bold tracking-widest text-neutral-400">
@@ -91,7 +91,7 @@ export default function StoryMap({ data }: { data: StoryMapRow[] }) {
                 {phase.tasks.map((task) => (
                   <div
                     key={task.id}
-                    className={`group relative bg-white rounded-md border border-neutral-200 px-2 py-1.5 text-xs leading-tight shadow-sm hover:shadow-md transition-shadow cursor-pointer max-w-full ${PRIORITY_RING[task.priority]}`}
+                    className={`group relative bg-white rounded-md border border-neutral-200 px-2 py-1.5 text-xs leading-tight shadow-xsmall hover:shadow-md transition-shadow cursor-pointer max-w-full ${PRIORITY_RING[task.priority]}`}
                   >
                     <div className="flex items-center gap-1.5">
                       <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[task.status]}`} />

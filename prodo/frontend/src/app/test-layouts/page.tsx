@@ -87,13 +87,11 @@ import {
   StageMapVariantC,
   StageMapVariantD,
   BottomWidgetVariantA,
-  BottomWidgetVariantB,
-  BottomWidgetVariantC,
-  BottomWidgetVariantD,
-  BottomWidgetVariantE,
-  BottomWidgetVariantF,
-  BottomWidgetVariantG,
-  BottomWidgetVariantH,
+  PeopleVariantA,
+  TaskWidgetVariantA,
+  TaskWidgetVariantB,
+  TaskWidgetVariantC,
+  GanttChart,
 } from "@/components/layouts";
 
 interface LayoutEntry {
@@ -580,86 +578,66 @@ const layouts: LayoutEntry[] = [
     component: <StageMapVariantD />,
   },
 
-  // Set 8 — Combined Bottom Widget
+  // Set 8 — KPI Dashboard
   {
-    id: "bottom-3col",
-    name: "Bottom: Three Columns",
-    description: "People heatmap (35%) | Risk bars + AI (30%) | Stage board (35%) — all visible at once",
-    icon: <LayoutPanelLeft className="w-5 h-5" />,
-    who: "Admins who want team, risk, and stage progress in one glance without clicking",
-    philosophy: "Three data streams, one row. No tabs, no hiding.",
+    id: "kpi-dashboard",
+    name: "KPI Dashboard",
+    description: "Project KPIs + segment bar + sprint burndown + sprint diagnostic (verdict-first: primary cause + contributing factors).",
+    icon: <BarChart3 className="w-5 h-5" />,
+    who: "Leads tracking project health, sprint velocity, and root cause of delays",
+    philosophy: "Overview on top. Sprint trend in middle. Verdict-first diagnostic at bottom.",
     set: 8,
     component: <BottomWidgetVariantA />,
   },
   {
-    id: "bottom-tabbed",
-    name: "Bottom: Tabbed Panel",
-    description: "Single full-width panel with tabs: Team Load (cards) | Risk Radar (grid) | Stage Board (table)",
-    icon: <PanelTop className="w-5 h-5" />,
-    who: "Admins who prefer one thing at a time with room to breathe",
-    philosophy: "Full width per view. Tabs trade density for clarity.",
+    id: "team-heatmap-assignments",
+    name: "Team: Heatmap + Assignments",
+    description: "Per-person row: heatmap cells (W14-W17) + utilization bar + status badge on top, task chips below. Blocked tasks first.",
+    icon: <Users className="w-5 h-5" />,
+    who: "Admins who want weekly load heatmap AND task assignments per person in one view",
+    philosophy: "Top row = when and how much. Bottom row = what exactly. Both per person.",
     set: 8,
-    component: <BottomWidgetVariantB />,
+    component: <PeopleVariantA />,
   },
   {
-    id: "bottom-stacked",
-    name: "Bottom: Two Rows",
-    description: "Top: People heatmap (60%) + Risk bars (40%). Bottom: Stage board full width",
-    icon: <Rows3 className="w-5 h-5" />,
-    who: "Admins who want people+risk paired, stages separate",
-    philosophy: "Group by relevance. People and risk are about capacity, stages are about progress.",
-    set: 8,
-    component: <BottomWidgetVariantC />,
-  },
-  {
-    id: "bottom-dark",
-    name: "Bottom: Dark Dashboard",
-    description: "Dark theme, three equal columns. Compact heatmap cells, risk bars, stage grids — maximum density",
-    icon: <Shield className="w-5 h-5" />,
-    who: "Power users who want a war-room monitoring strip",
-    philosophy: "Dark, dense, data-first. Everything glows against the background.",
-    set: 8,
-    component: <BottomWidgetVariantD />,
-  },
-  {
-    id: "bottom-risk-stage-ai",
-    name: "Bottom: Risk + Stage + AI",
-    description: "Risk bars (40%) | AI Brief (20%) | Stage board (40%) — no people, full focus on delivery",
-    icon: <Shield className="w-5 h-5" />,
-    who: "Leads who want risk, progress, and AI insights without team load",
-    philosophy: "Risk and outcome. What could go wrong, and where are we? Let AI guide decisions.",
-    set: 8,
-    component: <BottomWidgetVariantE />,
-  },
-  {
-    id: "bottom-risk-stage-summary",
-    name: "Bottom: Risk + Stage + AI Summary",
-    description: "Top: Risk bars + Stage grid. Bottom: AI brief with Risk Radar & Sprint callouts",
-    icon: <AlertTriangle className="w-5 h-5" />,
-    who: "Leads in standups who need risk + status + AI insights in sequence",
-    philosophy: "Top tells the story (risk + progress), bottom tells the lesson (AI + context).",
-    set: 8,
-    component: <BottomWidgetVariantF />,
-  },
-  {
-    id: "bottom-risk-cards",
-    name: "Bottom: Cards + AI",
-    description: "Risk cards (left) | Stage progress columns (center) | AI insights (right)",
-    icon: <Briefcase className="w-5 h-5" />,
-    who: "Admins who want compact card-based risk + stage view with AI guidance",
-    philosophy: "Cards are scannable. Grid columns show progress. AI on the right guides next steps.",
-    set: 8,
-    component: <BottomWidgetVariantG />,
-  },
-  {
-    id: "kpi-dashboard-50vw",
-    name: "KPI Dashboard (50VW)",
-    description: "Project selector | Story phases (Research/Design/Build/Test/Ship) | Risk radar | Sprint chart",
+    id: "task-inline-header",
+    name: "Tasks: Inline Header",
+    description: "Compact project header row (name, progress bar, count, days) + filter pills + task list. All in one card.",
     icon: <BarChart3 className="w-5 h-5" />,
-    who: "Leads & Engineers tracking project progress with risk and sprint visibility",
-    philosophy: "Vertical stack in 50% screen width: phases show development pipeline, risk radar shows assessment, burndown shows sprint health. Project-switchable.",
+    who: "Admins who want a compact project+tasks card with minimal header footprint",
+    philosophy: "Header is a single row. Filters below. Tasks scroll. One card.",
     set: 8,
-    component: <BottomWidgetVariantH />,
+    component: <TaskWidgetVariantA />,
+  },
+  {
+    id: "task-stats-ring",
+    name: "Tasks: Ring + Stats",
+    description: "Progress ring + project name + stat count badges (clickable as filters) + task list. Ring anchors the header.",
+    icon: <Layers className="w-5 h-5" />,
+    who: "Admins who want visual progress + stat badges that double as filters",
+    philosophy: "Ring shows progress. Badges show counts AND filter. Dual-purpose header.",
+    set: 8,
+    component: <TaskWidgetVariantB />,
+  },
+  {
+    id: "task-segment-bar",
+    name: "Tasks: Segment Bar",
+    description: "Segmented progress bar (done/active/blocked/todo) as the header. Click segments to filter. Compact task rows below.",
+    icon: <Target className="w-5 h-5" />,
+    who: "Admins who want the progress bar itself to be the filter mechanism",
+    philosophy: "Bar is the filter. Color segments show proportion. Click to drill.",
+    set: 8,
+    component: <TaskWidgetVariantC />,
+  },
+  {
+    id: "gantt-unified",
+    name: "Gantt: Timeline",
+    description: "Split: task table (toggleable columns) + Gantt chart. Group by None/Phase/Person. Dependency arrows. Critical path. Click for detail.",
+    icon: <BarChart3 className="w-5 h-5" />,
+    who: "PMs who want a Primavera-style Gantt with configurable columns and grouping",
+    philosophy: "Table columns toggleable. Group-by switches context. Chart always aligned. One unified view.",
+    set: 8,
+    component: <GanttChart />,
   },
 ];
 
@@ -700,7 +678,7 @@ export default function TestLayoutsPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-neutral-900">Layout Explorer</h1>
+          <h1 className="text-3xl font-bold text-neutral-950">Layout Explorer</h1>
           <p className="text-neutral-500 text-lg">50 layout components across 8 sets</p>
         </div>
 
@@ -742,7 +720,7 @@ export default function TestLayoutsPage() {
               </div>
               <span className="text-xs font-medium leading-tight">{layout.name}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.5 rounded ${
+                className={`text-xs px-1.5 py-0.5 rounded ${
                   activeLayout === layout.id ? "bg-white/20" : "bg-neutral-100 text-neutral-400"
                 }`}
               >
@@ -753,11 +731,11 @@ export default function TestLayoutsPage() {
         </div>
 
         {/* Info Bar */}
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-4">
+        <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-4">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-lg font-bold text-neutral-900">{current.name}</h2>
+                <h2 className="text-lg font-bold text-neutral-950">{current.name}</h2>
                 <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 text-neutral-500">
                   {SET_LABELS[current.set]}
                 </span>
@@ -778,7 +756,7 @@ export default function TestLayoutsPage() {
         </div>
 
         {/* Active Layout Render */}
-        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall overflow-hidden">
           <div className="px-4 py-2 bg-neutral-50 border-b border-neutral-200 text-xs text-neutral-400 font-mono">
             {"<"}{current.name.replace(/\s/g, "")}Layout {"/>"}
           </div>

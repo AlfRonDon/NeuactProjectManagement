@@ -23,20 +23,21 @@ interface DependencyGraphData {
   criticalPath?: string[];
 }
 
+// Canvas 2D cannot resolve CSS var() — use hex values matching v1 tokens.
 const STATUS_COLOR: Record<string, string> = {
-  backlog: "#d4d4d4",
-  todo: "#60a5fa",
-  in_progress: "#fbbf24",
-  in_review: "#a78bfa",
-  done: "#22c55e",
-  cancelled: "#94a3b8",
+  backlog: "#D5CFCE",   // --border-strong
+  todo: "#3B82F6",      // --info-solid
+  in_progress: "#F59E0B", // --warn-solid
+  in_review: "#8B5CF6", // --series-4
+  done: "#22C55E",      // --ok-solid
+  cancelled: "#938A89", // --text-tertiary
 };
 
 const PRIORITY_BORDER: Record<string, string> = {
-  critical: "#ef4444",
-  high: "#f97316",
-  medium: "#a3a3a3",
-  low: "#d4d4d4",
+  critical: "#EA580C",  // --hot-solid
+  high: "#EA580C",      // --hot-solid
+  medium: "#938A89",    // --text-tertiary
+  low: "#D5CFCE",       // --border-strong
 };
 
 export default function DependencyGraph({ data }: { data: DependencyGraphData }) {
@@ -136,7 +137,7 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
       const cx2 = from.x + (to.x - from.x) * 0.6;
       ctx.bezierCurveTo(cx1, from.y, cx2, to.y, to.x, to.y);
 
-      ctx.strokeStyle = isCritical ? "#ef4444" : "#e5e5e5";
+      ctx.strokeStyle = isCritical ? "#EF4444" : "#E9E5E4"; // --bad-solid / --border-subtle
       ctx.lineWidth = isCritical ? 2 : 1;
       ctx.stroke();
 
@@ -154,7 +155,7 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
         to.x - 20 * Math.cos(angle) - arrowLen * Math.cos(angle + 0.4),
         to.y - 20 * Math.sin(angle) - arrowLen * Math.sin(angle + 0.4)
       );
-      ctx.strokeStyle = isCritical ? "#ef4444" : "#d4d4d4";
+      ctx.strokeStyle = isCritical ? "#EF4444" : "#D5CFCE"; // --bad-solid / --border-strong
       ctx.lineWidth = isCritical ? 2 : 1;
       ctx.stroke();
     });
@@ -172,22 +173,22 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
       if (isCritical) {
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, r + 6, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(239, 68, 68, 0.1)";
+        ctx.fillStyle = "rgba(239, 68, 68, 0.10)";
         ctx.fill();
       }
 
       // Node circle
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, isHovered ? r + 2 : r, 0, Math.PI * 2);
-      ctx.fillStyle = STATUS_COLOR[node.status] || "#d4d4d4";
+      ctx.fillStyle = STATUS_COLOR[node.status] || "#D5CFCE"; // --border-strong
       ctx.fill();
-      ctx.strokeStyle = PRIORITY_BORDER[node.priority] || "#a3a3a3";
+      ctx.strokeStyle = PRIORITY_BORDER[node.priority] || "#938A89"; // --text-tertiary
       ctx.lineWidth = node.priority === "critical" ? 3 : node.priority === "high" ? 2 : 1;
       ctx.stroke();
 
       // Label
-      ctx.fillStyle = "#404040";
-      ctx.font = "bold 9px system-ui";
+      ctx.fillStyle = "#3D3837"; // --text-primary
+      ctx.font = "bold 9px Geist, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       const label = node.label.length > 20 ? node.label.slice(0, 18) + "..." : node.label;
@@ -195,8 +196,8 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
 
       // Assignee
       if (node.assignee) {
-        ctx.fillStyle = "#a3a3a3";
-        ctx.font = "8px system-ui";
+        ctx.fillStyle = "#938A89"; // --text-tertiary
+        ctx.font = "8px Geist, sans-serif";
         ctx.fillText(node.assignee, pos.x, pos.y + r + 15);
       }
     });
@@ -228,7 +229,7 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
   );
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <GitBranch className="w-4 h-4 text-neutral-400" />
@@ -237,7 +238,7 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
           </h3>
         </div>
         {blockers.length > 0 && (
-          <div className="flex items-center gap-1 text-xs text-red-500 bg-red-50 px-2 py-1 rounded border border-red-100 font-medium">
+          <div className="flex items-center gap-1 text-xs text-bad-fg bg-bad-bg px-2 py-1 rounded border border-bad-solid/20 font-medium">
             <AlertTriangle className="w-3 h-3" />
             {blockers.length} blocking on critical path
           </div>
@@ -257,7 +258,7 @@ export default function DependencyGraph({ data }: { data: DependencyGraphData })
       {/* Legend */}
       <div className="flex items-center gap-4 mt-3 pt-3 border-t border-neutral-100">
         <div className="flex items-center gap-1">
-          <div className="w-8 h-0.5 bg-red-500" />
+          <div className="w-8 h-0.5 bg-bad-solid" />
           <span className="text-xs text-neutral-400">Critical path</span>
         </div>
         {["todo", "in_progress", "done"].map((s) => (

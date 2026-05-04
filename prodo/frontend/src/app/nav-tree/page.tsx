@@ -54,14 +54,14 @@ const TabBar: React.FC<{
         onClick={() => onSelect(t.id)}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
           active === t.id
-            ? "bg-neutral-900 text-white shadow-sm"
+            ? "bg-neutral-900 text-whiteshadow-xsmall"
             : "text-neutral-500 hover:bg-neutral-100"
         }`}
       >
         {t.icon}
         {t.label}
         {t.badge && (
-          <span className={`text-[10px] px-1 py-0.5 rounded ${active === t.id ? "bg-white/20" : "bg-neutral-200"}`}>
+          <span className={`text-xs px-1 py-0.5 rounded ${active === t.id ? "bg-white/20" : "bg-neutral-200"}`}>
             {t.badge}
           </span>
         )}
@@ -85,13 +85,13 @@ const Greeting: React.FC = () => (
     <p className="text-xs text-neutral-500">3 tasks in progress, 1 blocker, Sprint 12 at 62%</p>
     <div className="flex gap-4 mt-3">
       {[
-        { label: "In Progress", value: "3", color: "text-amber-600" },
-        { label: "Blocked", value: "1", color: "text-red-600" },
-        { label: "Done Today", value: "2", color: "text-green-600" },
+        { label: "In Progress", value: "3", color: "text-warn-fg" },
+        { label: "Blocked", value: "1", color: "text-bad-fg" },
+        { label: "Done Today", value: "2", color: "text-ok-fg" },
       ].map((s) => (
         <div key={s.label} className="text-center">
           <div className={`text-lg font-bold ${s.color}`}>{s.value}</div>
-          <div className="text-[10px] text-neutral-400">{s.label}</div>
+          <div className="text-xs text-neutral-400">{s.label}</div>
         </div>
       ))}
     </div>
@@ -114,7 +114,7 @@ const ProtoFrame: React.FC<{ title: string; tag: string; color: string; children
   color,
   children,
 }) => (
-  <div className="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+  <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall overflow-hidden">
     <div className={`px-4 py-2 border-b border-neutral-200 flex items-center gap-2 ${color}`}>
       <span className="text-xs font-bold uppercase tracking-wider opacity-60">{tag}</span>
       <span className="text-sm font-semibold">{title}</span>
@@ -250,6 +250,7 @@ function Proto2AI() {
 function ProtoZeroTabs() {
   const [activeCard, setActiveCard] = useState<string | null>(null);
 
+  {/* decorative nav color — see COLOR_SYSTEM_v1.md §10 */}
   const cards = [
     { id: "board", label: "Tasks", icon: <LayoutGrid className="w-6 h-6" />, color: "bg-blue-50 border-blue-200 text-blue-700" },
     { id: "deps", label: "Blockers", icon: <AlertTriangle className="w-6 h-6" />, color: "bg-red-50 border-red-200 text-red-700" },
@@ -271,7 +272,7 @@ function ProtoZeroTabs() {
               <button
                 key={c.id}
                 onClick={() => setActiveCard(c.id)}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all hover:scale-105 hover:shadow-md ${c.color}`}
+                className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all hover:scale-105 hover:shadow-md ${c.color}`}
               >
                 {c.icon}
                 <span className="text-sm font-semibold">{c.label}</span>
@@ -317,25 +318,25 @@ function ProtoModeSwitcher() {
       id: "do",
       label: "DO",
       desc: "Get things done",
-      color: "bg-blue-600",
-      hoverColor: "hover:bg-blue-700",
-      borderColor: "border-blue-400",
+      color: "bg-series-1",
+      hoverColor: "hover:bg-series-1/90",
+      borderColor: "border-series-1",
     },
     {
       id: "see",
       label: "SEE",
       desc: "Understand the state",
-      color: "bg-amber-500",
-      hoverColor: "hover:bg-amber-600",
-      borderColor: "border-amber-400",
+      color: "bg-series-2",
+      hoverColor: "hover:bg-series-2/90",
+      borderColor: "border-series-2",
     },
     {
       id: "plan",
       label: "PLAN",
       desc: "Shape the future",
-      color: "bg-purple-600",
-      hoverColor: "hover:bg-purple-700",
-      borderColor: "border-purple-400",
+      color: "bg-series-4",
+      hoverColor: "hover:bg-series-4/90",
+      borderColor: "border-series-4",
     },
   ];
 
@@ -419,6 +420,7 @@ function ProtoModeSwitcher() {
 function ProtoHubSpoke() {
   const [spoke, setSpoke] = useState<string | null>(null);
 
+  {/* decorative nav color — see COLOR_SYSTEM_v1.md §10 */}
   const spokes = [
     { id: "board", label: "Tasks", icon: <LayoutGrid className="w-8 h-8" />, color: "bg-blue-500", lightBg: "bg-blue-50" },
     { id: "deps", label: "Dependencies", icon: <GitBranch className="w-8 h-8" />, color: "bg-red-500", lightBg: "bg-red-50" },
@@ -440,7 +442,7 @@ function ProtoHubSpoke() {
                 onClick={() => setSpoke(s.id)}
                 className={`flex flex-col items-center gap-3 p-5 rounded-2xl border border-neutral-200 transition-all hover:scale-105 hover:shadow-lg ${s.lightBg}`}
               >
-                <div className={`w-14 h-14 rounded-xl ${s.color} text-white flex items-center justify-center shadow-sm`}>
+                <div className={`w-14 h-14 rounded-lg ${s.color} text-white flex items-center justify-center shadow-sm`}>
                   {s.icon}
                 </div>
                 <span className="text-sm font-semibold text-neutral-700">{s.label}</span>
@@ -466,7 +468,7 @@ export default function NavTreePage() {
     <div className="min-h-screen bg-neutral-50 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-neutral-900">Navigation Feel</h1>
+          <h1 className="text-3xl font-bold text-neutral-950">Navigation Feel</h1>
           <p className="text-neutral-500 text-lg">
             5 interactive navigation prototypes -- click through and feel the flow
           </p>

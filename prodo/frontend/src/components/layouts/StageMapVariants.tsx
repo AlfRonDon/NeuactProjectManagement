@@ -4,9 +4,9 @@ import React from "react";
 import { Layers, ChevronRight, CheckCircle2, Clock, OctagonAlert, CircleDot } from "lucide-react";
 
 const PROJECTS = [
-  { name: "Command Center v5", short: "CCv5", color: "#3b82f6" },
-  { name: "NeuactReport v3", short: "NRv3", color: "#8b5cf6" },
-  { name: "Spot Particle", short: "Spot", color: "#f59e0b" },
+  { name: "Command Center v5", short: "CCv5", color: "#6366F1" },
+  { name: "NeuactReport v3", short: "NRv3", color: "#8B5CF6" },
+  { name: "Spot Particle", short: "Spot", color: "#EC4899" },
 ];
 
 const STAGES = ["Research", "Design", "Build", "Test", "Ship"];
@@ -39,9 +39,9 @@ const DATA: Record<string, ProjectStage[]> = {
 };
 
 const S_LABEL: Record<string, string> = { done: "Done", active: "Active", in_progress: "Active", blocked: "Blocked", todo: "To Do", backlog: "Backlog" };
-const S_COLOR: Record<string, string> = { done: "bg-green-500", active: "bg-amber-400", in_progress: "bg-amber-400", blocked: "bg-red-500", todo: "bg-blue-400", backlog: "bg-neutral-300" };
-const S_TEXT: Record<string, string> = { done: "text-green-700", active: "text-amber-700", in_progress: "text-amber-700", blocked: "text-red-700", todo: "text-blue-700", backlog: "text-neutral-500" };
-const S_BG: Record<string, string> = { done: "bg-green-50", active: "bg-amber-50", in_progress: "bg-amber-50", blocked: "bg-red-50", todo: "bg-blue-50", backlog: "bg-neutral-50" };
+const S_COLOR: Record<string, string> = { done: "bg-ok-solid", active: "bg-warn-solid", in_progress: "bg-warn-solid", blocked: "bg-bad-solid", todo: "bg-info-solid", backlog: "bg-neutral-300" };
+const S_TEXT: Record<string, string> = { done: "text-ok-fg", active: "text-warn-fg", in_progress: "text-warn-fg", blocked: "text-bad-fg", todo: "text-info-fg", backlog: "text-neutral-500" };
+const S_BG: Record<string, string> = { done: "bg-ok-bg", active: "bg-warn-bg", in_progress: "bg-warn-bg", blocked: "bg-bad-bg", todo: "bg-info-bg", backlog: "bg-neutral-50" };
 
 function stageProgress(tasks: StageTask[]) {
   if (tasks.length === 0) return 0;
@@ -65,10 +65,10 @@ function dominantStatus(tasks: StageTask[]): string {
    ═══════════════════════════════════════════════════════════ */
 export function StageMapVariantA() {
   return (
-    <div className="h-[500px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[500px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-2 shrink-0">
         <Layers className="w-5 h-5 text-indigo-500" />
-        <span className="text-sm font-bold text-neutral-900">Progress Pipeline</span>
+        <span className="text-sm font-serif font-bold text-neutral-950">Progress Pipeline</span>
         <span className="text-xs text-neutral-400 ml-1">stages × projects</span>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -78,7 +78,7 @@ export function StageMapVariantA() {
             <div key={p.short}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
-                <span className="text-sm font-semibold text-neutral-900">{p.name}</span>
+                <span className="text-sm font-semibold text-neutral-950">{p.name}</span>
               </div>
               <div className="flex gap-1">
                 {STAGES.map((stageName, i) => {
@@ -128,10 +128,10 @@ export function StageMapVariantA() {
    ═══════════════════════════════════════════════════════════ */
 export function StageMapVariantB() {
   return (
-    <div className="h-[500px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[500px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-2 shrink-0">
         <Layers className="w-5 h-5 text-indigo-500" />
-        <span className="text-sm font-bold text-neutral-900">Stage Board</span>
+        <span className="text-sm font-serif font-bold text-neutral-950">Stage Board</span>
       </div>
       <div className="flex-1 overflow-auto">
         <table className="w-full border-collapse">
@@ -163,7 +163,7 @@ export function StageMapVariantB() {
                     const StatusIcon = dom === "done" ? CheckCircle2 : dom === "blocked" ? OctagonAlert : dom === "active" ? Clock : CircleDot;
                     return (
                       <td key={stageName} className="px-2 py-3 text-center">
-                        <div className={`inline-flex flex-col items-center gap-1 rounded-xl px-3 py-2 ${S_BG[dom]} min-w-[64px]`}>
+                        <div className={`inline-flex flex-col items-center gap-1 rounded-lg px-3 py-2 ${S_BG[dom]} min-w-[64px]`}>
                           <StatusIcon className={`w-4 h-4 ${S_TEXT[dom]}`} />
                           <span className={`text-sm font-bold ${S_TEXT[dom]}`}>{doneCount}/{tasks.length}</span>
                           <span className={`text-xs ${S_TEXT[dom]} opacity-70`}>{S_LABEL[dom]}</span>
@@ -189,10 +189,10 @@ export function StageMapVariantB() {
    ═══════════════════════════════════════════════════════════ */
 export function StageMapVariantC() {
   return (
-    <div className="h-[500px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[500px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-5 py-3 border-b flex items-center gap-2 shrink-0">
         <Layers className="w-5 h-5 text-indigo-500" />
-        <span className="text-sm font-bold text-neutral-900">Phase Cards</span>
+        <span className="text-sm font-serif font-bold text-neutral-950">Phase Cards</span>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
         {PROJECTS.map(p => {
@@ -201,7 +201,7 @@ export function StageMapVariantC() {
             <div key={p.short}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
-                <span className="text-sm font-bold text-neutral-900">{p.name}</span>
+                <span className="text-sm font-serif font-bold text-neutral-950">{p.name}</span>
               </div>
               <div className="flex gap-2">
                 {STAGES.map((stageName, i) => {
@@ -212,12 +212,12 @@ export function StageMapVariantC() {
                   const circ = 2 * Math.PI * 14;
                   return (
                     <React.Fragment key={stageName}>
-                      <div className={`flex-1 rounded-xl border p-3 ${dom === "done" ? "border-green-200 bg-green-50/50" : dom === "blocked" ? "border-red-200 bg-red-50/50" : dom === "active" ? "border-amber-200 bg-amber-50/50" : "border-neutral-200"}`}>
+                      <div className={`flex-1 rounded-lg border p-3 ${dom === "done" ? "border-ok-solid/20 bg-ok-bg/50" : dom === "blocked" ? "border-bad-solid/20 bg-bad-bg/50" : dom === "active" ? "border-warn-solid/20 bg-warn-bg/50" : "border-neutral-200"}`}>
                         <div className="flex items-center gap-2 mb-2">
                           <div className="relative w-8 h-8 shrink-0">
                             <svg className="w-8 h-8 -rotate-90" viewBox="0 0 36 36">
-                              <circle cx="18" cy="18" r="14" fill="none" stroke="#e5e7eb" strokeWidth="3" />
-                              <circle cx="18" cy="18" r="14" fill="none" stroke={pct === 100 ? "#22c55e" : p.color} strokeWidth="3" strokeDasharray={`${(pct / 100) * circ} ${circ}`} strokeLinecap="round" />
+                              <circle cx="18" cy="18" r="14" fill="none" stroke="var(--border-subtle)" strokeWidth="3" />
+                              <circle cx="18" cy="18" r="14" fill="none" stroke={pct === 100 ? "var(--ok-solid)" : p.color} strokeWidth="3" strokeDasharray={`${(pct / 100) * circ} ${circ}`} strokeLinecap="round" />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-xs font-bold text-neutral-700">{pct}%</span>
@@ -262,13 +262,13 @@ export function StageMapVariantC() {
    ═══════════════════════════════════════════════════════════ */
 export function StageMapVariantD() {
   return (
-    <div className="h-[500px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900 text-white flex flex-col">
+    <div className="h-[500px] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 text-white flex flex-col">
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2 shrink-0">
         <Layers className="w-5 h-5 text-indigo-400" />
         <span className="text-sm font-bold">Stage Heat Grid</span>
         <div className="flex-1" />
         <div className="flex gap-3 text-xs">
-          {[{ l: "Complete", c: "bg-green-500" }, { l: "Active", c: "bg-amber-400" }, { l: "Blocked", c: "bg-red-500" }, { l: "Pending", c: "bg-blue-400/50" }].map(s => (
+          {[{ l: "Complete", c: "bg-ok-solid" }, { l: "Active", c: "bg-warn-solid" }, { l: "Blocked", c: "bg-bad-solid" }, { l: "Pending", c: "bg-info-solid/50" }].map(s => (
             <div key={s.l} className="flex items-center gap-1.5"><div className={`w-2.5 h-2.5 rounded-sm ${s.c}`} /><span className="text-neutral-400">{s.l}</span></div>
           ))}
         </div>
@@ -299,19 +299,19 @@ export function StageMapVariantD() {
                   const pct = stageProgress(tasks);
                   const doneCount = tasks.filter(t => t.status === "done").length;
 
-                  const cellBg = dom === "done" ? "bg-green-500/20 border-green-500/30"
-                    : dom === "blocked" ? "bg-red-500/20 border-red-500/30"
-                    : dom === "active" ? "bg-amber-400/20 border-amber-400/30"
-                    : dom === "todo" ? "bg-blue-400/10 border-blue-400/20"
+                  const cellBg = dom === "done" ? "bg-ok-solid/20 border-ok-solid/30"
+                    : dom === "blocked" ? "bg-bad-solid/20 border-bad-solid/30"
+                    : dom === "active" ? "bg-warn-solid/20 border-warn-solid/30"
+                    : dom === "todo" ? "bg-info-solid/10 border-info-solid/20"
                     : "bg-white/5 border-white/10";
 
                   return (
                     <div key={stageName} className={`flex-1 rounded-lg border p-2 ${cellBg} flex flex-col justify-between group cursor-default`}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs font-bold ${dom === "done" ? "text-green-400" : dom === "blocked" ? "text-red-400" : dom === "active" ? "text-amber-400" : "text-neutral-500"}`}>
+                        <span className={`text-xs font-bold ${dom === "done" ? "text-ok-fg" : dom === "blocked" ? "text-bad-fg" : dom === "active" ? "text-warn-fg" : "text-neutral-500"}`}>
                           {doneCount}/{tasks.length}
                         </span>
-                        {pct === 100 && <CheckCircle2 className="w-3 h-3 text-green-400" />}
+                        {pct === 100 && <CheckCircle2 className="w-3 h-3 text-ok-solid" />}
                       </div>
                       {/* Task names on hover */}
                       <div className="space-y-0.5">

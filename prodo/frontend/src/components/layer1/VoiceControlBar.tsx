@@ -91,7 +91,7 @@ export default function VoiceControlBar() {
       : isProcessing
         ? "border-yellow-500/30"
         : isError
-          ? "border-red-500/30"
+          ? "border-bad-solid/30"
           : "border-white/[0.06]";
 
   const pillShadow = isListening
@@ -129,14 +129,14 @@ export default function VoiceControlBar() {
 
       {/* Transcript panel — slides up from bottom */}
       {showTranscript && messages.length > 0 && (
-        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-[500px] max-h-[300px] bg-black/60 backdrop-blur-2xl rounded-xl border border-white/10 overflow-hidden z-40">
+        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-[500px] max-h-[300px] bg-black/60 backdrop-blur-2xl rounded-lg border border-white/10 overflow-hidden z-40">
           <div className="px-4 py-2 border-b border-white/10 flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-white/40">
+            <span className="text-xs uppercase font-bold tracking-widest text-white/40">
               Conversation
             </span>
             <button
               onClick={() => setShowTranscript(false)}
-              className="text-[10px] text-white/30 hover:text-white/60"
+              className="text-xs text-white/30 hover:text-white/60"
             >
               Close
             </button>
@@ -197,7 +197,7 @@ export default function VoiceControlBar() {
                   : isProcessing
                     ? "bg-yellow-500/80 shadow-yellow-500/30"
                     : isError
-                      ? "bg-red-500 shadow-red-500/30"
+                      ? "bg-bad-solid shadow-bad-solid/30"
                       : "bg-white/[0.08] hover:bg-white/[0.14]"
             }
           `}
@@ -234,7 +234,7 @@ export default function VoiceControlBar() {
         {/* Status text */}
         <div className="flex items-center gap-1.5 min-w-0 pr-0.5">
           <span
-            className={`text-[11px] leading-none truncate max-w-[200px] ${
+            className={`text-sm leading-none truncate max-w-[200px] ${
               isListening
                 ? "text-blue-300"
                 : isSpeaking
@@ -242,7 +242,7 @@ export default function VoiceControlBar() {
                   : isProcessing
                     ? "text-yellow-300"
                     : isError
-                      ? "text-red-400"
+                      ? "text-bad-fg"
                       : "text-white/40"
             }`}
           >

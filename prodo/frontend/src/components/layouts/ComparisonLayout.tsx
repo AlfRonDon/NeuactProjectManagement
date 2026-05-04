@@ -73,18 +73,18 @@ const projects: [ProjectMetrics, ProjectMetrics] = [
   },
 ];
 
-const riskColor = { low: "text-green-500", medium: "text-amber-500", high: "text-red-500" };
-const riskBg = { low: "bg-green-50 border-green-200", medium: "bg-amber-50 border-amber-200", high: "bg-red-50 border-red-200" };
+const riskColor = { low: "text-ok-fg", medium: "text-warn-fg", high: "text-bad-fg" };
+const riskBg = { low: "bg-ok-bg border-ok-solid/20", medium: "bg-warn-bg border-warn-solid/20", high: "bg-bad-bg border-bad-solid/20" };
 
 function MetricCompare({ label, left, right, icon: Icon, better }: { label: string; left: string; right: string; icon: React.ElementType; better?: "left" | "right" | "equal" }) {
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 py-2.5 border-b border-neutral-100 last:border-b-0">
-      <div className={`text-sm font-bold text-right tabular-nums ${better === "left" ? "text-emerald-600" : "text-neutral-800"}`}>{left}</div>
+      <div className={`text-sm font-bold text-right tabular-nums ${better === "left" ? "text-ok-fg" : "text-neutral-800"}`}>{left}</div>
       <div className="flex flex-col items-center gap-0.5">
         <Icon className="w-3.5 h-3.5 text-neutral-400" />
         <span className="text-[8px] text-neutral-400 uppercase tracking-wider">{label}</span>
       </div>
-      <div className={`text-sm font-bold tabular-nums ${better === "right" ? "text-emerald-600" : "text-neutral-800"}`}>{right}</div>
+      <div className={`text-sm font-bold tabular-nums ${better === "right" ? "text-ok-fg" : "text-neutral-800"}`}>{right}</div>
     </div>
   );
 }
@@ -96,21 +96,21 @@ export default function ComparisonLayout() {
   const maxBurndown = Math.max(...left.burndownActual, ...left.burndownPlanned, ...right.burndownActual, ...right.burndownPlanned);
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       {/* Header */}
       <div className="px-6 py-4 border-b flex items-center gap-3 shrink-0">
         <GitCompareArrows className="w-5 h-5 text-indigo-500" />
-        <h3 className="text-sm font-bold text-neutral-900">Project Comparison</h3>
+        <h3 className="text-sm font-serif font-bold text-neutral-950">Project Comparison</h3>
         <div className="flex-1" />
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-            <span className="text-[10px] text-neutral-600 font-medium">{left.name}</span>
+            <span className="text-xs text-neutral-600 font-medium">{left.name}</span>
           </div>
-          <span className="text-[10px] text-neutral-300">vs</span>
+          <span className="text-xs text-neutral-300">vs</span>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-            <span className="text-[10px] text-neutral-600 font-medium">{right.name}</span>
+            <span className="text-xs text-neutral-600 font-medium">{right.name}</span>
           </div>
         </div>
       </div>
@@ -119,12 +119,12 @@ export default function ComparisonLayout() {
         {/* Project headers side by side */}
         <div className="grid grid-cols-2 gap-4">
           {[left, right].map((p, i) => (
-            <div key={p.name} className={`rounded-xl border p-4 ${i === 0 ? "border-indigo-200 bg-indigo-50/50" : "border-rose-200 bg-rose-50/50"}`}>
+            <div key={p.name} className={`rounded-lg border p-4 ${i === 0 ? "border-indigo-200 bg-indigo-50/50" : "border-rose-200 bg-rose-50/50"}`}>
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-3 h-3 rounded-full ${i === 0 ? "bg-indigo-500" : "bg-rose-500"}`} />
-                <span className="text-sm font-bold text-neutral-900">{p.name}</span>
+                <span className="text-sm font-serif font-bold text-neutral-950">{p.name}</span>
               </div>
-              <div className="flex items-center gap-3 text-[10px] text-neutral-500">
+              <div className="flex items-center gap-3 text-xs text-neutral-500">
                 <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {p.teamSize} people</span>
                 <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {p.startDate} <ArrowRight className="w-2.5 h-2.5" /> {p.targetDate}</span>
                 <span>Lead: {p.lead}</span>
@@ -143,7 +143,7 @@ export default function ComparisonLayout() {
         </div>
 
         {/* Key metrics comparison */}
-        <div className="bg-neutral-50 rounded-xl border border-neutral-200 px-6 py-4">
+        <div className="bg-neutral-50 rounded-lg border border-neutral-200 px-6 py-4">
           <div className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 mb-3 text-center">Key Metrics</div>
           <MetricCompare label="Progress" left={`${left.progress}%`} right={`${right.progress}%`} icon={TrendingUp} better={left.progress > right.progress ? "left" : "right"} />
           <MetricCompare label="Velocity" left={`${left.velocity}/wk`} right={`${right.velocity}/wk`} icon={TrendingUp} better={left.velocity > right.velocity ? "left" : "right"} />
@@ -154,11 +154,11 @@ export default function ComparisonLayout() {
         </div>
 
         {/* Overlaid burndown */}
-        <div className="bg-white rounded-xl border border-neutral-200 p-5">
+        <div className="bg-white rounded-lg border border-neutral-200 p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="text-[9px] uppercase font-bold tracking-widest text-neutral-400">Burndown Overlay</div>
             <button onClick={() => setOverlayBurndown(!overlayBurndown)}
-              className="text-[10px] text-indigo-600 hover:text-indigo-800 transition-colors">
+              className="text-xs text-indigo-600 hover:text-indigo-800 transition-colors">
               {overlayBurndown ? "Split view" : "Overlay"}
             </button>
           </div>
@@ -189,7 +189,7 @@ export default function ComparisonLayout() {
         {/* Category breakdown */}
         <div className="grid grid-cols-2 gap-4">
           {[left, right].map((p, pi) => (
-            <div key={p.name} className="bg-white rounded-xl border border-neutral-200 p-4">
+            <div key={p.name} className="bg-white rounded-lg border border-neutral-200 p-4">
               <div className="text-[9px] uppercase font-bold tracking-widest text-neutral-400 mb-3">{p.name} Breakdown</div>
               <div className="space-y-2">
                 {p.categories.map((cat) => {
@@ -197,8 +197,8 @@ export default function ComparisonLayout() {
                   return (
                     <div key={cat.name}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] text-neutral-600">{cat.name}</span>
-                        <span className="text-[10px] font-medium text-neutral-800">{cat.done}/{cat.total}</span>
+                        <span className="text-xs text-neutral-600">{cat.name}</span>
+                        <span className="text-xs font-medium text-neutral-800">{cat.done}/{cat.total}</span>
                       </div>
                       <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                         <div className={`h-full rounded-full ${pi === 0 ? "bg-indigo-400" : "bg-rose-400"}`} style={{ width: `${pct}%` }} />
@@ -214,13 +214,13 @@ export default function ComparisonLayout() {
         {/* Risk comparison */}
         <div className="grid grid-cols-2 gap-4">
           {[left, right].map((p) => (
-            <div key={p.name} className={`rounded-xl border p-4 ${riskBg[p.risk]}`}>
+            <div key={p.name} className={`rounded-lg border p-4 ${riskBg[p.risk]}`}>
               <div className="flex items-center gap-2 mb-1">
                 <AlertTriangle className={`w-4 h-4 ${riskColor[p.risk]}`} />
                 <span className="text-[9px] uppercase font-bold tracking-widest text-neutral-500">Risk Level</span>
               </div>
               <div className={`text-2xl font-bold ${riskColor[p.risk]}`}>{p.riskScore}</div>
-              <div className={`text-[10px] capitalize font-medium mt-0.5 ${riskColor[p.risk]}`}>{p.risk} risk</div>
+              <div className={`text-xs capitalize font-medium mt-0.5 ${riskColor[p.risk]}`}>{p.risk} risk</div>
             </div>
           ))}
         </div>

@@ -36,17 +36,17 @@ const initialNotifications: Notification[] = [
 
 const categoryMeta: Record<Category, { label: string; icon: React.ElementType; color: string; dotColor: string }> = {
   all: { label: "All", icon: Inbox, color: "text-neutral-400", dotColor: "bg-neutral-400" },
-  blockers: { label: "Blockers", icon: AlertOctagon, color: "text-red-400", dotColor: "bg-red-500" },
-  overdue: { label: "Overdue", icon: Clock, color: "text-amber-400", dotColor: "bg-amber-500" },
-  mentions: { label: "Mentions", icon: AtSign, color: "text-blue-400", dotColor: "bg-blue-500" },
-  ai: { label: "AI Suggestions", icon: Sparkles, color: "text-purple-400", dotColor: "bg-purple-500" },
+  blockers: { label: "Blockers", icon: AlertOctagon, color: "text-bad-fg", dotColor: "bg-bad-solid" },
+  overdue: { label: "Overdue", icon: Clock, color: "text-warn-fg", dotColor: "bg-warn-solid" },
+  mentions: { label: "Mentions", icon: AtSign, color: "text-info-fg", dotColor: "bg-info-solid" },
+  ai: { label: "AI Suggestions", icon: Sparkles, color: "text-info-fg", dotColor: "bg-info-solid" },
 };
 
 const actionMeta: Record<NotifAction, { label: string; icon: React.ElementType; color: string }> = {
-  approve: { label: "Approve", icon: Check, color: "bg-green-500/20 text-green-400 hover:bg-green-500/30" },
+  approve: { label: "Approve", icon: Check, color: "bg-ok-solid/20 text-ok-fg hover:bg-ok-solid/30" },
   snooze: { label: "Snooze", icon: BellOff, color: "bg-neutral-500/20 text-neutral-400 hover:bg-neutral-500/30" },
-  reassign: { label: "Reassign", icon: UserPlus, color: "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30" },
-  escalate: { label: "Escalate", icon: ArrowUpRight, color: "bg-red-500/20 text-red-400 hover:bg-red-500/30" },
+  reassign: { label: "Reassign", icon: UserPlus, color: "bg-info-solid/20 text-info-fg hover:bg-info-solid/30" },
+  escalate: { label: "Escalate", icon: ArrowUpRight, color: "bg-bad-solid/20 text-bad-fg hover:bg-bad-solid/30" },
 };
 
 export default function NotificationHubLayout() {
@@ -71,14 +71,14 @@ export default function NotificationHubLayout() {
   };
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex flex-col text-white">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-800 bg-neutral-950 flex flex-col text-white">
       {/* Header */}
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3">
         <Inbox className="w-5 h-5 text-indigo-400" />
         <h3 className="text-sm font-bold">Notification Hub</h3>
-        <span className="text-[10px] text-neutral-500">{notifications.filter((n) => !n.read).length} unread</span>
+        <span className="text-xs text-neutral-500">{notifications.filter((n) => !n.read).length} unread</span>
         <div className="flex-1" />
-        <button onClick={markAllRead} className="text-[10px] text-neutral-500 hover:text-white flex items-center gap-1 transition-colors">
+        <button onClick={markAllRead} className="text-xs text-neutral-500 hover:text-white flex items-center gap-1 transition-colors">
           <CheckCheck className="w-3 h-3" /> Mark all read
         </button>
       </div>
@@ -91,7 +91,7 @@ export default function NotificationHubLayout() {
           const count = unreadCounts(cat);
           return (
             <button key={cat} onClick={() => setCategory(cat)}
-              className={`text-[10px] font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${category === cat ? "bg-white/10 text-white" : "text-neutral-500 hover:bg-white/5"}`}>
+              className={`text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${category === cat ? "bg-white/10 text-white" : "text-neutral-500 hover:bg-white/5"}`}>
               <meta.icon className="w-3 h-3" />
               {meta.label}
               {count > 0 && <span className={`w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center ${meta.dotColor} text-white`}>{count}</span>}
@@ -118,7 +118,7 @@ export default function NotificationHubLayout() {
                   <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!n.read ? meta.dotColor : "bg-transparent"}`} />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-white truncate">{n.title}</div>
-                    <div className="text-[10px] text-neutral-500 mt-0.5 truncate">{n.description}</div>
+                    <div className="text-xs text-neutral-500 mt-0.5 truncate">{n.description}</div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`text-[8px] font-bold uppercase tracking-wider ${meta.color}`}>{meta.label}</span>
                       <span className="text-[9px] text-neutral-600">{n.project}</span>
@@ -140,7 +140,7 @@ export default function NotificationHubLayout() {
               </div>
               <h4 className="text-sm font-bold text-white mb-2">{selectedNotif.title}</h4>
               <p className="text-xs text-neutral-400 mb-4 leading-relaxed">{selectedNotif.description}</p>
-              <div className="text-[10px] text-neutral-500 mb-1">From: {selectedNotif.from} &middot; {selectedNotif.project} &middot; {selectedNotif.time}</div>
+              <div className="text-xs text-neutral-500 mb-1">From: {selectedNotif.from} &middot; {selectedNotif.project} &middot; {selectedNotif.time}</div>
 
               <div className="mt-6 mb-4">
                 <div className="text-[9px] uppercase font-bold tracking-widest text-neutral-500 mb-3">Quick Actions</div>
@@ -149,7 +149,7 @@ export default function NotificationHubLayout() {
                     const am = actionMeta[a];
                     return (
                       <button key={a} onClick={() => handleAction(selectedNotif.id, a)}
-                        className={`flex items-center gap-1.5 text-[10px] font-medium px-3 py-2 rounded-lg transition-colors ${am.color}`}>
+                        className={`flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-colors ${am.color}`}>
                         <am.icon className="w-3 h-3" /> {am.label}
                       </button>
                     );
@@ -157,9 +157,9 @@ export default function NotificationHubLayout() {
                 </div>
               </div>
 
-              <div className="mt-6 bg-white/5 rounded-xl border border-white/10 p-4">
+              <div className="mt-6 bg-white/5 rounded-lg border border-white/10 p-4">
                 <div className="text-[9px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Context</div>
-                <div className="text-[10px] text-neutral-400 space-y-1.5">
+                <div className="text-xs text-neutral-400 space-y-1.5">
                   <div>Project: <span className="text-white">{selectedNotif.project}</span></div>
                   <div>Category: <span className="text-white capitalize">{selectedNotif.category}</span></div>
                   <div>Status: <span className={selectedNotif.read ? "text-neutral-500" : "text-indigo-400"}>{selectedNotif.read ? "Read" : "Unread"}</span></div>

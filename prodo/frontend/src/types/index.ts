@@ -28,7 +28,11 @@ export type PMEvent =
   | { type: "TRANSCRIPT_UPDATE"; transcript: { role: string; text: string; isFinal: boolean } }
   | { type: "RAG_RESULT"; result: RAGResult }
   | { type: "TASK_UPDATED"; taskId: string }
-  | { type: "PROJECT_UPDATED"; projectId: string };
+  | { type: "TASK_CREATED"; taskId?: string }
+  | { type: "PROJECT_UPDATED"; projectId: string }
+  | { type: "PROJECT_CREATED"; projectId?: string }
+  | { type: "BLOCKER_UPDATED"; blockerId?: string }
+  | { type: "DATA_CHANGED" };
 
 // Timeline / Gantt types (matching CommandCenter widget spec)
 export type TimelineStatus =

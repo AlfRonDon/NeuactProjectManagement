@@ -38,13 +38,13 @@ function VoiceFirstLayout() {
   };
 
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-950 flex flex-col text-white">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-950 flex flex-col text-white">
       {/* Minimal top */}
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3">
-        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-        <span className="text-[10px] text-neutral-500">Neuact PM — Voice Mode</span>
+        <div className="w-2 h-2 rounded-full bg-ok-solid animate-pulse" />
+        <span className="text-xs text-neutral-500">Neuact PM — Voice Mode</span>
         <div className="flex-1" />
-        <span className="text-[10px] text-neutral-500">CC v5</span>
+        <span className="text-xs text-neutral-500">CC v5</span>
       </div>
 
       <div className="flex-1 flex">
@@ -68,7 +68,7 @@ function VoiceFirstLayout() {
             <div className="flex flex-wrap gap-1.5">
               {presets.map((p) => (
                 <button key={p.query} onClick={() => handlePreset(p)}
-                  className="text-[10px] bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1.5 text-neutral-300 transition-colors">
+                  className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 rounded-full px-3 py-1.5 text-neutral-300 transition-colors">
                   {p.query}
                 </button>
               ))}
@@ -80,7 +80,7 @@ function VoiceFirstLayout() {
             <button className="w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-400 flex items-center justify-center transition-colors">
               <Mic className="w-5 h-5 text-white" />
             </button>
-            <input placeholder="Type or speak..." className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-white outline-none placeholder-neutral-500" />
+            <input placeholder="Type or speak..." className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-xs text-white outline-none placeholder-neutral-500" />
             <button className="p-2 text-neutral-500 hover:text-white transition-colors"><Send className="w-4 h-4" /></button>
           </div>
         </div>

@@ -88,7 +88,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         setToken(keycloak.token || null);
       }
-      console.log("[Auth] Access Token:", keycloak.token);
       setLoading(false);
 
       // Auto-refresh token (only set once)

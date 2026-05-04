@@ -3,7 +3,9 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     ProjectViewSet, MilestoneViewSet, TaskViewSet,
     SubTaskViewSet, CommentViewSet, ChangelogViewSet,
-    NotificationViewSet, CategoryViewSet, TaskDependencyViewSet, ActivityViewSet, orchestrate,
+    NotificationViewSet, CategoryViewSet, TaskDependencyViewSet, ActivityViewSet,
+    SprintViewSet, BlockerViewSet,
+    orchestrate,
 )
 
 router = DefaultRouter()
@@ -15,6 +17,8 @@ router.register(r"notifications", NotificationViewSet, basename="notification")
 router.register(r"categories", CategoryViewSet, basename="category")
 router.register(r"dependencies", TaskDependencyViewSet, basename="dependency")
 router.register(r"activities", ActivityViewSet, basename="activity")
+router.register(r"sprints", SprintViewSet, basename="sprint")
+router.register(r"blockers", BlockerViewSet, basename="blocker")
 
 urlpatterns = [
     path("", include(router.urls)),

@@ -11,7 +11,7 @@ import {
 
 /* ── SHARED DATA ─────────────────────────────────────── */
 
-const PROJ = { name: "Command Center v5", color: "#3b82f6", progress: 20, done: 2, total: 10, active: 3, blocked: 1, target: "2026-07-31", start: "2026-04-01" };
+const PROJ = { name: "Command Center v5", color: "#6366F1", progress: 20, done: 2, total: 10, active: 3, blocked: 1, target: "2026-07-31", start: "2026-04-01" };
 
 const TASKS = [
   { id: "t1",  title: "Implement Phase B — Fill/RAG",   desc: "RAG pipeline with vLLM guided decoding", status: "active",  priority: "high",   assignee: "Rohith", due: "2026-04-25", start: "2026-04-10", est: "16h", deps: [] as string[] },
@@ -37,22 +37,22 @@ const CHANGELOGS = [
 ];
 
 const STATUS: Record<string, { label: string; dot: string; bg: string; text: string; border: string }> = {
-  active:  { label: "Active",  dot: "bg-amber-400",  bg: "bg-amber-50",  text: "text-amber-700",  border: "border-amber-200" },
-  blocked: { label: "Blocked", dot: "bg-red-500",    bg: "bg-red-50",    text: "text-red-700",    border: "border-red-200" },
-  todo:    { label: "To Do",   dot: "bg-blue-400",   bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200" },
-  done:    { label: "Done",    dot: "bg-green-500",  bg: "bg-green-50",  text: "text-green-700",  border: "border-green-200" },
+  active:  { label: "Active",  dot: "bg-warn-solid",  bg: "bg-warn-bg",  text: "text-warn-fg",  border: "border-warn-solid/20" },
+  blocked: { label: "Blocked", dot: "bg-bad-solid",    bg: "bg-bad-bg",    text: "text-bad-fg",    border: "border-bad-solid/20" },
+  todo:    { label: "To Do",   dot: "bg-info-solid",   bg: "bg-info-bg",   text: "text-info-fg",   border: "border-info-solid/20" },
+  done:    { label: "Done",    dot: "bg-ok-solid",  bg: "bg-ok-bg",  text: "text-ok-fg",  border: "border-ok-solid/20" },
 };
 
 const PRIORITY: Record<string, { dot: string; label: string }> = {
-  urgent: { dot: "bg-red-500", label: "Urgent" }, high: { dot: "bg-orange-400", label: "High" },
-  medium: { dot: "bg-yellow-400", label: "Medium" }, low: { dot: "bg-neutral-300", label: "Low" },
+  urgent: { dot: "bg-bad-solid", label: "Urgent" }, high: { dot: "bg-hot-solid", label: "High" },
+  medium: { dot: "bg-warn-solid", label: "Medium" }, low: { dot: "bg-neutral-300", label: "Low" },
 };
 
 const CHANGE_META: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
-  feature: { icon: Sparkles, color: "text-blue-600", bg: "bg-blue-50 border-blue-200" },
-  fix: { icon: Bug, color: "text-red-600", bg: "bg-red-50 border-red-200" },
-  improvement: { icon: Wrench, color: "text-amber-600", bg: "bg-amber-50 border-amber-200" },
-  breaking: { icon: Rocket, color: "text-purple-600", bg: "bg-purple-50 border-purple-200" },
+  feature: { icon: Sparkles, color: "text-info-fg", bg: "bg-info-bg border-info-solid/20" },
+  fix: { icon: Bug, color: "text-bad-fg", bg: "bg-bad-bg border-bad-solid/20" },
+  improvement: { icon: Wrench, color: "text-warn-fg", bg: "bg-warn-bg border-warn-solid/20" },
+  breaking: { icon: Rocket, color: "text-bad-fg", bg: "bg-bad-bg border-bad-solid/20" },
 };
 
 const TODAY = new Date("2026-04-11");
@@ -65,26 +65,26 @@ const dl = Math.ceil((new Date(PROJ.target).getTime() - TODAY.getTime()) / 86400
 
 function KpiBar() {
   const stats = [
-    { icon: BadgeCheck, label: "Done", value: PROJ.done, color: "text-green-600", bg: "bg-green-50" },
-    { icon: Activity, label: "Active", value: PROJ.active, color: "text-amber-600", bg: "bg-amber-50" },
-    { icon: OctagonAlert, label: "Blocked", value: PROJ.blocked, color: PROJ.blocked > 0 ? "text-red-500" : "text-neutral-300", bg: PROJ.blocked > 0 ? "bg-red-50" : "bg-neutral-50" },
-    { icon: CircleDot, label: "To Do", value: todo, color: "text-blue-500", bg: "bg-blue-50" },
+    { icon: BadgeCheck, label: "Done", value: PROJ.done, color: "text-ok-fg", bg: "bg-ok-bg" },
+    { icon: Activity, label: "Active", value: PROJ.active, color: "text-warn-fg", bg: "bg-warn-bg" },
+    { icon: OctagonAlert, label: "Blocked", value: PROJ.blocked, color: PROJ.blocked > 0 ? "text-bad-fg" : "text-neutral-300", bg: PROJ.blocked > 0 ? "bg-bad-bg" : "bg-neutral-50" },
+    { icon: CircleDot, label: "To Do", value: todo, color: "text-info-fg", bg: "bg-info-bg" },
   ];
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PROJ.color }} />
-        <span className="text-sm font-bold text-neutral-900">{PROJ.name}</span>
+        <span className="text-sm font-serif font-bold text-neutral-950">{PROJ.name}</span>
         <div className="flex-1" />
         <span className="text-xs font-bold text-neutral-500">{PROJ.progress}%</span>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">{dl}d left</span>
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-warn-bg text-warn-fg">{dl}d left</span>
       </div>
       <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${PROJ.progress}%`, backgroundColor: PROJ.color }} />
       </div>
       <div className="grid grid-cols-4 gap-2">
         {stats.map((s, i) => { const I = s.icon; return (
-          <div key={i} className={`${s.bg} rounded-xl p-2.5 flex flex-col items-center gap-0.5`}>
+          <div key={i} className={`${s.bg} rounded-lg p-2.5 flex flex-col items-center gap-0.5`}>
             <I className={`w-3.5 h-3.5 ${s.color}`} />
             <span className={`text-base font-black ${s.color}`}>{s.value}</span>
             <span className={`text-xs font-semibold ${s.color} opacity-80`}>{s.label}</span>
@@ -101,7 +101,7 @@ function MiniChangelog() {
       {CHANGELOGS.map(r => (
         <div key={r.version} className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-neutral-900 font-mono">{r.version}</span>
+            <span className="text-xs font-bold text-neutral-950 font-mono">{r.version}</span>
             <span className="text-xs text-neutral-400">{r.date}</span>
             <span className="text-xs text-neutral-500">— {r.title}</span>
           </div>
@@ -167,35 +167,35 @@ function TaskDetailPanel({ task }: { task: typeof TASKS[0] }) {
           <div className="space-y-4">
             <div>
               <div className={`inline-block text-xs font-bold uppercase px-2.5 py-0.5 rounded-full mb-2 ${s?.bg} ${s?.text} border ${s?.border}`}>{s?.label}</div>
-              <h2 className="text-base font-bold text-neutral-900">{task.title}</h2>
+              <h2 className="text-base font-serif font-bold text-neutral-950">{task.title}</h2>
               {task.desc && <p className="text-xs text-neutral-500 mt-1">{task.desc}</p>}
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[{ l: "Assignee", v: task.assignee || "Unassigned" }, { l: "Priority", v: task.priority }, { l: "Due", v: task.due }, { l: "Estimated", v: task.est }, { l: "Start", v: task.start }, { l: "Status", v: s?.label ?? task.status }].map(f => (
-                <div key={f.l} className="bg-white rounded-xl border border-neutral-200 p-2.5">
+                <div key={f.l} className="bg-white rounded-lg border border-neutral-200 p-2.5">
                   <div className="text-xs text-neutral-400 uppercase font-semibold">{f.l}</div>
                   <div className="text-sm font-medium text-neutral-700 mt-0.5 capitalize">{f.v}</div>
                 </div>
               ))}
             </div>
             {task.deps.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3">
-                <div className="text-xs text-red-600 uppercase font-bold">Blocked by</div>
-                <div className="text-sm text-red-700 mt-1">{task.deps.map(d => TASKS.find(t => t.id === d)?.title ?? d).join(", ")}</div>
+              <div className="bg-bad-bg border border-bad-solid/20 rounded-lg p-3">
+                <div className="text-xs text-bad-fg uppercase font-bold">Blocked by</div>
+                <div className="text-sm text-bad-fg mt-1">{task.deps.map(d => TASKS.find(t => t.id === d)?.title ?? d).join(", ")}</div>
               </div>
             )}
           </div>
         )}
         {tab === "deps" && (
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-neutral-900">Dependency Chain</h3>
+            <h3 className="text-sm font-serif font-bold text-neutral-950">Dependency Chain</h3>
             {task.deps.length === 0 && <div className="text-xs text-neutral-400">No dependencies</div>}
             {task.deps.map(depId => {
               const dep = TASKS.find(t => t.id === depId);
               if (!dep) return null;
               const ds = STATUS[dep.status];
               return (
-                <div key={depId} className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200">
+                <div key={depId} className="flex items-center gap-3 p-3 rounded-lg border border-neutral-200">
                   <div className={`w-2 h-8 rounded-full ${ds?.dot}`} />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-neutral-800">{dep.title}</div>
@@ -205,12 +205,12 @@ function TaskDetailPanel({ task }: { task: typeof TASKS[0] }) {
                 </div>
               );
             })}
-            <h3 className="text-sm font-bold text-neutral-900 mt-4">Blocks</h3>
+            <h3 className="text-sm font-bold text-neutral-950 mt-4">Blocks</h3>
             {TASKS.filter(t => t.deps.includes(task.id)).length === 0 && <div className="text-xs text-neutral-400">Nothing blocked by this task</div>}
             {TASKS.filter(t => t.deps.includes(task.id)).map(t => {
               const ds = STATUS[t.status];
               return (
-                <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200">
+                <div key={t.id} className="flex items-center gap-3 p-3 rounded-lg border border-neutral-200">
                   <ArrowRight className="w-4 h-4 text-neutral-300" />
                   <div className={`w-2 h-8 rounded-full ${ds?.dot}`} />
                   <div className="flex-1 min-w-0">
@@ -224,7 +224,7 @@ function TaskDetailPanel({ task }: { task: typeof TASKS[0] }) {
         )}
         {tab === "timeline" && (
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-neutral-900">Task in context</h3>
+            <h3 className="text-sm font-serif font-bold text-neutral-950">Task in context</h3>
             <div className="text-xs text-neutral-500 mb-2">{task.start} → {task.due} · {task.est}</div>
             <MiniTimeline />
           </div>
@@ -248,13 +248,13 @@ export function ProjectPageVariantA() {
   const task = TASKS.find(t => t.id === sel);
 
   return (
-    <div className="flex h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white">
+    <div className="flex h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white">
       {/* Left */}
       <div className="w-[320px] border-r flex flex-col shrink-0">
         <div className="px-4 py-3 border-b shrink-0">
           <div className="flex items-center gap-2 mb-2">
             <ListChecks className="w-4 h-4 text-neutral-400" />
-            <span className="text-sm font-bold text-neutral-900">Tasks</span>
+            <span className="text-sm font-serif font-bold text-neutral-950">Tasks</span>
             <span className="text-xs bg-neutral-100 text-neutral-400 px-1.5 py-0.5 rounded">{filtered.length}</span>
           </div>
           <div className="flex gap-1 flex-wrap">
@@ -294,12 +294,12 @@ export function ProjectPageVariantA() {
         ) : (
           <div className="p-5 space-y-5">
             <KpiBar />
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="flex items-center gap-2 mb-3"><Activity className="w-4 h-4 text-neutral-400" /><span className="text-sm font-bold text-neutral-900">Timeline</span></div>
+            <div className="bg-white rounded-lg border border-neutral-200 p-4">
+              <div className="flex items-center gap-2 mb-3"><Activity className="w-4 h-4 text-neutral-400" /><span className="text-sm font-serif font-bold text-neutral-950">Timeline</span></div>
               <MiniTimeline />
             </div>
-            <div className="bg-white rounded-xl border border-neutral-200 p-4">
-              <div className="flex items-center gap-2 mb-3"><FileText className="w-4 h-4 text-neutral-400" /><span className="text-sm font-bold text-neutral-900">Changelog</span></div>
+            <div className="bg-white rounded-lg border border-neutral-200 p-4">
+              <div className="flex items-center gap-2 mb-3"><FileText className="w-4 h-4 text-neutral-400" /><span className="text-sm font-serif font-bold text-neutral-950">Changelog</span></div>
               <MiniChangelog />
             </div>
           </div>
@@ -323,12 +323,12 @@ export function ProjectPageVariantB() {
   const groups = ["active", "blocked", "todo", "done"];
 
   return (
-    <div className="flex h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white">
+    <div className="flex h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white">
       {/* Left: grouped */}
       <div className="w-[320px] border-r flex flex-col shrink-0">
         <div className="px-4 py-3 border-b shrink-0 flex items-center gap-2">
           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PROJ.color }} />
-          <span className="text-sm font-bold text-neutral-900">{PROJ.name}</span>
+          <span className="text-sm font-serif font-bold text-neutral-950">{PROJ.name}</span>
           <div className="flex-1" />
           <span className="text-xs text-neutral-400">{PROJ.done}/{PROJ.total}</span>
         </div>
@@ -377,8 +377,8 @@ export function ProjectPageVariantB() {
           ) : rightTab === "overview" ? (
             <div className="p-5 space-y-5">
               <KpiBar />
-              <div className="bg-white rounded-xl border border-neutral-200 p-4">
-                <div className="flex items-center gap-2 mb-3"><Activity className="w-4 h-4 text-neutral-400" /><span className="text-sm font-bold text-neutral-900">Timeline</span></div>
+              <div className="bg-white rounded-lg border border-neutral-200 p-4">
+                <div className="flex items-center gap-2 mb-3"><Activity className="w-4 h-4 text-neutral-400" /><span className="text-sm font-serif font-bold text-neutral-950">Timeline</span></div>
                 <MiniTimeline />
               </div>
             </div>
@@ -404,13 +404,13 @@ export function ProjectPageVariantC() {
   const task = TASKS.find(t => t.id === sel);
 
   return (
-    <div className="flex h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white">
+    <div className="flex h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white">
       {/* Left: narrow */}
       <div className="w-[240px] border-r flex flex-col shrink-0">
         <div className="px-3 py-3 border-b shrink-0 space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PROJ.color }} />
-            <span className="text-xs font-bold text-neutral-900 truncate">{PROJ.name}</span>
+            <span className="text-xs font-bold text-neutral-950 truncate">{PROJ.name}</span>
           </div>
           <div className="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
             <div className="h-full rounded-full" style={{ width: `${PROJ.progress}%`, backgroundColor: PROJ.color }} />
@@ -441,12 +441,12 @@ export function ProjectPageVariantC() {
         {/* Top: overview always visible */}
         <div className={`${task ? "h-[45%]" : "flex-1"} overflow-y-auto border-b p-4 space-y-4 transition-all`}>
           <KpiBar />
-          <div className="bg-white rounded-xl border border-neutral-200 p-3">
-            <div className="flex items-center gap-2 mb-2"><Activity className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-900">Timeline</span></div>
+          <div className="bg-white rounded-lg border border-neutral-200 p-3">
+            <div className="flex items-center gap-2 mb-2"><Activity className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-950">Timeline</span></div>
             <MiniTimeline />
           </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-3">
-            <div className="flex items-center gap-2 mb-2"><FileText className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-900">Changelog</span></div>
+          <div className="bg-white rounded-lg border border-neutral-200 p-3">
+            <div className="flex items-center gap-2 mb-2"><FileText className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-950">Changelog</span></div>
             <MiniChangelog />
           </div>
         </div>
@@ -472,12 +472,12 @@ export function ProjectPageVariantD() {
   const s = STATUS[task.status];
 
   return (
-    <div className="flex h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white">
+    <div className="flex h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white">
       {/* Col 1: task list */}
       <div className="w-[260px] border-r flex flex-col shrink-0">
         <div className="px-3 py-2.5 border-b shrink-0 flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PROJ.color }} />
-          <span className="text-xs font-bold text-neutral-900">{PROJ.name}</span>
+          <span className="text-xs font-bold text-neutral-950">{PROJ.name}</span>
           <div className="flex-1" />
           <Filter className="w-3 h-3 text-neutral-400 cursor-pointer" />
         </div>
@@ -499,7 +499,7 @@ export function ProjectPageVariantD() {
       <div className="w-[340px] border-r flex flex-col shrink-0 bg-white overflow-y-auto">
         <div className="px-4 py-3 border-b shrink-0">
           <div className={`inline-block text-xs font-bold uppercase px-2 py-0.5 rounded-full mb-1.5 ${s.bg} ${s.text} border ${s.border}`}>{s.label}</div>
-          <h2 className="text-sm font-bold text-neutral-900">{task.title}</h2>
+          <h2 className="text-sm font-serif font-bold text-neutral-950">{task.title}</h2>
           {task.desc && <p className="text-xs text-neutral-500 mt-1">{task.desc}</p>}
         </div>
         <div className="p-4 space-y-3">
@@ -512,15 +512,15 @@ export function ProjectPageVariantD() {
             ))}
           </div>
           {task.deps.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-2.5">
-              <div className="text-xs text-red-600 font-bold flex items-center gap-1"><GitBranch className="w-3 h-3" /> Blocked by</div>
-              {task.deps.map(d => <div key={d} className="text-xs text-red-700 mt-1">{TASKS.find(t => t.id === d)?.title}</div>)}
+            <div className="bg-bad-bg border border-bad-solid/20 rounded-lg p-2.5">
+              <div className="text-xs text-bad-fg font-bold flex items-center gap-1"><GitBranch className="w-3 h-3" /> Blocked by</div>
+              {task.deps.map(d => <div key={d} className="text-xs text-bad-fg mt-1">{TASKS.find(t => t.id === d)?.title}</div>)}
             </div>
           )}
           {TASKS.filter(t => t.deps.includes(task.id)).length > 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-              <div className="text-xs text-amber-600 font-bold flex items-center gap-1"><Flag className="w-3 h-3" /> Blocks</div>
-              {TASKS.filter(t => t.deps.includes(task.id)).map(t => <div key={t.id} className="text-xs text-amber-700 mt-1">{t.title}</div>)}
+            <div className="bg-warn-bg border border-warn-solid/20 rounded-lg p-2.5">
+              <div className="text-xs text-warn-fg font-bold flex items-center gap-1"><Flag className="w-3 h-3" /> Blocks</div>
+              {TASKS.filter(t => t.deps.includes(task.id)).map(t => <div key={t.id} className="text-xs text-warn-fg mt-1">{t.title}</div>)}
             </div>
           )}
         </div>
@@ -529,12 +529,12 @@ export function ProjectPageVariantD() {
       {/* Col 3: context */}
       <div className="flex-1 bg-neutral-50 overflow-y-auto p-4 space-y-4">
         <KpiBar />
-        <div className="bg-white rounded-xl border border-neutral-200 p-3">
-          <div className="flex items-center gap-2 mb-2"><Activity className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-900">Timeline</span></div>
+        <div className="bg-white rounded-lg border border-neutral-200 p-3">
+          <div className="flex items-center gap-2 mb-2"><Activity className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-950">Timeline</span></div>
           <MiniTimeline />
         </div>
-        <div className="bg-white rounded-xl border border-neutral-200 p-3">
-          <div className="flex items-center gap-2 mb-2"><FileText className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-900">Changelog</span></div>
+        <div className="bg-white rounded-lg border border-neutral-200 p-3">
+          <div className="flex items-center gap-2 mb-2"><FileText className="w-3.5 h-3.5 text-neutral-400" /><span className="text-xs font-bold text-neutral-950">Changelog</span></div>
           <MiniChangelog />
         </div>
       </div>

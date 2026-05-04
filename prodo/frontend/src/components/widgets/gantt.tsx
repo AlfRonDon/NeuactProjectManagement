@@ -43,15 +43,15 @@ const getWidth = (
 };
 
 const StatusColorMap: Record<TimelineStatus, string> = {
-  normal: "bg-green-500",
-  success: "bg-green-500",
-  warning: "bg-amber-400",
-  critical: "bg-red-500",
+  normal: "bg-ok-solid",
+  success: "bg-ok-solid",
+  warning: "bg-warn-solid",
+  critical: "bg-bad-solid",
   idle: "bg-neutral-300",
-  neutral: "bg-blue-400",
-  maintenance: "bg-orange-400",
-  offline: "bg-slate-500",
-  unknown: "bg-gray-400",
+  neutral: "bg-info-solid",
+  maintenance: "bg-hot-solid",
+  offline: "bg-neutral-500",
+  unknown: "bg-neutral-400",
 };
 
 const StatusBlock: React.FC<{
@@ -98,14 +98,14 @@ const TimeAxis: React.FC<{ start: number; end: number }> = ({
   }
 
   return (
-    <div className="relative w-full h-6 mt-4 border-t border-gray-200">
+    <div className="relative w-full h-6 mt-4 border-t border-neutral-200">
       {ticks.map((tick, i) => (
         <div
           key={i}
           className="absolute transform -translate-x-1/2 flex flex-col items-center"
           style={{ left: `${tick.percent}%` }}
         >
-          <div className="w-px h-1 bg-gray-300 mb-1" />
+          <div className="w-px h-1 bg-neutral-300 mb-1" />
           <span className="text-xs text-neutral-400 font-mono whitespace-nowrap">
             {tick.label}
           </span>
@@ -159,7 +159,7 @@ export default function GanttChart({ spec }: { spec: TimelineSpec }) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-5">
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
@@ -170,21 +170,21 @@ export default function GanttChart({ spec }: { spec: TimelineSpec }) {
         </div>
 
         <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-lg border border-neutral-200">
-          <button onClick={() => handlePan("left")} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-900" title="Pan Left">
+          <button onClick={() => handlePan("left")} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-950" title="Pan Left">
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
           <div className="w-px h-3 bg-neutral-300 mx-0.5" />
-          <button onClick={() => handleZoom(1.3)} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-900" title="Zoom Out">
+          <button onClick={() => handleZoom(1.3)} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-950" title="Zoom Out">
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
-          <button onClick={handleReset} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-900" title="Reset">
+          <button onClick={handleReset} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-950" title="Reset">
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => handleZoom(0.7)} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-900" title="Zoom In">
+          <button onClick={() => handleZoom(0.7)} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-950" title="Zoom In">
             <ZoomIn className="w-3.5 h-3.5" />
           </button>
           <div className="w-px h-3 bg-neutral-300 mx-0.5" />
-          <button onClick={() => handlePan("right")} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-900" title="Pan Right">
+          <button onClick={() => handlePan("right")} className="p-1 hover:bg-white hover:shadow-sm rounded transition-all text-neutral-500 hover:text-neutral-950" title="Pan Right">
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -196,7 +196,7 @@ export default function GanttChart({ spec }: { spec: TimelineSpec }) {
           {spec.lanes.map((lane) => (
             <div key={lane.id} className="flex items-center gap-3">
               <div className="w-28 flex-shrink-0 text-right pr-2">
-                <span className="text-[11px] font-medium text-neutral-600 truncate block">
+                <span className="text-sm font-medium text-neutral-600 truncate block">
                   {lane.label}
                 </span>
               </div>
@@ -222,7 +222,7 @@ export default function GanttChart({ spec }: { spec: TimelineSpec }) {
           {spec.annotations.map((ann) => (
             <div
               key={ann.id}
-              className="flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 rounded border border-emerald-200 text-xs font-medium"
+              className="flex items-center gap-1 px-2 py-1 bg-ok-bg text-ok-fg rounded border border-ok-solid/20 text-xs font-medium"
             >
               <Flag className="w-3 h-3" />
               {ann.label} — {ann.time}

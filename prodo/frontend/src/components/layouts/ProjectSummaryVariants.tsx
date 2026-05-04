@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 
 const PROJECTS = [
-  { name: "Command Center v5", short: "CCv5", color: "#3b82f6", progress: 30, tasks: 10, done: 3, active: 3, blocked: 1, target: "2026-07-31", start: "2026-04-01" },
-  { name: "NeuactReport v3", short: "NRv3", color: "#8b5cf6", progress: 33, tasks: 6, done: 2, active: 2, blocked: 0, target: "2026-06-01", start: "2026-03-15" },
-  { name: "Spot Particle", short: "Spot", color: "#f59e0b", progress: 50, tasks: 6, done: 3, active: 1, blocked: 1, target: "2026-04-30", start: "2026-03-01" },
+  { name: "Command Center v5", short: "CCv5", color: "#6366F1", progress: 30, tasks: 10, done: 3, active: 3, blocked: 1, target: "2026-07-31", start: "2026-04-01" },
+  { name: "NeuactReport v3", short: "NRv3", color: "#8B5CF6", progress: 33, tasks: 6, done: 2, active: 2, blocked: 0, target: "2026-06-01", start: "2026-03-15" },
+  { name: "Spot Particle", short: "Spot", color: "#EC4899", progress: 50, tasks: 6, done: 3, active: 1, blocked: 1, target: "2026-04-30", start: "2026-03-01" },
 ];
 
 const total = PROJECTS.reduce((s, p) => s + p.tasks, 0);
@@ -24,7 +24,7 @@ function pace(p: typeof PROJECTS[0]) {
   const td = Math.ceil((new Date(p.target).getTime() - new Date(p.start).getTime()) / 86400000);
   const el = Math.ceil((new Date().getTime() - new Date(p.start).getTime()) / 86400000);
   const delta = p.progress - Math.round(Math.min(100, (el / td) * 100));
-  return delta >= 5 ? { label: "Ahead", color: "text-green-600", bg: "bg-green-50" } : delta >= -10 ? { label: "On track", color: "text-amber-600", bg: "bg-amber-50" } : { label: "Behind", color: "text-red-600", bg: "bg-red-50" };
+  return delta >= 5 ? { label: "Ahead", color: "text-ok-fg", bg: "bg-ok-bg" } : delta >= -10 ? { label: "On track", color: "text-warn-fg", bg: "bg-warn-bg" } : { label: "Behind", color: "text-bad-fg", bg: "bg-bad-bg" };
 }
 const closest = [...PROJECTS].sort((a, b) => dl(a.target) - dl(b.target))[0];
 
@@ -38,13 +38,13 @@ const AI_BRIEF = `Across ${PROJECTS.length} projects you're tracking ${total} ta
    ═══════════════════════════════════════════════════════════ */
 export function ProjectSummaryVariantA() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-4 py-3 border-b shrink-0">
-        <span className="text-sm font-bold text-neutral-900">Portfolio Summary</span>
+        <span className="text-sm font-serif font-bold text-neutral-950">Portfolio Summary</span>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {/* Overall */}
-        <div className="bg-neutral-900 rounded-xl p-4 text-white">
+        <div className="bg-neutral-900 rounded-lg p-4 text-white">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs uppercase font-semibold opacity-60">Overall Progress</span>
             <span className="text-xs opacity-60">{done}/{total} tasks</span>
@@ -58,9 +58,9 @@ export function ProjectSummaryVariantA() {
             </div>
           </div>
           <div className="flex gap-3 mt-2 text-xs">
-            <span><span className="font-bold text-green-400">{done}</span> done</span>
-            <span><span className="font-bold text-amber-400">{active}</span> active</span>
-            <span className={blocked > 0 ? "text-red-400" : ""}><span className="font-bold">{blocked}</span> blocked</span>
+            <span><span className="font-bold text-ok-fg">{done}</span> done</span>
+            <span><span className="font-bold text-warn-fg">{active}</span> active</span>
+            <span className={blocked > 0 ? "text-bad-fg" : ""}><span className="font-bold">{blocked}</span> blocked</span>
           </div>
         </div>
 
@@ -69,10 +69,10 @@ export function ProjectSummaryVariantA() {
           const pc = pace(p);
           const d = dl(p.target);
           return (
-            <div key={p.short} className="rounded-xl border border-neutral-200 p-4 space-y-2">
+            <div key={p.short} className="rounded-lg border border-neutral-200 p-4 space-y-2">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: p.color }} />
-                <span className="text-sm font-bold text-neutral-900 flex-1">{p.name}</span>
+                <span className="text-sm font-bold text-neutral-950 flex-1">{p.name}</span>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${pc.bg} ${pc.color}`}>{pc.label}</span>
               </div>
               <div className="flex items-center gap-3">
@@ -81,20 +81,20 @@ export function ProjectSummaryVariantA() {
                     <div className="h-full rounded-full" style={{ width: `${p.progress}%`, backgroundColor: p.color }} />
                   </div>
                 </div>
-                <span className="text-sm font-black text-neutral-800">{p.progress}%</span>
+                <span className="text-sm font-mono font-black text-neutral-800">{p.progress}%</span>
               </div>
               <div className="flex gap-4 text-xs text-neutral-500">
-                <span><span className="font-semibold text-green-600">{p.done}</span> done</span>
-                <span><span className="font-semibold text-amber-600">{p.active}</span> active</span>
-                {p.blocked > 0 && <span><span className="font-semibold text-red-500">{p.blocked}</span> blocked</span>}
-                <span className="ml-auto"><span className={`font-semibold ${d < 30 ? "text-amber-600" : "text-neutral-700"}`}>{d}d</span> left</span>
+                <span><span className="font-semibold text-ok-fg">{p.done}</span> done</span>
+                <span><span className="font-semibold text-warn-fg">{p.active}</span> active</span>
+                {p.blocked > 0 && <span><span className="font-semibold text-bad-fg">{p.blocked}</span> blocked</span>}
+                <span className="ml-auto"><span className={`font-semibold ${d < 30 ? "text-warn-fg" : "text-neutral-700"}`}>{d}d</span> left</span>
               </div>
             </div>
           );
         })}
 
         {/* Task distribution mini */}
-        <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3">
+        <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-3">
           <div className="text-xs font-bold text-neutral-500 uppercase mb-2">Distribution</div>
           <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
             {PROJECTS.map(p => (
@@ -109,7 +109,7 @@ export function ProjectSummaryVariantA() {
         </div>
 
         {/* AI Brief */}
-        <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
+        <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Brain className="w-4 h-4 text-purple-500" />
             <span className="text-xs font-bold text-purple-700 uppercase">AI Brief</span>
@@ -129,16 +129,16 @@ export function ProjectSummaryVariantA() {
    ═══════════════════════════════════════════════════════════ */
 export function ProjectSummaryVariantB() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-4 py-3 border-b shrink-0">
-        <span className="text-sm font-bold text-neutral-900">Portfolio Pulse</span>
+        <span className="text-sm font-serif font-bold text-neutral-950">Portfolio Pulse</span>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Big ring + stats */}
         <div className="flex items-center gap-4">
           <div className="relative w-24 h-24 shrink-0">
             <svg className="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-              <circle cx="48" cy="48" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
+              <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border-subtle)" strokeWidth="8" />
               {(() => {
                 let offset = 0;
                 return PROJECTS.map(p => {
@@ -150,21 +150,21 @@ export function ProjectSummaryVariantB() {
               })()}
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-black text-neutral-900">{overallPct}%</span>
+              <span className="text-2xl font-mono font-black text-neutral-950">{overallPct}%</span>
               <span className="text-xs text-neutral-400">done</span>
             </div>
           </div>
           <div className="flex-1 space-y-1.5">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-ok-solid" />
               <span className="text-xs text-neutral-700"><span className="font-bold">{done}</span> completed</span>
             </div>
             <div className="flex items-center gap-2">
-              <Activity className="w-3.5 h-3.5 text-amber-500" />
+              <Activity className="w-3.5 h-3.5 text-warn-solid" />
               <span className="text-xs text-neutral-700"><span className="font-bold">{active}</span> in progress</span>
             </div>
             <div className="flex items-center gap-2">
-              <OctagonAlert className="w-3.5 h-3.5 text-red-500" />
+              <OctagonAlert className="w-3.5 h-3.5 text-bad-solid" />
               <span className="text-xs text-neutral-700"><span className="font-bold">{blocked}</span> blocked</span>
             </div>
             <div className="flex items-center gap-2">
@@ -188,21 +188,21 @@ export function ProjectSummaryVariantB() {
                 </div>
                 <span className="text-xs font-bold text-neutral-700 w-8 text-right">{p.progress}%</span>
                 <span className={`text-xs font-semibold w-14 text-right ${pc.color}`}>{pc.label}</span>
-                <span className={`text-xs w-8 text-right ${d < 15 ? "text-red-500 font-bold" : "text-neutral-400"}`}>{d}d</span>
+                <span className={`text-xs w-8 text-right ${d < 15 ? "text-bad-solid font-bold" : "text-neutral-400"}`}>{d}d</span>
               </div>
             );
           })}
         </div>
 
         {/* Deadlines */}
-        <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-3">
+        <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-3">
           <div className="text-xs font-bold text-neutral-500 uppercase mb-2">Deadlines</div>
           <div className="flex gap-2">
             {[...PROJECTS].sort((a, b) => dl(a.target) - dl(b.target)).map(p => {
               const d = dl(p.target);
               return (
                 <div key={p.short} className="flex-1 text-center">
-                  <div className={`text-xl font-black ${d < 15 ? "text-red-600" : d < 40 ? "text-amber-600" : "text-green-600"}`}>{d}d</div>
+                  <div className={`text-xl font-black ${d < 15 ? "text-bad-fg" : d < 40 ? "text-warn-fg" : "text-ok-fg"}`}>{d}d</div>
                   <div className="text-xs text-neutral-500 mt-0.5">{p.short}</div>
                   <div className="text-xs text-neutral-400">{new Date(p.target).toLocaleDateString([], { month: "short", day: "numeric" })}</div>
                 </div>
@@ -212,7 +212,7 @@ export function ProjectSummaryVariantB() {
         </div>
 
         {/* AI Brief */}
-        <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
+        <div className="bg-purple-50 rounded-lg border border-purple-200 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-purple-500" />
             <span className="text-xs font-bold text-purple-700 uppercase">AI Summary</span>
@@ -232,9 +232,9 @@ export function ProjectSummaryVariantB() {
    ═══════════════════════════════════════════════════════════ */
 export function ProjectSummaryVariantC() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900 text-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 text-white flex flex-col">
       <div className="px-4 py-3 border-b border-white/10 shrink-0 flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <div className="w-2 h-2 rounded-full bg-ok-solid animate-pulse" />
         <span className="text-sm font-bold">System Status</span>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -243,16 +243,16 @@ export function ProjectSummaryVariantC() {
           <div className="relative w-28 h-28 mx-auto">
             <svg className="w-28 h-28 -rotate-90" viewBox="0 0 112 112">
               <circle cx="56" cy="56" r="48" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
-              <circle cx="56" cy="56" r="48" fill="none" stroke="#22c55e" strokeWidth="8" strokeDasharray={`${overallPct * 3.02} 301.6`} strokeLinecap="round" />
+              <circle cx="56" cy="56" r="48" fill="none" stroke="var(--ok-solid)" strokeWidth="8" strokeDasharray={`${overallPct * 3.02} 301.6`} strokeLinecap="round" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-3xl font-black">{overallPct}%</span>
             </div>
           </div>
           <div className="flex justify-center gap-4 mt-3 text-xs">
-            <span><span className="font-bold text-green-400">{done}</span> done</span>
-            <span><span className="font-bold text-amber-400">{active}</span> active</span>
-            <span><span className="font-bold text-red-400">{blocked}</span> blocked</span>
+            <span><span className="font-bold text-ok-fg">{done}</span> done</span>
+            <span><span className="font-bold text-warn-fg">{active}</span> active</span>
+            <span><span className="font-bold text-bad-fg">{blocked}</span> blocked</span>
           </div>
         </div>
 
@@ -260,9 +260,9 @@ export function ProjectSummaryVariantC() {
         {PROJECTS.map(p => {
           const pc = pace(p);
           const d = dl(p.target);
-          const healthDot = pc.label === "Ahead" ? "bg-green-500" : pc.label === "On track" ? "bg-amber-400" : "bg-red-500";
+          const healthDot = pc.label === "Ahead" ? "bg-ok-solid" : pc.label === "On track" ? "bg-warn-solid" : "bg-bad-solid";
           return (
-            <div key={p.short} className="bg-white/5 rounded-xl border border-white/10 p-3">
+            <div key={p.short} className="bg-white/5 rounded-lg border border-white/10 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-3 h-3 rounded-full ${healthDot}`} />
                 <span className="text-sm font-bold flex-1">{p.short}</span>
@@ -276,7 +276,7 @@ export function ProjectSummaryVariantC() {
               </div>
               <div className="flex gap-3 mt-1.5 text-xs opacity-60">
                 <span>{p.done}/{p.tasks} done</span>
-                {p.blocked > 0 && <span className="text-red-400">{p.blocked} blocked</span>}
+                {p.blocked > 0 && <span className="text-bad-fg">{p.blocked} blocked</span>}
               </div>
             </div>
           );
@@ -284,17 +284,17 @@ export function ProjectSummaryVariantC() {
 
         {/* Blockers callout */}
         {blocked > 0 && (
-          <div className="bg-red-500/10 rounded-xl border border-red-500/20 p-3">
+          <div className="bg-bad-solid/10 rounded-lg border border-bad-solid/20 p-3">
             <div className="flex items-center gap-2 mb-1">
-              <OctagonAlert className="w-3.5 h-3.5 text-red-400" />
-              <span className="text-xs font-bold text-red-400">{blocked} Blocker{blocked > 1 ? "s" : ""}</span>
+              <OctagonAlert className="w-3.5 h-3.5 text-bad-fg" />
+              <span className="text-xs font-bold text-bad-fg">{blocked} Blocker{blocked > 1 ? "s" : ""}</span>
             </div>
-            <p className="text-xs text-red-300 opacity-80">Tasks blocked across {PROJECTS.filter(p => p.blocked > 0).length} project{PROJECTS.filter(p => p.blocked > 0).length > 1 ? "s" : ""}. Resolve to unblock downstream work.</p>
+            <p className="text-xs text-bad-solid opacity-80">Tasks blocked across {PROJECTS.filter(p => p.blocked > 0).length} project{PROJECTS.filter(p => p.blocked > 0).length > 1 ? "s" : ""}. Resolve to unblock downstream work.</p>
           </div>
         )}
 
         {/* AI Brief */}
-        <div className="bg-purple-500/10 rounded-xl border border-purple-500/20 p-3">
+        <div className="bg-purple-500/10 rounded-lg border border-purple-500/20 p-3">
           <div className="flex items-center gap-2 mb-1.5">
             <Brain className="w-3.5 h-3.5 text-purple-400" />
             <span className="text-xs font-bold text-purple-400 uppercase">AI Brief</span>
@@ -314,15 +314,15 @@ export function ProjectSummaryVariantC() {
    ═══════════════════════════════════════════════════════════ */
 export function ProjectSummaryVariantD() {
   return (
-    <div className="h-[700px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
+    <div className="h-[700px] rounded-lg overflow-hidden border border-neutral-200 bg-white flex flex-col">
       <div className="px-4 py-3 border-b shrink-0">
-        <span className="text-sm font-bold text-neutral-900">Portfolio</span>
+        <span className="text-sm font-serif font-bold text-neutral-950">Portfolio</span>
         <span className="text-xs text-neutral-400 ml-2">{PROJECTS.length} projects · {total} tasks · {done} done</span>
       </div>
       <div className="flex-1 overflow-y-auto">
         {/* Inline overall */}
         <div className="px-4 py-3 border-b flex items-center gap-3">
-          <span className="text-3xl font-black text-neutral-900">{overallPct}%</span>
+          <span className="text-3xl font-mono font-black text-neutral-950">{overallPct}%</span>
           <div className="flex-1">
             <div className="w-full h-2.5 bg-neutral-100 rounded-full overflow-hidden flex gap-px">
               {PROJECTS.map(p => (
@@ -333,9 +333,9 @@ export function ProjectSummaryVariantD() {
             </div>
           </div>
           <div className="flex gap-2 text-xs shrink-0">
-            <span className="text-green-600 font-bold">{done}✓</span>
-            <span className="text-amber-600 font-bold">{active}→</span>
-            {blocked > 0 && <span className="text-red-600 font-bold">{blocked}✕</span>}
+            <span className="text-ok-fg font-bold">{done}✓</span>
+            <span className="text-warn-fg font-bold">{active}→</span>
+            {blocked > 0 && <span className="text-bad-fg font-bold">{blocked}✕</span>}
           </div>
         </div>
 
@@ -347,7 +347,7 @@ export function ProjectSummaryVariantD() {
             <div key={p.short} className="px-4 py-3 border-b">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                <span className="text-sm font-semibold text-neutral-900 flex-1">{p.name}</span>
+                <span className="text-sm font-semibold text-neutral-950 flex-1">{p.name}</span>
                 <span className={`text-xs font-bold ${pc.color}`}>{pc.label}</span>
               </div>
               <div className="flex items-center gap-2 mb-1">
@@ -359,8 +359,8 @@ export function ProjectSummaryVariantD() {
               <div className="flex gap-3 text-xs text-neutral-500">
                 <span>{p.done}/{p.tasks} tasks</span>
                 <span>{p.active} active</span>
-                {p.blocked > 0 && <span className="text-red-500">{p.blocked} blocked</span>}
-                <span className={`ml-auto font-semibold ${d < 15 ? "text-red-500" : "text-neutral-500"}`}>Target: {new Date(p.target).toLocaleDateString([], { month: "short", day: "numeric" })} ({d}d)</span>
+                {p.blocked > 0 && <span className="text-bad-fg">{p.blocked} blocked</span>}
+                <span className={`ml-auto font-semibold ${d < 15 ? "text-bad-fg" : "text-neutral-500"}`}>Target: {new Date(p.target).toLocaleDateString([], { month: "short", day: "numeric" })} ({d}d)</span>
               </div>
             </div>
           );

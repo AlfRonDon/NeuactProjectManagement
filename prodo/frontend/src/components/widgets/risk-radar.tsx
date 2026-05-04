@@ -14,7 +14,7 @@ import { Shield, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 interface RiskAxis {
   axis: string;
-  score: number; // 0-100
+  score: number;
   description: string;
 }
 
@@ -26,40 +26,61 @@ interface RiskRadarData {
 }
 
 const RISK_COLOR: Record<string, { fill: string; stroke: string; bg: string; text: string }> = {
-  low: { fill: "rgba(34, 197, 94, 0.15)", stroke: "#22c55e", bg: "bg-green-50", text: "text-green-700" },
-  medium: { fill: "rgba(234, 179, 8, 0.15)", stroke: "#eab308", bg: "bg-yellow-50", text: "text-yellow-700" },
-  high: { fill: "rgba(249, 115, 22, 0.15)", stroke: "#f97316", bg: "bg-orange-50", text: "text-orange-700" },
-  critical: { fill: "rgba(239, 68, 68, 0.2)", stroke: "#ef4444", bg: "bg-red-50", text: "text-red-700" },
+  low: { fill: "rgba(34, 197, 94, 0.12)", stroke: "#22C55E", bg: "bg-ok-bg", text: "text-ok-fg" },
+  medium: { fill: "rgba(245, 158, 11, 0.12)", stroke: "#F59E0B", bg: "bg-warn-bg", text: "text-warn-fg" },
+  high: { fill: "rgba(234, 88, 12, 0.12)", stroke: "#EA580C", bg: "bg-hot-bg", text: "text-hot-fg" },
+  critical: { fill: "rgba(239, 68, 68, 0.15)", stroke: "#EF4444", bg: "bg-bad-bg", text: "text-bad-fg" },
 };
 
+/* CMD-style tooltip — white, subtle border, Geist font */
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const data = payload[0]?.payload;
   return (
-    <div className="bg-neutral-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl border border-neutral-800 max-w-[200px]">
-      <div className="font-bold mb-1">{data?.axis}</div>
-      <div className="text-amber-400 mb-1">Score: {data?.score}/100</div>
-      <div className="text-neutral-300">{data?.description}</div>
+    <div style={{ background: "#fff", border: "1px solid #E9E5E4", borderRadius: 8, padding: "8px 12px", fontFamily: "'Geist', sans-serif", fontSize: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.08)", maxWidth: 200 }}>
+      <div style={{ fontWeight: 600, color: "#1A1716", marginBottom: 4 }}>{data?.axis}</div>
+      <div style={{ fontFamily: "'Geist Mono', monospace", color: "#1A1716", marginBottom: 4 }}>Score: <b>{data?.score}</b>/100</div>
+      <div style={{ color: "#938A89", fontSize: 11 }}>{data?.description}</div>
     </div>
   );
 };
+
+/* Radar label tick — matches Sprint Diagnostic style: pushed outward, semibold, warm colors */
+function RiskRadarTick(props: any) {
+  const { x, y, payload, cx: chartCx, cy: chartCy, data } = props;
+  const axis = data?.find((d: any) => d.axis === payload.value);
+  const score = axis?.score ?? 0;
+  // High scores = warm/red, low = green/muted
+  const fill = score >= 70 ? "#991B1B" : score >= 50 ? "#1A1716" : "#686160";
+  const dx = x - chartCx;
+  const dy = y - chartCy;
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  const push = 8 + Math.abs(dx / len) * 18;
+  const lx = x + (dx / len) * push;
+  const ly = y + (dy / len) * push;
+
+  return (
+    <text x={lx} y={ly} textAnchor="middle" dominantBaseline="central"
+      fill={fill} fontSize={11} fontWeight={600} fontFamily="'Geist', sans-serif">
+      {payload.value}
+    </text>
+  );
+}
 
 export default function RiskRadar({ data }: { data: RiskRadarData }) {
   const colors = RISK_COLOR[data.overallRisk] || RISK_COLOR.medium;
   const highRisks = data.axes.filter((a) => a.score >= 70);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-neutral-400" />
-          <h3 className="text-xs uppercase font-bold tracking-widest text-neutral-400">
-            Risk Radar — {data.projectName}
-          </h3>
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-4 h-full flex flex-col">
+      {/* Header — same style as Sprint Diagnostic */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <Shield className="w-3.5 h-3.5 text-neutral-400" />
+          <span className="text-base font-serif font-semibold text-neutral-950">Risk Radar</span>
+          <span className="text-sm text-neutral-500">· {data.projectName}</span>
         </div>
-        <div
-          className={`flex items-center gap-1 text-xs font-bold uppercase tracking-wider px-2 py-1 rounded border ${colors.bg} ${colors.text}`}
-        >
+        <div className={`flex items-center gap-1 text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full ${colors.bg} ${colors.text}`}>
           {data.overallRisk === "low" || data.overallRisk === "medium" ? (
             <CheckCircle2 className="w-3 h-3" />
           ) : (
@@ -69,37 +90,35 @@ export default function RiskRadar({ data }: { data: RiskRadarData }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+      <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
+        {/* Radar chart — matches Sprint Diagnostic: no tick numbers, warm grid, pushed labels */}
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data.axes} cx="50%" cy="50%" outerRadius="75%">
-            <PolarGrid stroke="#e5e5e5" />
+          <RadarChart data={data.axes} cx="50%" cy="50%" outerRadius="65%">
+            <PolarGrid stroke="#E9E5E4" strokeWidth={0.8} />
             <PolarAngleAxis
               dataKey="axis"
-              tick={{ fontSize: 11, fill: "#737373" }}
+              tick={(tickProps: any) => <RiskRadarTick {...tickProps} data={data.axes} />}
             />
-            <PolarRadiusAxis
-              angle={30}
-              domain={[0, 100]}
-              tick={{ fontSize: 10, fill: "#a3a3a3" }}
-              tickCount={5}
-            />
+            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
             <Radar
               dataKey="score"
               stroke={colors.stroke}
               fill={colors.fill}
-              strokeWidth={2}
+              strokeWidth={2.5}
+              dot={{ r: 4, fill: colors.stroke, stroke: "none" }}
             />
             <Tooltip content={<CustomTooltip />} />
           </RadarChart>
         </ResponsiveContainer>
 
-        <div className="flex flex-col justify-center">
+        {/* Right side — AI + scores */}
+        <div className="flex flex-col justify-center gap-2">
           {/* AI Summary */}
-          <div className="bg-neutral-50 rounded-lg border border-neutral-100 p-3 mb-3">
-            <div className="text-xs uppercase font-bold tracking-widest text-neutral-400 mb-1.5">
+          <div className="bg-neutral-50 rounded-lg border border-neutral-100 p-3">
+            <div className="text-xs uppercase font-bold tracking-widest text-neutral-500 mb-1">
               AI Assessment
             </div>
-            <p className="text-xs text-neutral-600 leading-relaxed">
+            <p className="text-sm text-neutral-700 leading-relaxed">
               {data.aiSummary}
             </p>
           </div>
@@ -107,49 +126,38 @@ export default function RiskRadar({ data }: { data: RiskRadarData }) {
           {/* High risk axes */}
           {highRisks.length > 0 && (
             <div>
-              <div className="text-xs uppercase font-bold tracking-widest text-red-400 mb-2">
+              <div className="text-xs uppercase font-bold tracking-widest text-bad-solid mb-1.5">
                 Attention Areas
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {highRisks.map((r) => (
-                  <div
-                    key={r.axis}
-                    className="flex items-center justify-between bg-red-50 rounded px-2.5 py-1.5 border border-red-100"
-                  >
-                    <span className="text-xs font-medium text-red-700">
-                      {r.axis}
-                    </span>
-                    <span className="text-xs font-bold text-red-600">
-                      {r.score}
-                    </span>
+                  <div key={r.axis}
+                    className="flex items-center justify-between bg-bad-bg rounded-lg px-3 py-1.5 border border-bad-solid/20">
+                    <span className="text-sm font-semibold text-bad-fg">{r.axis}</span>
+                    <span className="text-sm font-mono font-bold text-bad-fg">{r.score}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* All scores */}
-          <div className="mt-3 space-y-1">
+          {/* Lower scores — bar chart style */}
+          <div className="space-y-1">
             {data.axes
               .filter((a) => a.score < 70)
               .map((a) => (
                 <div key={a.axis} className="flex items-center gap-2">
-                  <span className="text-xs text-neutral-400 w-24 truncate">
-                    {a.axis}
-                  </span>
+                  <span className="text-sm text-neutral-500 w-20 truncate">{a.axis}</span>
                   <div className="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all"
+                      className="h-full rounded-full"
                       style={{
                         width: `${a.score}%`,
-                        backgroundColor:
-                          a.score > 50 ? "#f59e0b" : "#22c55e",
+                        backgroundColor: a.score > 50 ? "#F59E0B" : "#22C55E",
                       }}
                     />
                   </div>
-                  <span className="text-xs text-neutral-400 w-6 text-right">
-                    {a.score}
-                  </span>
+                  <span className="text-sm font-mono text-neutral-500 w-6 text-right">{a.score}</span>
                 </div>
               ))}
           </div>

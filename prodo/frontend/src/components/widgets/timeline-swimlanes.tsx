@@ -38,18 +38,18 @@ interface SwimLaneData {
 
 const STATUS_COLORS: Record<string, string> = {
   backlog: "bg-neutral-300",
-  todo: "bg-blue-400",
-  in_progress: "bg-amber-400",
-  in_review: "bg-purple-400",
-  done: "bg-green-500",
+  todo: "bg-info-solid",
+  in_progress: "bg-warn-solid",
+  in_review: "bg-info-solid/70",
+  done: "bg-ok-solid",
 };
 
 const STATUS_HOVER: Record<string, string> = {
   backlog: "hover:bg-neutral-400",
-  todo: "hover:bg-blue-500",
-  in_progress: "hover:bg-amber-500",
-  in_review: "hover:bg-purple-500",
-  done: "hover:bg-green-600",
+  todo: "hover:bg-info-solid/90",
+  in_progress: "hover:bg-warn-solid/90",
+  in_review: "hover:bg-info-solid/60",
+  done: "hover:bg-ok-solid/90",
 };
 
 const ts = (d: string) => new Date(d).getTime();
@@ -102,7 +102,7 @@ export default function TimelineSwimLanes({ data }: { data: SwimLaneData }) {
   });
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div className="bg-white rounded-lg border border-neutral-200 shadow-xsmall p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -116,11 +116,11 @@ export default function TimelineSwimLanes({ data }: { data: SwimLaneData }) {
         </div>
 
         <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-lg border border-neutral-200">
-          <button onClick={() => pan("left")} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-900"><ChevronLeft className="w-3.5 h-3.5" /></button>
-          <button onClick={() => zoom(1.3)} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-900"><ZoomOut className="w-3.5 h-3.5" /></button>
-          <button onClick={reset} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-900"><RotateCcw className="w-3.5 h-3.5" /></button>
-          <button onClick={() => zoom(0.7)} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-900"><ZoomIn className="w-3.5 h-3.5" /></button>
-          <button onClick={() => pan("right")} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-900"><ChevronRight className="w-3.5 h-3.5" /></button>
+          <button onClick={() => pan("left")} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-950"><ChevronLeft className="w-3.5 h-3.5" /></button>
+          <button onClick={() => zoom(1.3)} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-950"><ZoomOut className="w-3.5 h-3.5" /></button>
+          <button onClick={reset} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-950"><RotateCcw className="w-3.5 h-3.5" /></button>
+          <button onClick={() => zoom(0.7)} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-950"><ZoomIn className="w-3.5 h-3.5" /></button>
+          <button onClick={() => pan("right")} className="p-1 hover:bg-white hover:shadow-sm rounded text-neutral-500 hover:text-neutral-950"><ChevronRight className="w-3.5 h-3.5" /></button>
         </div>
       </div>
 
@@ -131,7 +131,7 @@ export default function TimelineSwimLanes({ data }: { data: SwimLaneData }) {
           return (
             <div key={lane.id} className="flex items-center gap-3">
               <div className="w-28 flex-shrink-0 text-right pr-2">
-                <span className="text-[11px] font-medium text-neutral-600 truncate block">
+                <span className="text-sm font-medium text-neutral-600 truncate block">
                   {lane.label}
                 </span>
               </div>
@@ -139,7 +139,7 @@ export default function TimelineSwimLanes({ data }: { data: SwimLaneData }) {
                 {/* Today line */}
                 {todayPct >= 0 && todayPct <= 100 && (
                   <div
-                    className="absolute top-0 bottom-0 w-px bg-red-400 z-20"
+                    className="absolute top-0 bottom-0 w-px bg-bad-solid z-20"
                     style={{ left: `${todayPct}%` }}
                   />
                 )}
@@ -180,7 +180,7 @@ export default function TimelineSwimLanes({ data }: { data: SwimLaneData }) {
                       className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 group"
                       style={{ left: `${pos}%` }}
                     >
-                      <Diamond className="w-4 h-4 text-emerald-500 fill-emerald-500 drop-shadow" />
+                      <Diamond className="w-4 h-4 text-ok-solid fill-ok-solid drop-shadow" />
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-neutral-900 text-white text-xs rounded px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
                         {ms.label} — {ms.date}
                       </div>
@@ -201,7 +201,7 @@ export default function TimelineSwimLanes({ data }: { data: SwimLaneData }) {
             className="absolute -top-0.5"
             style={{ left: `${todayPct}%`, transform: "translateX(-50%)" }}
           >
-            <div className="text-xs font-bold text-red-500 bg-red-50 px-1 rounded border border-red-200">
+            <div className="text-xs font-bold text-bad-fg bg-bad-bg px-1 rounded border border-bad-solid/20">
               Today
             </div>
           </div>
@@ -229,11 +229,11 @@ export default function TimelineSwimLanes({ data }: { data: SwimLaneData }) {
           </div>
         ))}
         <div className="flex items-center gap-1 ml-2">
-          <Diamond className="w-3 h-3 text-emerald-500 fill-emerald-500" />
+          <Diamond className="w-3 h-3 text-ok-solid fill-ok-solid" />
           <span className="text-xs text-neutral-400">Milestone</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-px h-3 bg-red-400" />
+          <div className="w-px h-3 bg-bad-solid" />
           <span className="text-xs text-neutral-400">Today</span>
         </div>
       </div>
