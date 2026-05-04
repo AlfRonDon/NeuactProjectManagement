@@ -1,790 +1,618 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import SprintCard from "@/components/widgets/SprintCard";
+import DiagnosticCard from "@/components/widgets/DiagnosticCard";
+import WorkloadCard from "@/components/widgets/WorkloadCard";
+import ProjectCards from "@/components/widgets/ProjectCards";
+import ProjectDetail from "@/components/widgets/ProjectDetail";
 import {
-  Users, Shield, Layers, AlertTriangle, CheckCircle2, OctagonAlert,
-  Activity, CircleDot, Clock, ChevronRight, TrendingDown,
+  Shield,
+  Activity,
+  CheckCircle2,
+  OctagonAlert,
+  CircleDot,
+  TrendingDown,
+  AlertTriangle,
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+  ReferenceArea,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+} from "recharts";
 import RiskRadar from "@/components/widgets/risk-radar";
-import Burndown from "@/components/widgets/burndown";
 import { riskData, burndownData } from "@/components/layouts/fixtures";
+import {
+  fetchProjectDashboard,
+  fetchSprintTimeline,
+  fetchBlockersPanel,
+  fetchDiagnostic,
+  fetchWorkload,
+  lockBacklog,
+  setReviewSla,
+  assignDris,
+  escalateBlocker,
+  snoozeBlocker,
+} from "@/lib/api";
+import { usePMStore, selectDashboardProjects } from "@/lib/store";
+import type { DashboardProject } from "@/lib/store";
 
-/* ── DATA ─────────────────────────────────────────────── */
+/* ── Types ────────────────────────────────────────────────── */
 
-const PROJECTS = [
-  { name: "Command Center v5", short: "CCv5", color: "#3b82f6" },
-  { name: "NeuactReport v3", short: "NRv3", color: "#8b5cf6" },
-  { name: "Spot Particle", short: "Spot", color: "#f59e0b" },
-];
+type ProjectRow = {
+  id?: string;
+  name: string;
+  short: string;
+  color: string;
+  progress: number;
+  done: number;
+  active: number;
+  blocked: number;
+  total: number;
+  deadline: number;
+  health: "on-track" | "at-risk" | "critical";
+  lead: string;
+};
 
-const TEAM = [
-  { name: "Rohith", role: "Lead", avatar: "R", capacity: 40, weeks: [{ w: "W14", h: 45 }, { w: "W15", h: 48 }, { w: "W16", h: 42 }, { w: "W17", h: 44 }] },
-  { name: "Priya", role: "Frontend", avatar: "P", capacity: 40, weeks: [{ w: "W14", h: 32 }, { w: "W15", h: 35 }, { w: "W16", h: 38 }, { w: "W17", h: 30 }] },
-  { name: "Arjun", role: "Backend", avatar: "A", capacity: 40, weeks: [{ w: "W14", h: 28 }, { w: "W15", h: 30 }, { w: "W16", h: 35 }, { w: "W17", h: 25 }] },
-];
+/* ── Store → ProjectRow conversion ───────────────────────── */
 
-const RISKS = [
-  { axis: "Scope", score: 72 }, { axis: "Deadline", score: 85 }, { axis: "Resource", score: 58 },
-  { axis: "Deps", score: 45 }, { axis: "Tech Debt", score: 30 }, { axis: "External", score: 65 },
-];
+function storeToProjectRows(storeProjects: DashboardProject[]): ProjectRow[] {
+  if (!storeProjects || storeProjects.length === 0) return [];
+  return storeProjects.map((p) => {
+    const targetDate = p.target ? new Date(p.target).getTime() : 0;
+    const now = Date.now();
+    const deadline = targetDate ? Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24)) : 999;
+    let health: "on-track" | "at-risk" | "critical" = "on-track";
+    if (deadline < 7 && p.progress < 80) health = "critical";
+    else if (deadline < 14 && p.progress < 60) health = "at-risk";
+    return {
+      id: p.id,
+      name: p.name,
+      short: p.short,
+      color: p.color,
+      progress: p.progress,
+      done: p.done,
+      active: p.active,
+      blocked: p.blocked,
+      total: p.total,
+      deadline,
+      health,
+      lead: "",
+    };
+  });
+}
+
+function useProjects(): ProjectRow[] {
+  const storeProjects = usePMStore(selectDashboardProjects);
+  return storeToProjectRows(storeProjects);
+}
+
+/* ── Constants ────────────────────────────────────────────── */
 
 const STAGES = ["Research", "Design", "Build", "Test", "Ship"];
+
 const STAGE_DATA: Record<string, { stage: string; done: number; total: number; status: string }[]> = {
-  CCv5: [{ stage: "Research", done: 2, total: 2, status: "done" }, { stage: "Design", done: 2, total: 2, status: "done" }, { stage: "Build", done: 1, total: 4, status: "active" }, { stage: "Test", done: 0, total: 2, status: "todo" }, { stage: "Ship", done: 0, total: 2, status: "blocked" }],
-  NRv3: [{ stage: "Research", done: 1, total: 1, status: "done" }, { stage: "Design", done: 1, total: 1, status: "done" }, { stage: "Build", done: 1, total: 3, status: "active" }, { stage: "Test", done: 0, total: 1, status: "todo" }, { stage: "Ship", done: 0, total: 1, status: "backlog" }],
-  Spot: [{ stage: "Research", done: 1, total: 1, status: "done" }, { stage: "Design", done: 2, total: 2, status: "done" }, { stage: "Build", done: 2, total: 4, status: "blocked" }, { stage: "Test", done: 0, total: 1, status: "todo" }, { stage: "Ship", done: 1, total: 1, status: "done" }],
+  CCv5: [
+    { stage: "Research", done: 2, total: 2, status: "done" },
+    { stage: "Design", done: 2, total: 2, status: "done" },
+    { stage: "Build", done: 1, total: 4, status: "active" },
+    { stage: "Test", done: 0, total: 2, status: "todo" },
+    { stage: "Ship", done: 0, total: 2, status: "blocked" },
+  ],
+  NRv3: [
+    { stage: "Research", done: 1, total: 1, status: "done" },
+    { stage: "Design", done: 1, total: 1, status: "done" },
+    { stage: "Build", done: 1, total: 3, status: "active" },
+    { stage: "Test", done: 0, total: 1, status: "todo" },
+    { stage: "Ship", done: 0, total: 1, status: "backlog" },
+  ],
+  Spot: [
+    { stage: "Research", done: 1, total: 1, status: "done" },
+    { stage: "Design", done: 2, total: 2, status: "done" },
+    { stage: "Build", done: 2, total: 4, status: "blocked" },
+    { stage: "Test", done: 0, total: 1, status: "todo" },
+    { stage: "Ship", done: 1, total: 1, status: "done" },
+  ],
 };
 
-const S_TEXT: Record<string, string> = { done: "text-green-700", active: "text-amber-700", blocked: "text-red-700", todo: "text-blue-700", backlog: "text-neutral-500" };
-const S_BG: Record<string, string> = { done: "bg-green-50", active: "bg-amber-50", blocked: "bg-red-50", todo: "bg-blue-50", backlog: "bg-neutral-50" };
-const S_LABEL: Record<string, string> = { done: "Done", active: "Active", blocked: "Blocked", todo: "To Do", backlog: "—" };
-
-const heatColor = (h: number, cap: number) => {
-  const r = h / cap;
-  if (r < 0.5) return "bg-green-200";
-  if (r < 0.75) return "bg-green-400";
-  if (r < 0.9) return "bg-yellow-300";
-  if (r <= 1) return "bg-orange-400";
-  return "bg-red-500";
+const HEALTH_COLORS: Record<string, { bg: string; text: string; fill: string; label: string }> = {
+  "on-track": { bg: "bg-ok-bg", text: "text-ok-fg", fill: "fill-ok-solid", label: "On Track" },
+  "at-risk": { bg: "bg-warn-bg", text: "text-warn-fg", fill: "fill-warn-solid", label: "At Risk" },
+  critical: { bg: "bg-hot-bg", text: "text-hot-fg", fill: "fill-hot-solid", label: "Critical" },
 };
 
-function StageCell({ done, total, status }: { done: number; total: number; status: string }) {
-  const Icon = status === "done" ? CheckCircle2 : status === "blocked" ? OctagonAlert : status === "active" ? Activity : CircleDot;
-  return (
-    <div className={`inline-flex flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 ${S_BG[status]} min-w-[48px]`}>
-      <Icon className={`w-3.5 h-3.5 ${S_TEXT[status]}`} />
-      <span className={`text-xs font-bold ${S_TEXT[status]}`}>{done}/{total}</span>
-    </div>
-  );
+const STAGE_COLORS: Record<string, { bg: string; text: string; fill: string }> = {
+  done: { bg: "bg-ok-subtle", text: "text-ok-fg", fill: "fill-ok-solid" },
+  active: { bg: "bg-warn-subtle", text: "text-warn-fg", fill: "fill-warn-solid" },
+  blocked: { bg: "bg-bad-subtle", text: "text-bad-fg", fill: "fill-bad-solid" },
+  todo: { bg: "bg-info-subtle", text: "text-info-fg", fill: "fill-info-solid" },
+  backlog: { bg: "bg-neutral-100", text: "text-neutral-500", fill: "fill-neutral-400" },
+};
+
+function deadlineColor(days: number): string {
+  if (days < 7) return "text-bad-fg";
+  if (days < 14) return "text-warn-fg";
+  return "text-ok-fg";
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   VARIANT A — Three Columns
-   People (left) | Risk (center) | Stage Board (right)
-   ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantA() {
-  return (
-    <div className="h-[400px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex">
-      {/* People — 35% */}
-      <div className="border-r border-neutral-200 flex flex-col overflow-hidden" style={{ flex: "35 1 0" }}>
-        <div className="px-4 py-2.5 border-b flex items-center gap-2 shrink-0">
-          <Users className="w-4 h-4 text-purple-500" />
-          <span className="text-sm font-bold text-neutral-900">Team Load</span>
-          <span className="text-xs text-red-500 font-semibold ml-auto">1 overloaded</span>
-        </div>
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {TEAM.map(t => {
-            const total = t.weeks.reduce((s, w) => s + w.h, 0);
-            const avg = Math.round(total / t.weeks.length);
-            const pct = Math.round((avg / t.capacity) * 100);
-            return (
-              <div key={t.name} className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-neutral-900 flex items-center justify-center text-xs font-bold text-white">{t.avatar}</div>
-                  <div className="flex-1">
-                    <div className="text-xs font-semibold text-neutral-800">{t.name}</div>
-                    <div className="text-xs text-neutral-400">{t.role}</div>
-                  </div>
-                  <span className={`text-xs font-bold ${pct > 90 ? "text-red-500" : pct > 70 ? "text-amber-500" : "text-green-500"}`}>{pct}%</span>
-                </div>
-                <div className="flex gap-1">
-                  {t.weeks.map(w => (
-                    <div key={w.w} className={`flex-1 h-6 rounded flex items-center justify-center text-xs font-bold ${heatColor(w.h, t.capacity)} ${w.h > t.capacity ? "text-white" : "text-neutral-700"}`}>
-                      {w.h}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Risk — 30% */}
-      <div className="border-r border-neutral-200 flex flex-col overflow-hidden" style={{ flex: "30 1 0" }}>
-        <div className="px-4 py-2.5 border-b flex items-center gap-2 shrink-0">
-          <Shield className="w-4 h-4 text-red-500" />
-          <span className="text-sm font-bold text-neutral-900">Risk</span>
-          <span className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-bold border border-red-200 ml-auto">HIGH</span>
-        </div>
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {RISKS.map(r => (
-            <div key={r.axis} className="flex items-center gap-2">
-              <span className="text-xs text-neutral-600 w-16 shrink-0">{r.axis}</span>
-              <div className="flex-1 h-2 bg-neutral-100 rounded-full">
-                <div className={`h-full rounded-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} />
-              </div>
-              <span className={`text-xs font-bold w-6 text-right ${r.score > 70 ? "text-red-500" : r.score > 50 ? "text-amber-500" : "text-green-500"}`}>{r.score}</span>
-            </div>
-          ))}
-          <div className="bg-purple-50 rounded-lg border border-purple-200 p-2.5 mt-2">
-            <div className="text-xs font-bold text-purple-700 mb-1">AI Assessment</div>
-            <p className="text-xs text-purple-600 leading-relaxed">Deadline risk high — scope creep + single contributor bottleneck. Freeze scope, parallelize widget work.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Stage Board — 35% */}
-      <div className="flex flex-col overflow-hidden" style={{ flex: "35 1 0" }}>
-        <div className="px-4 py-2.5 border-b flex items-center gap-2 shrink-0">
-          <Layers className="w-4 h-4 text-indigo-500" />
-          <span className="text-sm font-bold text-neutral-900">Stages</span>
-        </div>
-        <div className="flex-1 overflow-auto p-2">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="text-left text-xs font-semibold text-neutral-400 uppercase px-2 py-1 w-16"></th>
-                {STAGES.map(s => <th key={s} className="text-center text-xs font-semibold text-neutral-400 uppercase px-1 py-1">{s.slice(0, 3)}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {PROJECTS.map(p => (
-                <tr key={p.short} className="border-t border-neutral-100">
-                  <td className="px-2 py-1.5"><div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} /><span className="text-xs font-medium text-neutral-700">{p.short}</span></div></td>
-                  {STAGES.map(s => {
-                    const sd = STAGE_DATA[p.short]?.find(x => x.stage === s);
-                    return <td key={s} className="text-center px-1 py-1.5">{sd ? <StageCell {...sd} /> : <span className="text-xs text-neutral-300">—</span>}</td>;
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+function deadlineBgClass(days: number): string {
+  if (days < 7) return "bg-bad-subtle";
+  if (days < 14) return "bg-warn-subtle";
+  return "bg-ok-subtle";
 }
 
+const CIRC = 2 * Math.PI * 42;
+
+const toSlug = (name: string) => `/project/${name.toLowerCase().replace(/\s+/g, "-")}`;
+
+/* ── Diagnostic Data ──────────────────────────────────────── */
+
+const DIAG_AXES = [
+  { axis: "Scope Creep", actual: 88 },
+  { axis: "Slow Reviews", actual: 82 },
+  { axis: "Missing Owner", actual: 70 },
+  { axis: "Ext. Deps", actual: 65 },
+  { axis: "Context Switch", actual: 55 },
+  { axis: "Tech Debt", actual: 35 },
+];
+
+const DIAG_ACTIONS: Record<string, string> = {
+  "Scope Creep": "Lock backlog \u2192",
+  "Slow Reviews": "Set review SLA \u2192",
+  "Missing Owner": "Assign DRIs \u2192",
+  "Ext. Deps": "Escalate \u2192",
+};
+
+const LAST_SPRINT_SCORES: Record<string, number> = {
+  "Scope Creep": 65,
+  "Slow Reviews": 78,
+  "Missing Owner": 60,
+  "Ext. Deps": 50,
+  "Context Switch": 70,
+  "Tech Debt": 40,
+};
+
+function deltaColorScale(index: number): string {
+  if (index === 0) return "text-bad-fg";
+  if (index === 1) return "text-hot-fg";
+  if (index <= 3) return "text-warn-fg";
+  return "text-ok-fg";
+}
 
 /* ═══════════════════════════════════════════════════════════
-   VARIANT B — Tabbed Single Panel
-   One full-width panel, tabs to switch: People | Risk | Stages
+   1. KPIHeader
    ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantB() {
-  const [tab, setTab] = useState<"people" | "risk" | "stages">("people");
+
+function KPIHeader() {
+  return null;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   2. SegmentBar
+   ═══════════════════════════════════════════════════════════ */
+
+function SegmentBar({ sel, onSelect }: { sel: string; onSelect: (s: string) => void }) {
+  const projects = useProjects();
+  if (projects.length === 0) return null;
+
   return (
-    <div className="h-[400px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
-      <div className="px-4 py-2 border-b flex items-center gap-1 shrink-0">
-        {[
-          { id: "people" as const, icon: Users, label: "Team Load" },
-          { id: "risk" as const, icon: Shield, label: "Risk Radar" },
-          { id: "stages" as const, icon: Layers, label: "Stage Board" },
-        ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg ${tab === t.id ? "bg-neutral-900 text-white" : "text-neutral-500 hover:bg-neutral-100"}`}>
-            <t.icon className="w-3.5 h-3.5" />{t.label}
+    <div className="flex h-12 rounded-lg gap-[2px] bg-neutral-100 overflow-hidden">
+      {projects.map((p) => {
+        const isActive = p.short === sel;
+        return (
+          <button
+            key={p.short}
+            onClick={() => onSelect(p.short)}
+            className={`flex items-center justify-center gap-1.5 text-xs font-semibold transition-all ${
+              isActive ? "text-white" : "text-neutral-700 hover:bg-neutral-200"
+            }`}
+            style={{
+              flex: `${p.total || 1} 1 0`,
+              backgroundColor: isActive ? p.color : undefined,
+            }}
+          >
+            <span>{p.short}</span>
+            <span className="opacity-70">{p.progress}%</span>
           </button>
-        ))}
-      </div>
-      <div className="flex-1 overflow-y-auto p-4">
-        {tab === "people" && (
-          <div className="grid grid-cols-3 gap-4">
-            {TEAM.map(t => {
-              const avg = Math.round(t.weeks.reduce((s, w) => s + w.h, 0) / t.weeks.length);
-              const pct = Math.round((avg / t.capacity) * 100);
-              return (
-                <div key={t.name} className="rounded-xl border border-neutral-200 p-4 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center text-sm font-bold text-white">{t.avatar}</div>
-                    <div><div className="text-sm font-bold text-neutral-900">{t.name}</div><div className="text-xs text-neutral-400">{t.role}</div></div>
-                    <span className={`text-sm font-bold ml-auto ${pct > 90 ? "text-red-500" : pct > 70 ? "text-amber-500" : "text-green-500"}`}>{pct}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-neutral-100 rounded-full"><div className={`h-full rounded-full ${pct > 90 ? "bg-red-400" : pct > 70 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${Math.min(100, pct)}%` }} /></div>
-                  <div className="flex gap-1">
-                    {t.weeks.map(w => (
-                      <div key={w.w} className={`flex-1 h-8 rounded flex items-center justify-center text-xs font-bold ${heatColor(w.h, t.capacity)} ${w.h > t.capacity ? "text-white" : "text-neutral-700"}`}>{w.h}</div>
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-xs text-neutral-400">{t.weeks.map(w => <span key={w.w}>{w.w}</span>)}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {tab === "risk" && (
-          <div className="grid grid-cols-3 gap-3">
-            {RISKS.map(r => (
-              <div key={r.axis} className={`rounded-xl border p-4 ${r.score > 70 ? "border-red-200 bg-red-50/50" : r.score > 50 ? "border-amber-200 bg-amber-50/50" : "border-green-200 bg-green-50/50"}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-neutral-900">{r.axis}</span>
-                  <span className={`text-lg font-black ${r.score > 70 ? "text-red-600" : r.score > 50 ? "text-amber-600" : "text-green-600"}`}>{r.score}</span>
-                </div>
-                <div className="w-full h-2.5 bg-white rounded-full"><div className={`h-full rounded-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} /></div>
-              </div>
-            ))}
-          </div>
-        )}
-        {tab === "stages" && (
-          <table className="w-full border-collapse">
-            <thead><tr className="border-b border-neutral-200"><th className="text-left text-xs font-semibold text-neutral-500 uppercase px-3 py-2 w-32">Project</th>{STAGES.map(s => <th key={s} className="text-center text-xs font-semibold text-neutral-500 uppercase px-2 py-2">{s}</th>)}</tr></thead>
-            <tbody>{PROJECTS.map(p => (<tr key={p.short} className="border-b border-neutral-100"><td className="px-3 py-2"><div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} /><span className="text-sm font-medium">{p.short}</span></div></td>{STAGES.map(s => { const sd = STAGE_DATA[p.short]?.find(x => x.stage === s); return <td key={s} className="text-center px-2 py-2">{sd ? <StageCell {...sd} /> : "—"}</td>; })}</tr>))}</tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════════════════════════════════════════════════════════
-   VARIANT C — Two Rows
-   Top row: People (60%) + Risk bars (40%)
-   Bottom row: Stage Board full width
-   ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantC() {
-  return (
-    <div className="h-[400px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
-      {/* Top: People + Risk */}
-      <div className="flex border-b border-neutral-200" style={{ flex: "1 1 55%" }}>
-        {/* People */}
-        <div className="border-r border-neutral-200 flex flex-col" style={{ flex: "6 1 0" }}>
-          <div className="px-4 py-2 border-b flex items-center gap-2 shrink-0">
-            <Users className="w-3.5 h-3.5 text-purple-500" />
-            <span className="text-xs font-bold text-neutral-900">Team</span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2">
-            {TEAM.map(t => {
-              const pct = Math.round((t.weeks.reduce((s, w) => s + w.h, 0) / t.weeks.length / t.capacity) * 100);
-              return (
-                <div key={t.name} className="flex items-center gap-2 py-1.5">
-                  <div className="w-6 h-6 rounded-full bg-neutral-900 flex items-center justify-center text-xs font-bold text-white">{t.avatar}</div>
-                  <span className="text-xs font-medium text-neutral-800 w-14">{t.name}</span>
-                  <div className="flex gap-0.5 flex-1">
-                    {t.weeks.map(w => (
-                      <div key={w.w} className={`flex-1 h-5 rounded flex items-center justify-center text-xs font-bold ${heatColor(w.h, t.capacity)} ${w.h > t.capacity ? "text-white" : "text-neutral-700"}`}>{w.h}</div>
-                    ))}
-                  </div>
-                  <span className={`text-xs font-bold w-8 text-right ${pct > 90 ? "text-red-500" : "text-neutral-500"}`}>{pct}%</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        {/* Risk */}
-        <div className="flex flex-col" style={{ flex: "4 1 0" }}>
-          <div className="px-4 py-2 border-b flex items-center gap-2 shrink-0">
-            <Shield className="w-3.5 h-3.5 text-red-500" />
-            <span className="text-xs font-bold text-neutral-900">Risk</span>
-            <span className="text-xs text-red-600 font-bold ml-auto">HIGH</span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
-            {RISKS.map(r => (
-              <div key={r.axis} className="flex items-center gap-2">
-                <span className="text-xs text-neutral-500 w-14 shrink-0">{r.axis}</span>
-                <div className="flex-1 h-1.5 bg-neutral-100 rounded-full"><div className={`h-full rounded-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} /></div>
-                <span className={`text-xs font-bold w-5 text-right ${r.score > 70 ? "text-red-500" : "text-neutral-500"}`}>{r.score}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      {/* Bottom: Stage Board */}
-      <div className="flex-1 overflow-auto p-2">
-        <table className="w-full border-collapse">
-          <thead><tr><th className="text-left text-xs font-semibold text-neutral-400 uppercase px-3 py-1 w-28"></th>{STAGES.map(s => <th key={s} className="text-center text-xs font-semibold text-neutral-400 uppercase px-1 py-1">{s}</th>)}</tr></thead>
-          <tbody>{PROJECTS.map(p => (<tr key={p.short} className="border-t border-neutral-100"><td className="px-3 py-1.5"><div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} /><span className="text-xs font-medium">{p.short}</span></div></td>{STAGES.map(s => { const sd = STAGE_DATA[p.short]?.find(x => x.stage === s); return <td key={s} className="text-center px-1 py-1.5">{sd ? <StageCell {...sd} /> : "—"}</td>; })}</tr>))}</tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════════════════════════════════════════════════════════
-   VARIANT D — Dense Dashboard Strip
-   All three inline in one compact row, no headers,
-   maximum density
-   ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantD() {
-  return (
-    <div className="h-[400px] rounded-xl overflow-hidden border border-neutral-200 bg-neutral-900 text-white flex flex-col">
-      <div className="px-4 py-2 border-b border-white/10 flex items-center gap-4 shrink-0">
-        <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-purple-400" /><span className="text-xs font-bold">Team</span></div>
-        <div className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-red-400" /><span className="text-xs font-bold">Risk</span></div>
-        <div className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 text-indigo-400" /><span className="text-xs font-bold">Stages</span></div>
-      </div>
-      <div className="flex-1 flex overflow-hidden">
-        {/* People */}
-        <div className="border-r border-white/10 p-3 overflow-y-auto" style={{ flex: "1 1 0" }}>
-          {TEAM.map(t => {
-            const pct = Math.round((t.weeks.reduce((s, w) => s + w.h, 0) / t.weeks.length / t.capacity) * 100);
-            return (
-              <div key={t.name} className="mb-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">{t.avatar}</div>
-                  <span className="text-xs font-medium flex-1">{t.name}</span>
-                  <span className={`text-xs font-bold ${pct > 90 ? "text-red-400" : "text-neutral-400"}`}>{pct}%</span>
-                </div>
-                <div className="flex gap-0.5">
-                  {t.weeks.map(w => {
-                    const r = w.h / t.capacity;
-                    const bg = r > 1 ? "bg-red-500" : r > 0.9 ? "bg-orange-400" : r > 0.75 ? "bg-yellow-400" : "bg-green-400";
-                    return <div key={w.w} className={`flex-1 h-5 rounded flex items-center justify-center text-xs font-bold ${bg} text-neutral-900`}>{w.h}</div>;
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {/* Risk */}
-        <div className="border-r border-white/10 p-3 overflow-y-auto" style={{ flex: "1 1 0" }}>
-          {RISKS.map(r => (
-            <div key={r.axis} className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-neutral-400 w-14 shrink-0">{r.axis}</span>
-              <div className="flex-1 h-2 bg-white/10 rounded-full"><div className={`h-full rounded-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} /></div>
-              <span className={`text-xs font-bold w-5 ${r.score > 70 ? "text-red-400" : "text-neutral-500"}`}>{r.score}</span>
-            </div>
-          ))}
-          <div className="bg-purple-500/10 rounded-lg border border-purple-500/20 p-2 mt-2">
-            <p className="text-xs text-purple-300 leading-relaxed">Deadline risk high. Freeze scope, parallelize.</p>
-          </div>
-        </div>
-        {/* Stages */}
-        <div className="p-3 overflow-auto" style={{ flex: "1 1 0" }}>
-          {PROJECTS.map(p => (
-            <div key={p.short} className="mb-2">
-              <div className="flex items-center gap-1.5 mb-1"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} /><span className="text-xs font-medium">{p.short}</span></div>
-              <div className="flex gap-1">
-                {STAGES.map(s => {
-                  const sd = STAGE_DATA[p.short]?.find(x => x.stage === s);
-                  if (!sd) return <div key={s} className="flex-1 h-6 rounded bg-white/5" />;
-                  const bg = sd.status === "done" ? "bg-green-500/20" : sd.status === "blocked" ? "bg-red-500/20" : sd.status === "active" ? "bg-amber-400/20" : "bg-white/5";
-                  const tc = sd.status === "done" ? "text-green-400" : sd.status === "blocked" ? "text-red-400" : sd.status === "active" ? "text-amber-400" : "text-neutral-500";
-                  return <div key={s} className={`flex-1 h-6 rounded ${bg} flex items-center justify-center text-xs font-bold ${tc}`}>{sd.done}/{sd.total}</div>;
-                })}
-              </div>
-            </div>
-          ))}
-          <div className="flex justify-between text-xs text-neutral-500 mt-1">{STAGES.map(s => <span key={s}>{s.slice(0, 3)}</span>)}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════════════════════════════════════════════════════════
-   VARIANT E — Risk + AI + Stage (Three Columns, No People)
-   Risk bars (40%) | AI Brief (20%) | Stage board (40%)
-   ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantE() {
-  const [selectedProject, setSelectedProject] = useState("CCv5");
-  const [riskSort, setRiskSort] = useState<"score" | "alpha">("score");
-
-  const risksDisplayed = riskSort === "alpha" ? [...RISKS].sort((a, b) => a.axis.localeCompare(b.axis)) : RISKS;
-  const selectedData = STAGE_DATA[selectedProject] || [];
-  const highestRisks = RISKS.filter(r => r.score > 70);
-
-  return (
-    <div className="h-[400px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
-      {/* Mini Header with Project Selection */}
-      <div className="px-4 py-2 border-b bg-neutral-50 flex items-center gap-2 text-xs shrink-0">
-        <span className="font-semibold text-neutral-700">Project:</span>
-        {PROJECTS.map(p => (
-          <button key={p.short} onClick={() => setSelectedProject(p.short)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-all ${selectedProject === p.short ? "bg-neutral-900 text-white" : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300"}`}>
-            {p.short}
-          </button>
-        ))}
-        <button onClick={() => setRiskSort(riskSort === "score" ? "alpha" : "score")}
-          className="ml-auto px-2 py-1 rounded text-xs bg-neutral-100 text-neutral-600 hover:bg-neutral-200">
-          Sort: {riskSort === "score" ? "Score" : "Axis"}
-        </button>
-      </div>
-
-      <div className="flex-1 flex overflow-hidden">
-        {/* Risk — 40% */}
-        <div className="border-r border-neutral-200 flex flex-col overflow-hidden" style={{ flex: "40 1 0" }}>
-          <div className="px-4 py-2.5 border-b flex items-center gap-2 shrink-0">
-            <Shield className="w-4 h-4 text-red-500" />
-            <span className="text-sm font-bold text-neutral-900">Risk Radar</span>
-            <span className={`text-xs font-bold ml-auto px-2 py-0.5 rounded-full border ${highestRisks.length > 2 ? "bg-red-50 text-red-600 border-red-200" : "bg-amber-50 text-amber-600 border-amber-200"}`}>
-              {highestRisks.length > 2 ? "⚠️ CRITICAL" : "⚠️ WARNING"}
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-            {risksDisplayed.map(r => (
-              <div key={r.axis} className="space-y-1 cursor-pointer hover:bg-neutral-50 p-1 rounded transition-colors">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-neutral-700">{r.axis}</span>
-                  <span className={`text-xs font-bold ${r.score > 70 ? "text-red-600" : r.score > 50 ? "text-amber-600" : "text-green-600"}`}>{r.score}%</span>
-                </div>
-                <div className="h-2.5 bg-neutral-100 rounded-full overflow-hidden">
-                  <div className={`h-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* AI Brief — 20% */}
-        <div className="border-r border-neutral-200 flex flex-col overflow-hidden px-3 py-3" style={{ flex: "20 1 0" }}>
-          <div className="text-xs font-bold text-purple-700 mb-2 flex items-center gap-1">
-            <span>💡</span> AI
-          </div>
-          <div className="text-xs leading-relaxed text-purple-600 space-y-1.5 flex-1 overflow-y-auto">
-            {highestRisks.length > 0 && (
-              <>
-                <p><strong>Top Risk:</strong> {highestRisks[0]?.axis} ({highestRisks[0]?.score}%)</p>
-                <p className="text-purple-500 font-semibold">Action: Mitigate {highestRisks[0]?.axis.toLowerCase()}</p>
-              </>
-            )}
-            <p className="text-xs italic text-purple-500">Sprint velocity down 15%. {selectedProject} at risk.</p>
-          </div>
-        </div>
-
-        {/* Stage Board — 40% */}
-        <div className="flex flex-col overflow-hidden" style={{ flex: "40 1 0" }}>
-          <div className="px-4 py-2.5 border-b flex items-center gap-2 shrink-0">
-            <Layers className="w-4 h-4 text-indigo-500" />
-            <span className="text-sm font-bold text-neutral-900">{selectedProject} Progress</span>
-          </div>
-          <div className="flex-1 overflow-auto p-2">
-            <div className="space-y-2">
-              {selectedData.length > 0 ? selectedData.map(sd => {
-                const pct = Math.round((sd.done / sd.total) * 100);
-                return (
-                  <div key={sd.stage} className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-neutral-700">{sd.stage}</span>
-                      <span className="text-xs font-bold text-neutral-500">{sd.done}/{sd.total}</span>
-                    </div>
-                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${sd.status === "done" ? "bg-green-400" : sd.status === "blocked" ? "bg-red-500" : sd.status === "active" ? "bg-amber-400" : "bg-blue-300"}`} style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              }) : <div className="text-xs text-neutral-400">No data</div>}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════════════════════════════════════════════════════════
-   VARIANT F — Risk + Stage (Top/Bottom) with AI Summary
-   Top: Risk bars + Stage cards
-   Bottom: AI brief with radar + sprint callouts
-   Interactive: Click risk to filter, shows connected insights
-   ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantF() {
-  const [selectedRisk, setSelectedRisk] = useState<string | null>(null);
-  const [sprintWeek, setSprintWeek] = useState("W17");
-
-  const topRisk = selectedRisk ? RISKS.find(r => r.axis === selectedRisk) : RISKS.reduce((max, r) => r.score > max.score ? r : max);
-  const blockedProjects = PROJECTS.filter(p =>
-    STAGE_DATA[p.short]?.some(sd => sd.status === "blocked")
-  ).map(p => p.short);
-
-  return (
-    <div className="h-[400px] rounded-xl overflow-hidden border border-neutral-200 bg-white flex flex-col">
-      {/* Top: Risk + Stage */}
-      <div className="flex border-b border-neutral-200" style={{ flex: "1 1 55%" }}>
-        {/* Risk — Clickable */}
-        <div className="border-r border-neutral-200 flex flex-col p-3 overflow-auto bg-neutral-50" style={{ flex: "1 1 0" }}>
-          <div className="text-xs font-bold text-neutral-900 mb-2 flex items-center gap-1">
-            <Shield className="w-3 h-3" /> Risk (click to filter)
-          </div>
-          {RISKS.map(r => (
-            <button key={r.axis} onClick={() => setSelectedRisk(selectedRisk === r.axis ? null : r.axis)}
-              className={`flex items-center gap-2 mb-1.5 p-1 rounded transition-all text-left ${selectedRisk === r.axis ? "bg-white border-l-2" : "hover:bg-white/50"}`}
-              style={selectedRisk === r.axis ? { borderLeftColor: r.score > 70 ? "#ef4444" : "#f59e0b" } : {}}>
-              <span className="text-xs text-neutral-600 w-12 shrink-0">{r.axis}</span>
-              <div className="flex-1 h-1.5 bg-white rounded-full overflow-hidden">
-                <div className={`h-full rounded-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} />
-              </div>
-              <span className="text-xs font-bold">{r.score}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Stage Grid */}
-        <div className="flex flex-col p-3 overflow-auto" style={{ flex: "1 1 0" }}>
-          <div className="text-xs font-bold text-neutral-900 mb-2">All Projects</div>
-          <div className="flex gap-1">
-            {PROJECTS.map(p => (
-              <div key={p.short} className="flex flex-col gap-1 flex-1">
-                <div className={`text-xs font-medium text-center px-1 py-0.5 rounded ${blockedProjects.includes(p.short) ? "bg-red-100 text-red-700" : "text-neutral-600"}`} style={{ color: blockedProjects.includes(p.short) ? undefined : p.color }}>
-                  {p.short}
-                </div>
-                {STAGES.map(s => {
-                  const sd = STAGE_DATA[p.short]?.find(x => x.stage === s);
-                  if (!sd) return <div key={s} className="h-4 rounded bg-neutral-100" />;
-                  const bg = sd.status === "done" ? "bg-green-400" : sd.status === "blocked" ? "bg-red-500" : sd.status === "active" ? "bg-amber-400" : "bg-blue-200";
-                  return <div key={s} title={`${s}: ${sd.done}/${sd.total}`} className={`h-4 rounded ${bg}`} />;
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom: AI + Connectors */}
-      <div className="flex border-t border-neutral-200 flex-1 p-3 space-x-4 text-xs overflow-auto">
-        {/* AI Insights */}
-        <div className="flex-1 bg-purple-50 rounded-lg p-2.5 border border-purple-200">
-          <div className="text-xs font-bold text-purple-700 mb-2">💡 AI Brief</div>
-          <p className="text-purple-600 leading-snug font-medium">{topRisk?.axis} is {topRisk?.score}% at risk.</p>
-          <p className="text-purple-600 leading-snug mt-1">
-            {blockedProjects.length > 0 && `${blockedProjects.join(", ")} blocked. `}
-            {topRisk?.score! > 70 && "Immediate action needed."}
-          </p>
-        </div>
-
-        {/* Risk Radar Connection */}
-        <div className="flex-1 bg-red-50 rounded-lg p-2.5 border border-red-200 space-y-1">
-          <div className="text-xs font-bold text-red-700">📊 Risk Radar</div>
-          <div className="text-xs text-red-600">
-            {selectedRisk ? (
-              <div>Focused on <strong>{selectedRisk}</strong></div>
-            ) : (
-              <div>
-                <div>Scope ▼ stable</div>
-                <div>Deadline ▲▲ critical</div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Sprint Connection */}
-        <div className="flex-1 bg-amber-50 rounded-lg p-2.5 border border-amber-200 space-y-1">
-          <div className="text-xs font-bold text-amber-700">🏃 Sprint</div>
-          <div className="text-xs text-amber-600">
-            <div>{sprintWeek}: {blockedProjects.length} blocker{blockedProjects.length !== 1 ? "s" : ""}</div>
-            <div>Velocity: -15%</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-/* ═══════════════════════════════════════════════════════════
-   VARIANT G — Compact Card Layout
-   Risk card (high-level) | Stage card grid | AI callout
-   Interactive: Click KPI card, Risk radar, Sprint all connected
-   ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantG() {
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [filterByRisk, setFilterByRisk] = useState<"high" | "all">("high");
-
-  const topThreeRisks = filterByRisk === "high" ? RISKS.filter(r => r.score > 70) : RISKS.slice(0, 3);
-  const selectedProjData = selectedProject ? STAGE_DATA[selectedProject] : null;
-  const blocker = STAGE_DATA["CCv5"]?.find(sd => sd.status === "blocked");
-
-  return (
-    <div className="h-[400px] rounded-xl overflow-hidden border border-neutral-200 bg-gradient-to-br from-neutral-50 to-neutral-100 p-3 flex flex-col gap-3">
-      {/* Header with KPI-like filters */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-red-500" />
-          <Layers className="w-4 h-4 text-indigo-500" />
-          <span className="text-sm font-bold text-neutral-900">Risk + Progress Board</span>
-        </div>
-        <div className="flex gap-1">
-          <button onClick={() => setFilterByRisk(filterByRisk === "high" ? "all" : "high")}
-            className={`px-2 py-1 rounded text-xs font-medium transition-all ${filterByRisk === "high" ? "bg-red-500 text-white" : "bg-white text-neutral-600 border border-neutral-200"}`}>
-            {filterByRisk === "high" ? "🔴 High Risk" : "All Risks"}
-          </button>
-        </div>
-      </div>
-
-      {/* Body Grid */}
-      <div className="flex-1 flex gap-2 overflow-hidden">
-        {/* Risk Cards — Interactive on click */}
-        <div className="flex flex-col gap-1.5 overflow-y-auto" style={{ flex: "1 1 0" }}>
-          {topThreeRisks.map(r => (
-            <button key={r.axis} onClick={() => setSelectedProject(null)}
-              className={`rounded-lg border p-2.5 transition-all cursor-pointer hover:shadow-md ${r.score > 70 ? "bg-red-50 border-red-200 hover:border-red-400" : r.score > 50 ? "bg-amber-50 border-amber-200 hover:border-amber-400" : "bg-green-50 border-green-200"}`}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold text-neutral-700">{r.axis}</span>
-                <span className={`text-sm font-black ${r.score > 70 ? "text-red-600" : r.score > 50 ? "text-amber-600" : "text-green-600"}`}>{r.score}</span>
-              </div>
-              <div className="h-1.5 bg-white rounded-full overflow-hidden">
-                <div className={`h-full ${r.score > 70 ? "bg-red-500" : r.score > 50 ? "bg-amber-400" : "bg-green-400"}`} style={{ width: `${r.score}%` }} />
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Stage Progress Columns — Clickable per project */}
-        <div className="flex flex-col gap-1.5 overflow-y-auto" style={{ flex: "1 1 0" }}>
-          {PROJECTS.map(p => (
-            <button key={p.short} onClick={() => setSelectedProject(selectedProject === p.short ? null : p.short)}
-              className={`rounded-lg border p-2.5 space-y-1.5 transition-all cursor-pointer ${selectedProject === p.short ? "border-indigo-500 bg-indigo-50" : "bg-white border-neutral-200 hover:border-neutral-300"}`}>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
-                <span className="text-xs font-bold text-neutral-700">{p.short}</span>
-                {STAGE_DATA[p.short]?.some(sd => sd.status === "blocked") && <span className="text-xs text-red-600 font-bold ml-auto">⚠️</span>}
-              </div>
-              <div className="flex gap-1">
-                {STAGES.map(s => {
-                  const sd = STAGE_DATA[p.short]?.find(x => x.stage === s);
-                  if (!sd) return <div key={s} className="flex-1 h-3 rounded bg-neutral-100" />;
-                  const bg = sd.status === "done" ? "bg-green-500" : sd.status === "blocked" ? "bg-red-600" : sd.status === "active" ? "bg-amber-500" : "bg-blue-300";
-                  return <div key={s} title={`${s}: ${sd.done}/${sd.total}`} className={`flex-1 h-3 rounded ${bg}`} />;
-                })}
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* AI + Context Panel */}
-        <div className="bg-white rounded-lg border border-purple-200 p-3 overflow-y-auto flex flex-col justify-between" style={{ flex: "0.8 1 0" }}>
-          <div>
-            <div className="text-xs font-bold text-purple-700 mb-2">💡 AI Guidance</div>
-            <div className="space-y-1.5 text-xs text-purple-600">
-              {selectedProject ? (
-                <>
-                  <div><strong>{selectedProject}:</strong></div>
-                  <div className="text-purple-500">
-                    {selectedProjData?.find(s => s.status === "blocked") && "Blocked stage detected. Unblock to ship."}
-                    {!selectedProjData?.find(s => s.status === "blocked") && "On track. Keep momentum."}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div><strong>Focus:</strong> Deadline (85%)</div>
-                  <div className="text-purple-500">Parallelize work. Reduce bottleneck.</div>
-                  <div className="mt-1 pt-1 border-t border-purple-200 text-purple-500">Sprint: -15% velocity</div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Sprint/Risk Radar Quick Stats */}
-          <div className="text-xs space-y-1 pt-2 border-t border-purple-200">
-            <div className="flex justify-between">
-              <span className="text-purple-600">Risk Level:</span>
-              <span className="font-bold text-red-600">High</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-purple-600">Blockers:</span>
-              <span className="font-bold text-amber-600">{PROJECTS.filter(p => STAGE_DATA[p.short]?.some(s => s.status === "blocked")).length}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════
-   VARIANT H — KPI Dashboard (50VW, 100VH)
-   Project Selector | Story Phases | Risk Radar | Sprint Chart
+   3. ProjectDetailCompact
    ═══════════════════════════════════════════════════════════ */
-export function BottomWidgetVariantH() {
-  const [selProject, setSelProject] = useState("CCv5");
-  const projData = PROJECTS.find(p => p.short === selProject);
-  const stages = STAGE_DATA[selProject] || [];
+
+function ProjectDetailCompact({ sel }: { sel: string }) {
+  const projects = useProjects();
+  const router = useRouter();
+  const proj = projects.find((p) => p.short === sel) || projects[0];
+  if (!proj) return null;
+
+  const stages = STAGE_DATA[proj.short] || [];
+  const healthCfg = HEALTH_COLORS[proj.health];
+  const healthLabel =
+    proj.health === "on-track" ? "On Track" : proj.health === "at-risk" ? "At Risk" : "Critical";
 
   return (
-    <div className="w-screen h-screen bg-white overflow-hidden flex flex-col gap-0">
-      {/* Project Selector */}
-      <div className="bg-white border-b border-neutral-200 px-5 py-3 flex items-center gap-3 shrink-0">
-        <span className="text-sm font-semibold text-neutral-600">Project:</span>
-        <div className="flex gap-2">
-          {PROJECTS.map(p => (
-            <button
-              key={p.short}
-              onClick={() => setSelProject(p.short)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                selProject === p.short
-                  ? "bg-neutral-900 text-white"
-                  : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-              }`}
+    <div
+      className="bg-white rounded-lg border border-neutral-200 p-3 cursor-pointer hover:shadow-sm transition-shadow"
+      onClick={() => router.push(toSlug(proj.name))}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: proj.color }} />
+        <span className="text-sm font-semibold text-neutral-900 font-serif">{proj.name}</span>
+        <div className="flex-1" />
+        <span className="text-xs font-mono text-neutral-500">
+          {proj.done}/{proj.total}
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-1.5 bg-neutral-100 rounded-full overflow-hidden mb-3">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${proj.progress}%`, backgroundColor: proj.color }}
+        />
+      </div>
+
+      {/* Stage pipeline */}
+      <div className="flex gap-1 mb-2">
+        {stages.map((s) => {
+          const colors = STAGE_COLORS[s.status] || STAGE_COLORS.backlog;
+          const Icon =
+            s.status === "done"
+              ? CheckCircle2
+              : s.status === "blocked"
+              ? OctagonAlert
+              : s.status === "active"
+              ? Activity
+              : CircleDot;
+          return (
+            <div
+              key={s.stage}
+              className={`flex-1 flex flex-col items-center gap-0.5 rounded-lg px-1.5 py-1 ${colors.bg}`}
             >
-              {p.short}
-            </button>
-          ))}
-        </div>
+              <Icon className={`w-3.5 h-3.5 ${colors.text}`} />
+              <span className={`text-[10px] font-bold ${colors.text}`}>
+                {s.done}/{s.total}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Main Container - 50VW */}
-      <div className="flex-1 overflow-y-auto" style={{ width: "50vw" }}>
-        <div className="p-5 space-y-5 h-full">
-
-          {/* Story Phase Card */}
-          <div className="bg-white rounded-xl border border-neutral-200 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Layers className="w-5 h-5 text-blue-500" />
-              <span className="text-sm font-bold text-neutral-900">Development Pipeline</span>
-              <span className="text-xs text-neutral-400 ml-auto">{projData?.name}</span>
-            </div>
-
-            <div className="space-y-3">
-              {stages.map((stage, i) => {
-                const pct = stage.total > 0 ? Math.round((stage.done / stage.total) * 100) : 0;
-                const statusColor = {
-                  done: "bg-green-500",
-                  active: "bg-amber-500",
-                  blocked: "bg-red-500",
-                  todo: "bg-blue-500",
-                  backlog: "bg-neutral-400",
-                }[stage.status] || "bg-neutral-300";
-
-                return (
-                  <div key={stage.stage} className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-neutral-700">{stage.stage}</span>
-                      <span className="text-xs text-neutral-400">
-                        {stage.done}/{stage.total}
-                      </span>
-                    </div>
-                    <div className="flex gap-2 items-center">
-                      <div className="flex-1 h-2 bg-neutral-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${statusColor} transition-all`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-bold text-neutral-600 w-8 text-right">{pct}%</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Stage Summary */}
-            <div className="mt-4 pt-4 border-t border-neutral-200 grid grid-cols-5 gap-2">
-              {stages.map(s => (
-                <div key={s.stage} className="text-center">
-                  <div className="text-xs text-neutral-400 mb-1">{s.stage.slice(0, 3)}</div>
-                  <div className={`text-sm font-bold ${s.status === "done" ? "text-green-600" : s.status === "active" ? "text-amber-600" : s.status === "blocked" ? "text-red-600" : "text-neutral-500"}`}>
-                    {s.done}/{s.total}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Risk Radar Chart */}
-          <div className="bg-white rounded-xl border border-neutral-200 p-4" style={{ height: "280px" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <Shield className="w-4 h-4 text-red-500" />
-              <span className="text-sm font-bold text-neutral-900">Risk Assessment</span>
-            </div>
-            <RiskRadar data={riskData} />
-          </div>
-
-          {/* Burndown/Sprint Chart */}
-          <div className="bg-white rounded-xl border border-neutral-200 p-4" style={{ height: "280px" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingDown className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-bold text-neutral-900">Sprint Progress</span>
-              <span className="text-xs text-neutral-400 ml-auto">{burndownData.title}</span>
-            </div>
-            <Burndown data={burndownData} />
-          </div>
-
-        </div>
+      {/* Footer: health + deadline */}
+      <div className="flex items-center justify-between">
+        <span
+          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${healthCfg.bg} ${healthCfg.text}`}
+        >
+          {healthLabel}
+        </span>
+        <span className={`text-[10px] font-mono ${deadlineColor(proj.deadline)}`}>
+          {proj.deadline}d left
+        </span>
       </div>
     </div>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════
+   4. SprintSection
+   ═══════════════════════════════════════════════════════════ */
+
+function SprintSection({
+  sel,
+  onSprintId,
+}: {
+  sel: string;
+  onSprintId?: (id: string) => void;
+}) {
+  return <SprintCard projectShort={sel} />;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   5. DiagnosticSectionA / DiagnosticSectionB (placeholders)
+   ═══════════════════════════════════════════════════════════ */
+
+function DiagnosticSectionA() {
+  return <div className="bg-white rounded-lg border border-neutral-200 p-3 text-xs text-neutral-400">Diagnostic A</div>;
+}
+
+function DiagnosticSectionB() {
+  return <div className="bg-white rounded-lg border border-neutral-200 p-3 text-xs text-neutral-400">Diagnostic B</div>;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   6. DiagRadarTick
+   ═══════════════════════════════════════════════════════════ */
+
+function DiagRadarTick(props: any) {
+  const { x, y, cx, cy, payload, index } = props;
+  const axes = props.axes || DIAG_AXES;
+  const axisItem = axes[index];
+  const score = axisItem?.actual ?? 0;
+  const lastScore = LAST_SPRINT_SCORES[axisItem?.axis] ?? score;
+  const delta = score - lastScore;
+  const deltaStr = delta > 15 ? "\u2191\u2191" : delta > 0 ? "\u2191" : delta < 0 ? "\u2193" : "";
+
+  let color = "#a8a29e";
+  if (index === 0) color = "#ef4444";
+  else if (score > 70) color = "#f97316";
+
+  // Push label outward
+  const angle = Math.atan2(y - cy, x - cx);
+  const offset = 16;
+  const tx = x + Math.cos(angle) * offset;
+  const ty = y + Math.sin(angle) * offset;
+
+  return (
+    <g>
+      <text
+        x={tx}
+        y={ty}
+        textAnchor={tx > cx ? "start" : "end"}
+        dominantBaseline="central"
+        style={{ fontSize: 10, fontFamily: "Geist, sans-serif", fill: color, fontWeight: 500 }}
+      >
+        {axisItem?.axis}
+      </text>
+      {deltaStr && (
+        <text
+          x={tx}
+          y={ty + 11}
+          textAnchor={tx > cx ? "start" : "end"}
+          dominantBaseline="central"
+          style={{ fontSize: 9, fontFamily: "Geist Mono, monospace", fill: color }}
+        >
+          {deltaStr}
+        </text>
+      )}
+    </g>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   7. DiagRadarDot
+   ═══════════════════════════════════════════════════════════ */
+
+function DiagRadarDot(props: any) {
+  const { cx, cy, index } = props;
+  const axes = props.axes || DIAG_AXES;
+  const score = axes[index]?.actual ?? 0;
+  const fill = score > 60 ? "#f97316" : "#22c55e";
+  return <circle cx={cx} cy={cy} r={3.5} fill={fill} stroke="#fff" strokeWidth={1} />;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   8. DiagnosticSectionC (Main Diagnostic Card)
+   ═══════════════════════════════════════════════════════════ */
+
+function DiagnosticSectionC({
+  sel,
+  sprintId,
+  topBlockerId,
+}: {
+  sel: string;
+  sprintId?: string;
+  topBlockerId?: string;
+}) {
+  return <DiagnosticCard projectShort={sel} sprintId={sprintId} topBlockerId={topBlockerId} />;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   9. TopSection
+   ═══════════════════════════════════════════════════════════ */
+
+function TopSection({ sel, setSel }: { sel: string; setSel: (s: string) => void }) {
+  return (
+    <div className="space-y-2">
+      <ProjectCards />
+      <ProjectDetail projectShort={sel} />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   10. BottomWidgetVariantA (MAIN EXPORT)
+   ═══════════════════════════════════════════════════════════ */
+
+export function BottomWidgetVariantA({
+  renderLayout = "full",
+  sel,
+  onSelChange,
+  onSprintId,
+  sprintId,
+  topBlockerId,
+}: {
+  renderLayout?: "left-only" | "right-only" | "sprint-only" | "diagnostic-only" | "full";
+  sel?: string;
+  onSelChange?: (s: string) => void;
+  onSprintId?: (id: string) => void;
+  sprintId?: string;
+  topBlockerId?: string;
+}) {
+  const [internalSel, setInternalSel] = useState("CCv5");
+  const [internalSprintId, setInternalSprintId] = useState<string | undefined>(sprintId);
+  const [internalTopBlockerId] = useState<string | undefined>(topBlockerId);
+
+  const activeSel = sel ?? internalSel;
+  const handleSel = onSelChange ?? setInternalSel;
+  const handleSprintId = onSprintId ?? ((id: string) => setInternalSprintId(id));
+  const activeSprintId = sprintId ?? internalSprintId;
+  const activeBlockerId = topBlockerId ?? internalTopBlockerId;
+
+  if (renderLayout === "left-only") {
+    return <TopSection sel={activeSel} setSel={handleSel} />;
+  }
+
+  if (renderLayout === "sprint-only") {
+    return <SprintSection sel={activeSel} onSprintId={handleSprintId} />;
+  }
+
+  if (renderLayout === "diagnostic-only") {
+    return (
+      <DiagnosticSectionC
+        sel={activeSel}
+        sprintId={activeSprintId}
+        topBlockerId={activeBlockerId}
+      />
+    );
+  }
+
+  if (renderLayout === "right-only") {
+    return (
+      <div className="flex flex-col gap-3 h-full">
+        <SprintSection sel={activeSel} onSprintId={handleSprintId} />
+        <div className="flex-1 min-h-0">
+          <DiagnosticSectionC
+            sel={activeSel}
+            sprintId={activeSprintId}
+            topBlockerId={activeBlockerId}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // full layout
+  return (
+    <div className="flex gap-3 h-full">
+      {/* Left column */}
+      <div className="flex flex-col gap-3" style={{ flex: "4 1 0" }}>
+        <TopSection sel={activeSel} setSel={handleSel} />
+        <SprintSection sel={activeSel} onSprintId={handleSprintId} />
+      </div>
+      {/* Right column */}
+      <div className="flex-1 min-h-0" style={{ flex: "6 1 0" }}>
+        <DiagnosticSectionC
+          sel={activeSel}
+          sprintId={activeSprintId}
+          topBlockerId={activeBlockerId}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   11. Heat styling for PeopleVariantA
+   ═══════════════════════════════════════════════════════════ */
+
+const HEAT_STYLE = {
+  light: { bg: "bg-ok-subtle", text: "text-ok-fg", label: "Light" },
+  busy: { bg: "bg-info-subtle", text: "text-info-fg", label: "Busy" },
+  full: { bg: "bg-warn-subtle", text: "text-warn-fg", label: "Full" },
+  over: { bg: "bg-bad-subtle", text: "text-bad-fg", label: "Over" },
+} as const;
+
+function heatLevel(hours: number, capacity: number): keyof typeof HEAT_STYLE {
+  const ratio = hours / capacity;
+  if (ratio < 0.6) return "light";
+  if (ratio < 0.85) return "busy";
+  if (ratio <= 1.0) return "full";
+  return "over";
+}
+
+/* ═══════════════════════════════════════════════════════════
+   12. PeopleVariantA
+   ═══════════════════════════════════════════════════════════ */
+
+export function PeopleVariantA({ project = "CCv5" }: { project?: string }) {
+  return <WorkloadCard project={project} />;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   13. GanttEditView
+   ═══════════════════════════════════════════════════════════ */
+
+export function GanttEditView() {
+  const projects = useProjects();
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+
+  const tasks = [
+    { id: "g1", label: "Auth API", start: 0, duration: 12, lane: 0, color: "#3b82f6", status: "done" },
+    { id: "g2", label: "Dashboard API", start: 8, duration: 17, lane: 0, color: "#3b82f6", status: "active" },
+    { id: "g3", label: "Login UI", start: 5, duration: 13, lane: 1, color: "#8b5cf6", status: "done" },
+    { id: "g4", label: "Widget Renderer", start: 15, duration: 25, lane: 1, color: "#8b5cf6", status: "active" },
+    { id: "g5", label: "Voice Pipeline", start: 20, duration: 25, lane: 2, color: "#f59e0b", status: "active" },
+    { id: "g6", label: "E2E Tests", start: 45, duration: 26, lane: 3, color: "#22c55e", status: "todo" },
+  ];
+
+  const lanes = ["Backend", "Frontend", "ML", "QA"];
+  const totalDays = 90;
+  const dayWidth = 8;
+
+  return (
+    <div className="bg-white rounded-lg border border-neutral-200 p-3 overflow-x-auto">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-sm font-serif font-semibold text-neutral-900">Timeline</span>
+        <span className="text-[10px] text-neutral-400 font-mono">Apr 1 - Jun 30</span>
+      </div>
+
+      {/* Gantt body */}
+      <div className="relative" style={{ width: totalDays * dayWidth, minHeight: lanes.length * 36 }}>
+        {/* Lane backgrounds */}
+        {lanes.map((lane, i) => (
+          <div
+            key={lane}
+            className="absolute left-0 right-0 flex items-center border-b border-neutral-100"
+            style={{ top: i * 36, height: 36 }}
+          >
+            <span className="text-[10px] text-neutral-400 w-16 shrink-0 pl-1">{lane}</span>
+          </div>
+        ))}
+
+        {/* Task bars */}
+        {tasks.map((task) => (
+          <div
+            key={task.id}
+            className={`absolute h-6 rounded cursor-pointer flex items-center px-1.5 text-[9px] font-medium text-white transition-all ${
+              selectedTask === task.id ? "ring-2 ring-neutral-900" : "hover:brightness-110"
+            }`}
+            style={{
+              left: 64 + task.start * dayWidth,
+              top: task.lane * 36 + 5,
+              width: task.duration * dayWidth,
+              backgroundColor: task.color,
+              opacity: task.status === "done" ? 0.6 : 1,
+            }}
+            onClick={() => setSelectedTask(selectedTask === task.id ? null : task.id)}
+          >
+            <span className="truncate">{task.label}</span>
+          </div>
+        ))}
+
+        {/* Today line */}
+        <div
+          className="absolute top-0 bottom-0 w-[1px] bg-neutral-900"
+          style={{ left: 64 + 33 * dayWidth }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ── Compat stubs for unused variant exports ── */
+export function TaskWidgetVariantA() { return null; }
+export function TaskWidgetVariantB() { return null; }
+export function TaskWidgetVariantC() { return null; }
+export function GanttChart(_props: any) { return null; }
+
+/* ── Compat type exports ── */
+export type GanttRow = { id: string; label: string; tasks: any[]; isGroup?: boolean };
